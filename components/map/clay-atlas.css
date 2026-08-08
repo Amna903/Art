@@ -1,0 +1,137 @@
+.nu-atlas {
+  /* Dark (default) — sculptural, luxury museum */
+  --atlas-bg: #0E0B08;
+  --atlas-fg: #F5F2EE;
+  --atlas-fg-muted: rgba(245,242,238,0.65);
+  --atlas-accent: #D4AF78;
+  --atlas-border: rgba(212,175,120,0.28);
+  --atlas-hover: rgba(212,175,120,0.06);
+  --atlas-tooltip-bg: rgba(14,11,8,0.92);
+  --atlas-canvas: radial-gradient(ellipse at 50% 45%, #1e150d 0%, #0b0705 70%, #050302 100%);
+  --atlas-canvas-shadow: inset 0 0 160px rgba(0,0,0,0.85);
+  --atlas-vignette-in: rgba(212,175,120,0.08);
+  --atlas-vignette-out: rgba(0,0,0,0.55);
+  --atlas-shard-top: #4a3a2a;
+  --atlas-shard-bot: #2b1f16;
+  --atlas-shard-hover-top: #c69352;
+  --atlas-shard-hover-bot: #8a5a2c;
+  --atlas-shard-visited-top: #5a4a36;
+  --atlas-shard-visited-bot: #3a2c1e;
+  --atlas-shard-stroke: #1a120b;
+  --atlas-shard-stroke-hover: #D4AF78;
+  --atlas-glow-a: rgba(212,175,120,0.10);
+  --atlas-glow-b: rgba(159,13,18,0.10);
+  background-color: var(--atlas-bg);
+  color: var(--atlas-fg);
+}
+:root:not(.dark) .nu-atlas {
+  /* Light — warm cream museum wall, bronze shards */
+  --atlas-bg: #F5F2EE;
+  --atlas-fg: #1A120B;
+  --atlas-fg-muted: rgba(26,18,11,0.62);
+  --atlas-accent: #9F0D12;
+  --atlas-border: rgba(26,18,11,0.18);
+  --atlas-hover: rgba(159,13,18,0.05);
+  --atlas-tooltip-bg: rgba(245,242,238,0.96);
+  --atlas-canvas: radial-gradient(ellipse at 50% 45%, #FBF8F3 0%, #EDE5D8 70%, #DDD1BE 100%);
+  --atlas-canvas-shadow: inset 0 0 80px rgba(90,60,30,0.18);
+  --atlas-vignette-in: rgba(159,13,18,0.05);
+  --atlas-vignette-out: rgba(90,60,30,0.18);
+  --atlas-shard-top: #B08A5A;
+  --atlas-shard-bot: #7A5230;
+  --atlas-shard-hover-top: #9F0D12;
+  --atlas-shard-hover-bot: #6B0308;
+  --atlas-shard-visited-top: #8F6B42;
+  --atlas-shard-visited-bot: #5C3A1E;
+  --atlas-shard-stroke: rgba(26,18,11,0.55);
+  --atlas-shard-stroke-hover: #9F0D12;
+  --atlas-glow-a: rgba(159,13,18,0.06);
+  --atlas-glow-b: rgba(212,175,120,0.14);
+}
+.nu-atlas-bg {
+  background:
+    radial-gradient(ellipse 60% 50% at 30% 30%, var(--atlas-glow-a) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 45% at 75% 75%, var(--atlas-glow-b) 0%, transparent 60%);
+}
+.nu-atlas-canvas {
+  background: var(--atlas-canvas);
+  box-shadow: var(--atlas-canvas-shadow);
+}
+.nu-thread-line {
+  stroke-dasharray: 1400;
+  stroke-dashoffset: 1400;
+  animation:
+    nu-thread-draw 3.2s cubic-bezier(0.65, 0, 0.35, 1) 0.4s forwards,
+    nu-thread-pulse 5.5s ease-in-out 3.8s infinite;
+  filter: drop-shadow(0 0 3px rgba(159, 13, 18, 0.35));
+}
+.nu-thread-node {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: nu-thread-node-in 0.6s ease-out forwards;
+}
+@keyframes nu-thread-draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes nu-thread-pulse {
+  0%, 100% { stroke-opacity: 0.85; stroke-width: 1.4; }
+  50% { stroke-opacity: 1; stroke-width: 1.8; }
+}
+@keyframes nu-thread-node-in {
+  0% { opacity: 0; transform: scale(0.2); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.nu-shard {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1),
+              filter 320ms ease,
+              opacity 320ms ease;
+  opacity: 0;
+  animation: nu-shard-in 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  will-change: transform;
+}
+.nu-shard:focus { outline: none; }
+.nu-shard:focus-visible {
+  outline: 2px solid #D4AF78;
+  outline-offset: 2px;
+}
+.nu-shard.is-hover {
+  transform: translateY(-6px);
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.55));
+}
+.nu-shard.is-visited {
+  transform: translateY(-3px);
+}
+.nu-shard.is-visited.is-hover {
+  transform: translateY(-8px);
+}
+.nu-shard-hover-wash {
+  opacity: 0;
+  mix-blend-mode: soft-light;
+  transition: opacity 320ms ease;
+}
+.nu-shard.is-hover .nu-shard-hover-wash { opacity: 0.85; }
+.nu-shard-select-rim {
+  opacity: 0;
+  transition: opacity 260ms ease;
+}
+.nu-shard.is-visited .nu-shard-select-rim { opacity: 0.75; }
+.nu-island.is-hover { transform: translateY(-3px); }
+.nu-island.is-visited { transform: translateY(-1.5px); }
+.nu-shard.is-dimmed { opacity: 0.22 !important; filter: grayscale(0.5) !important; }
+@keyframes nu-shard-in {
+  0%   { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 768px) {
+  /* Lighter material on mobile for perf */
+  .nu-atlas svg [filter="url(#clay)"] { filter: none; }
+  .nu-atlas svg [filter="url(#clayErode)"] { filter: url(#shardErode); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nu-thread-line { animation: none; stroke-dashoffset: 0; }
+  .nu-thread-node { animation: none; opacity: 1; }
+  .nu-shard { animation: none; opacity: 1; transition: none; }
+}

@@ -1,0 +1,816 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Fonts — NU-ART Collective brand identity */
+  --font-display: "Cormorant Garamond", "Trajan Pro", serif;
+  --font-body: "Montserrat", sans-serif;
+  --font-script: "Allura", "Great Vibes", cursive;
+  --font-navigation: "Montserrat", sans-serif;
+  --font-label-caps: "Montserrat", sans-serif;
+
+  /* Type scale — fluid clamp() for proportional responsive sizing */
+  --text-display-lg: clamp(36px, 4.6vw, 56px);
+  --text-display-lg--line-height: 1.08;
+  --text-display-lg--letter-spacing: -0.02em;
+  --text-display-lg--font-weight: 400;
+
+  --text-display-lg-mobile: clamp(32px, 4vw, 44px);
+  --text-display-lg-mobile--line-height: 1.12;
+  --text-display-lg-mobile--letter-spacing: -0.02em;
+  --text-display-lg-mobile--font-weight: 400;
+
+  --text-headline-md: clamp(22px, 2.4vw, 30px);
+  --text-headline-md--line-height: 1.22;
+  --text-headline-md--font-weight: 400;
+
+  --text-headline-sm: clamp(16px, 1.5vw, 19px);
+  --text-headline-sm--line-height: 1.35;
+  --text-headline-sm--font-weight: 400;
+
+  --text-body-lg: clamp(15px, 1.1vw, 17px);
+  --text-body-lg--line-height: 1.65;
+  --text-body-lg--letter-spacing: 0.01em;
+
+  --text-body-md: 15px;
+  --text-body-md--line-height: 1.6;
+
+  --text-label-caps: 10.5px;
+  --text-label-caps--line-height: 14px;
+  --text-label-caps--letter-spacing: 0.22em;
+  --text-label-caps--font-weight: 500;
+
+  --text-eyebrow: 10.5px;
+  --text-eyebrow--line-height: 14px;
+  --text-eyebrow--letter-spacing: 0.22em;
+  --text-eyebrow--font-weight: 500;
+
+  --text-navigation: 11px;
+  --text-navigation--line-height: 16px;
+  --text-navigation--letter-spacing: 0.18em;
+  --text-navigation--font-weight: 400;
+
+  /* Spacing — fluid for responsive proportion */
+  --spacing-container-max: 1320px;
+  --spacing-header-h: 64px;
+  --spacing-gutter: clamp(16px, 2vw, 24px);
+  --spacing-gutter-page: clamp(16px, 4.5vw, 64px);
+  --spacing-section-gap: clamp(72px, 8vw, 112px);
+
+  --max-width-container-max: 1320px;
+
+  /* Sharp, editorial radius — locked to zero across the brand */
+  --radius: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-on-background: var(--on-background);
+  --color-surface: var(--surface);
+  --color-surface-dim: var(--surface-dim);
+  --color-surface-bright: var(--surface-bright);
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-inverse-surface: var(--inverse-surface);
+  --color-inverse-on-surface: var(--inverse-on-surface);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+  --color-surface-tint: var(--surface-tint);
+  --color-surface-variant: var(--surface-variant);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary-container: var(--on-primary-container);
+  --color-secondary: var(--secondary);
+  --color-on-secondary: var(--on-secondary);
+  --color-secondary-container: var(--secondary-container);
+  --color-on-secondary-container: var(--on-secondary-container);
+  --color-secondary-fixed-dim: var(--secondary-fixed-dim);
+  --color-tertiary: var(--tertiary);
+  --color-on-tertiary: var(--on-tertiary);
+  --color-tertiary-container: var(--tertiary-container);
+  --color-on-tertiary-container: var(--on-tertiary-container);
+  --color-error: var(--error);
+  --color-on-error: var(--on-error);
+  --color-error-container: var(--error-container);
+  --color-on-error-container: var(--on-error-container);
+
+  /* Semantic brand shortcuts */
+  --color-beige: var(--beige);
+  --color-red-blood: var(--red-blood);
+  --color-red-blood-light: var(--red-blood-light);
+
+  /* shadcn-style aliases */
+  --color-foreground: var(--on-background);
+  --color-card: var(--surface-container);
+  --color-card-foreground: var(--on-surface);
+  --color-popover: var(--surface-container);
+  --color-popover-foreground: var(--on-surface);
+  --color-muted: var(--surface-container-low);
+  --color-muted-foreground: var(--on-surface-variant);
+  --color-accent: var(--surface-container);
+  --color-accent-foreground: var(--on-surface);
+  --color-destructive: var(--secondary);
+  --color-destructive-foreground: var(--on-secondary);
+  --color-border: var(--outline-variant);
+  --color-input: var(--outline-variant);
+  --color-ring: var(--secondary);
+  --color-primary-foreground: var(--on-primary);
+  --color-secondary-foreground: var(--on-secondary);
+}
+
+:root {
+  /* NU-ART Collective — brand palette (locked) */
+  --brand-marfim: #F5F2EE;
+  --brand-preto: #111111;
+  --brand-vermelho: #9F0D12;
+  --brand-vermelho-suave: #C96D6D;
+  --brand-cinza: #D9D2CC;
+
+  --beige: var(--brand-marfim);
+  --red-blood: var(--brand-vermelho);
+  --red-blood-light: var(--brand-vermelho-suave);
+
+  --background: var(--brand-marfim);
+  --surface: var(--brand-marfim);
+  --surface-bright: #FAF8F5;
+  --surface-container-lowest: var(--brand-marfim);
+  --surface-container-low: #EFEAE3;
+  --surface-container: #EAE4DD;
+  --surface-container-high: #E4DED6;
+  --surface-container-highest: #DED7CF;
+  --surface-dim: #E8E2DB;
+  --surface-variant: var(--brand-cinza);
+
+  --on-background: var(--brand-preto);
+  --on-surface: var(--brand-preto);
+  --on-surface-variant: #5A5550;
+
+  --inverse-surface: var(--brand-preto);
+  --inverse-on-surface: var(--brand-marfim);
+
+  --outline: #8A847E;
+  --outline-variant: var(--brand-cinza);
+  --surface-tint: var(--brand-vermelho);
+
+  --primary: var(--brand-preto);
+  --on-primary: var(--brand-marfim);
+  --primary-container: #1c1b1b;
+  --on-primary-container: var(--brand-marfim);
+
+  --secondary: var(--brand-vermelho);
+  --on-secondary: var(--brand-marfim);
+  --secondary-container: var(--brand-vermelho-suave);
+  --on-secondary-container: var(--brand-marfim);
+  --secondary-fixed-dim: #E5B3B3;
+
+  --tertiary: var(--brand-vermelho-suave);
+  --on-tertiary: var(--brand-marfim);
+  --tertiary-container: #F0DADA;
+  --on-tertiary-container: var(--brand-preto);
+
+  --error: var(--brand-vermelho);
+  --on-error: var(--brand-marfim);
+  --error-container: #F8DEDE;
+  --on-error-container: #3E0006;
+
+  --overlay-scrim: rgba(17, 17, 17, 0.62);
+  --overlay-scrim-strong: rgba(17, 17, 17, 0.82);
+  --on-overlay: #F5F2EE;
+  --on-overlay-muted: rgba(245, 242, 238, 0.72);
+  --label-bg: rgba(17, 17, 17, 0.78);
+  --label-fg: #F5F2EE;
+
+  color-scheme: light;
+}
+
+:root.dark {
+  --brand-marfim: #15110e;
+  --brand-preto: #ede5dc;
+  --brand-cinza: #3a332d;
+
+  --beige: #1c1814;
+  --red-blood: #c8262c;
+  --red-blood-light: #e98a8a;
+
+  --background: #15110e;
+  --surface: #15110e;
+  --surface-bright: #221d18;
+  --surface-container-lowest: #100d0a;
+  --surface-container-low: #1c1814;
+  --surface-container: #221d18;
+  --surface-container-high: #2a241e;
+  --surface-container-highest: #332c25;
+  --surface-dim: #15110e;
+  --surface-variant: #3a332d;
+
+  --on-background: #ede5dc;
+  --on-surface: #ede5dc;
+  --on-surface-variant: #b5ada3;
+
+  --inverse-surface: #ede5dc;
+  --inverse-on-surface: #15110e;
+
+  --outline: #6e655c;
+  --outline-variant: #3a332d;
+  --surface-tint: var(--red-blood);
+
+  --primary: #ede5dc;
+  --on-primary: #15110e;
+  --primary-container: #2a241e;
+  --on-primary-container: #ede5dc;
+
+  --secondary: var(--red-blood);
+  --on-secondary: #ede5dc;
+  --secondary-container: #4a1416;
+  --on-secondary-container: #ede5dc;
+  --secondary-fixed-dim: #E5B3B3;
+
+  --tertiary: var(--red-blood-light);
+  --on-tertiary: #15110e;
+
+  --error: #ff6b6b;
+  --on-error: #15110e;
+  --error-container: #4a1416;
+  --on-error-container: #ffd6d6;
+
+  --overlay-scrim: rgba(0, 0, 0, 0.72);
+  --overlay-scrim-strong: rgba(0, 0, 0, 0.88);
+  --on-overlay: #f5ede2;
+  --on-overlay-muted: rgba(245, 237, 226, 0.72);
+  --label-bg: rgba(0, 0, 0, 0.82);
+  --label-fg: #f5ede2;
+
+  color-scheme: dark;
+}
+
+/* Smooth theme transition — only active during toggle, avoids perf cost */
+.theme-swapping,
+.theme-swapping *,
+.theme-swapping *::before,
+.theme-swapping *::after {
+  transition:
+    background-color 240ms ease,
+    color 240ms ease,
+    border-color 240ms ease,
+    fill 240ms ease,
+    stroke 240ms ease,
+    box-shadow 240ms ease !important;
+}
+.theme-swapping canvas,
+.theme-swapping img,
+.theme-swapping video {
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-swapping,
+  .theme-swapping * {
+    transition: none !important;
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html,
+  body {
+    background-color: var(--color-background);
+    color: var(--color-on-background);
+    font-family: var(--font-body);
+  }
+  body {
+    font-size: 15px;
+    line-height: 1.6;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .font-script {
+    font-family: var(--font-script);
+    font-weight: 400;
+  }
+  .material-symbols-outlined {
+    font-family: "Material Symbols Outlined";
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 24;
+  }
+}
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.red-thread {
+  position: relative;
+}
+
+@keyframes pulse-ring {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.3;
+  }
+}
+
+/* Save/like "pop" — plays once on the icon when a favorite/bookmark toggles on */
+@keyframes icon-bounce {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.4);
+  }
+  55% {
+    transform: scale(0.85);
+  }
+  80% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-icon-bounce {
+  display: inline-block;
+  animation: icon-bounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Skeleton loading placeholders — shown by the app router's loading.tsx files while data streams in */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background-image: linear-gradient(
+    90deg,
+    var(--color-surface-container-high) 25%,
+    var(--color-surface-container-highest) 50%,
+    var(--color-surface-container-high) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+/* =====================================================================
+   NU-ART ORGANIC RED THREAD SYSTEM
+   Hand-drawn curved wave/loop accents — signature brand gesture used
+   across hero, section transitions, cards, and CTAs.
+   ===================================================================== */
+:root {
+  --nu-thread-h: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 14' preserveAspectRatio='none'><path d='M2 8 C 25 2 45 14 70 7 S 115 1 140 8 S 185 13 198 6' fill='none' stroke='%23c8262c' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  --nu-thread-v: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 200' preserveAspectRatio='none'><path d='M8 2 C 2 25 14 45 7 70 S 1 115 8 140 S 13 185 6 198' fill='none' stroke='%23c8262c' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  --nu-thread-ring: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 6 C 78 4 96 24 94 52 C 96 78 74 96 48 94 C 22 96 4 76 6 50 C 4 22 24 4 50 6 Z' fill='none' stroke='%23c8262c' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+}
+
+/* BAR MODE: plain <div className="red-thread" /> becomes an organic wave */
+.red-thread:not(.thread-h):not(.thread-v):not(.red-thread-h):not(.red-thread-v) {
+  background: transparent !important;
+  background-image: var(--nu-thread-h) !important;
+  background-repeat: no-repeat !important;
+  background-position: left center !important;
+  background-size: 100% 100% !important;
+  height: 10px !important;
+  min-height: 10px;
+  opacity: 0.88;
+  border: none !important;
+  animation: nu-thread-draw 1.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Vertical bar variant */
+.red-thread-v {
+  background: transparent !important;
+  background-image: var(--nu-thread-v) !important;
+  background-repeat: no-repeat !important;
+  background-position: center top !important;
+  background-size: 100% 100% !important;
+  width: 10px !important;
+  min-width: 10px;
+  opacity: 0.88;
+  border: none !important;
+  animation: nu-thread-draw-v 1.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* UNDERLINE MODE: .red-thread.thread-h / thread-v draws via ::after */
+.red-thread.thread-h::after,
+.red-thread.red-thread-h::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 0 !important;
+  bottom: -10px !important;
+  width: 96px !important;
+  height: 10px !important;
+  background: transparent !important;
+  background-image: var(--nu-thread-h) !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+}
+.red-thread.thread-v::after,
+.red-thread.red-thread-v::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -28px !important;
+  width: 10px !important;
+  height: 100% !important;
+  background: transparent !important;
+  background-image: var(--nu-thread-v) !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+}
+
+/* Loop / circle gesture around emphasis */
+.hand-drawn-circle::before,
+.hand-drawn-circle::after {
+  border: none !important;
+  background-image: var(--nu-thread-ring) !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  border-radius: 0 !important;
+  opacity: 0.75 !important;
+}
+
+@keyframes nu-thread-draw {
+  0% {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0;
+  }
+  60% {
+    opacity: 0.9;
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+    opacity: 0.88;
+  }
+}
+@keyframes nu-thread-draw-v {
+  0% {
+    clip-path: inset(0 0 100% 0);
+    opacity: 0;
+  }
+  60% {
+    opacity: 0.9;
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+    opacity: 0.88;
+  }
+}
+
+/* Card hover gesture (opt-in via .nu-thread-hover inside a .group) */
+.group .nu-thread-hover {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 12px;
+  background-image: var(--nu-thread-h);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.group:hover .nu-thread-hover {
+  opacity: 0.9;
+  transform: translateY(0);
+}
+
+/* CTA hover loop */
+.btn-nu-loop {
+  position: relative;
+  isolation: isolate;
+}
+.btn-nu-loop::before {
+  content: "";
+  position: absolute;
+  inset: -10px -14px;
+  background-image: var(--nu-thread-ring);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  opacity: 0;
+  transform: scale(0.85) rotate(-2deg);
+  transition:
+    opacity 0.5s ease,
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  z-index: -1;
+}
+.btn-nu-loop:hover::before {
+  opacity: 0.7;
+  transform: scale(1) rotate(-2deg);
+}
+
+/* Section transition ornament */
+.nu-thread-divider {
+  display: block;
+  width: min(720px, 82%);
+  height: 22px;
+  margin: 0 auto;
+  background-image: var(--nu-thread-h);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  opacity: 0.7;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.hand-drawn-circle {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: draw 2s ease-out forwards;
+}
+
+/* === Homepage hero: atmospheric backdrop + orbiting logo ring === */
+.nu-hero {
+  --nu-halo: radial-gradient(circle, rgba(159, 13, 18, 0.14) 0%, rgba(212, 175, 120, 0.1) 45%, transparent 72%);
+  --nu-glow: radial-gradient(ellipse 70% 55% at 50% 45%, rgba(159, 13, 18, 0.1) 0%, rgba(159, 13, 18, 0.03) 35%, transparent 70%),
+    radial-gradient(circle at 15% 20%, rgba(212, 175, 120, 0.14) 0%, transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(159, 13, 18, 0.06) 0%, transparent 45%);
+  --nu-dot-color: rgba(17, 17, 17, 0.5);
+  --nu-dot-opacity: 0.05;
+  --nu-logo-shadow: drop-shadow(0 12px 28px rgba(17, 17, 17, 0.18)) drop-shadow(0 0 24px rgba(159, 13, 18, 0.14));
+}
+:root.dark .nu-hero {
+  --nu-halo: radial-gradient(circle, rgba(212, 175, 120, 0.14) 0%, rgba(159, 13, 18, 0.08) 45%, transparent 72%);
+  --nu-glow: radial-gradient(ellipse 70% 55% at 50% 45%, rgba(159, 13, 18, 0.16) 0%, rgba(159, 13, 18, 0.05) 35%, transparent 70%),
+    radial-gradient(circle at 15% 20%, rgba(212, 175, 120, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(212, 175, 120, 0.06) 0%, transparent 45%);
+  --nu-dot-color: rgba(245, 242, 238, 0.6);
+  --nu-dot-opacity: 0.06;
+  --nu-logo-shadow: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 24px rgba(159, 13, 18, 0.18));
+}
+.nu-hero-glow {
+  background: var(--nu-glow);
+}
+.nu-hero-dots {
+  background-image: radial-gradient(var(--nu-dot-color) 1px, transparent 1px);
+  background-size: 3px 3px;
+  opacity: var(--nu-dot-opacity);
+  mix-blend-mode: overlay;
+}
+.nu-halo-bg {
+  background: var(--nu-halo);
+}
+.nu-logo-img {
+  filter: var(--nu-logo-shadow);
+}
+
+@keyframes nu-orbit-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes nu-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+@keyframes nu-logo-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+@keyframes nu-arc-draw {
+  from {
+    stroke-dashoffset: 1180;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.nu-orbit {
+  animation: nu-orbit-spin 42s linear infinite;
+  transform-origin: 50% 50%;
+}
+.nu-orbit-arc {
+  animation: nu-arc-draw 2.4s ease-out both;
+}
+.nu-breathe {
+  animation: nu-breathe 6s ease-in-out infinite;
+}
+.nu-logo-in {
+  animation: nu-logo-in 1.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.red-thread-circle {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawCircle 2s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+@keyframes drawCircle {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.8s ease-out 0.5s forwards;
+}
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.thread-line-vertical {
+  width: 1px;
+  background-color: var(--red-blood);
+  height: 0;
+  animation: growLine 1.5s ease-out 1s forwards;
+}
+@keyframes growLine {
+  to {
+    height: 100%;
+  }
+}
+
+.checkout-input {
+  width: 100%;
+  background: transparent;
+  border-bottom: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
+  padding: 0.75rem 0;
+  outline: none;
+  font-family: var(--font-body);
+  color: var(--on-surface);
+  transition: border-color 0.2s ease;
+}
+.checkout-input:focus {
+  border-color: var(--primary);
+}
+.checkout-label {
+  display: block;
+  font-family: var(--font-label-caps);
+  font-size: var(--text-label-caps);
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+  margin-bottom: 0.25rem;
+}
+.validation-error {
+  color: var(--error);
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-top: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+input:invalid:not(:placeholder-shown) + .validation-error {
+  opacity: 1;
+}
+.circle-svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  width: 120%;
+  height: 180%;
+}
+
+.vertical-thread {
+  width: 1px;
+  background-color: var(--red-blood);
+}
+.museum-signage {
+  border-left: 1px solid var(--on-background);
+  padding-left: 24px;
+}
+
+::selection {
+  background: var(--secondary);
+  color: var(--on-secondary);
+}
+a:hover {
+  color: var(--secondary);
+}
+.text-accent-red,
+.accent-red {
+  color: var(--secondary) !important;
+}
+hr {
+  border-color: var(--secondary);
+}
+*:focus-visible {
+  outline: 2px solid var(--secondary);
+  outline-offset: 2px;
+}
+
+.drop-cap::first-letter {
+  float: left;
+  font-family: var(--font-display);
+  font-size: 5rem;
+  line-height: 1;
+  padding-right: 0.75rem;
+  color: var(--on-background);
+}
+
+.gallery-lighting {
+  background: radial-gradient(circle at 50% 20%, color-mix(in srgb, var(--beige) 80%, transparent) 0%, rgba(251, 249, 247, 0) 70%);
+}
+.zoom-container:hover img {
+  transform: scale(1.1);
+}
+
+.editorial-line {
+  position: relative;
+}
+.editorial-line::after {
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  width: 15px;
+  height: 1px;
+  background: var(--red-blood-light);
+}
+.glass-badge {
+  background: color-mix(in srgb, var(--beige) 70%, transparent);
+  backdrop-filter: blur(8px);
+}
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.hover-lift:hover {
+  transform: translateY(-8px);
+}
+@keyframes pan {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nu-orbit,
+  .nu-breathe {
+    animation: none;
+  }
+}
