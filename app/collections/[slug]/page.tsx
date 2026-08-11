@@ -73,6 +73,10 @@ export function generateStaticParams() {
   return COLLECTIONS.map((c) => ({ slug: c.slug }));
 }
 
+// ISR so cover/artwork swaps from the admin portal aren't stuck on the
+// build-time snapshot (Vercel) while localhost (always dynamic in dev) looks fine.
+export const revalidate = 60;
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const resolved = await resolveCollection(slug);

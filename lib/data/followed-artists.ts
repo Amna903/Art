@@ -131,39 +131,88 @@ export async function unfollowArtist(userId: string | undefined | null, slug: st
 }
 
 export async function listFollowedArtists(userId: string | undefined | null): Promise<FollowedArtistRow[]> {
-  const localItems = getLocalFollowedArtists(userId);
+  let localItems = getLocalFollowedArtists(userId);
 
-  if (!userId || !isSupabaseConfigured()) {
-    return localItems;
+  // When a guest logs in, sync any guest localStorage items up to Supabase
+  if (userId && isSupabaseConfigured() && typeof window !== "undefined") {
+    try {
+      const guestRaw = localStorage.getItem(`${LOCAL_STORAGE_KEY_PREFIX}guest`);
+      if (guestRaw) {
+        const guestItems: FollowedArtistRow[] = JSON.parse(guestRaw);
+        if (guestItems.length > 0) {
+          const insertPayloads = guestItems.map((g) => ({
+            user_id: userId,
+            artist_slug: g.artist_slug,
+            artist_name: g.artist_name,
+            artist_image: g.artist_image,
+            technique: g.technique,
+            country_name: g.country_name,
+          }));
+          await supabase.from("followed_artists").upsert(insertPayloads, { onConflict: "user_id,artist_slug" });
+          localStorage.removeItem(`${LOCAL_STORAGE_KEY_PREFIX}guest`);
+        }
+      }
+    } catch {
+      // Ignore migration errors
+    }
   }
 
-  try {
-    const { data, error } = await supabase
-      .from("followed_artists")
-      .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
+  let dbItems: FollowedArtistRow[] = [];
+  if (userId && isSupabaseConfigured()) {
+    try {
+      const { data } = await supabase
+        .from("followed_artists")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
 
-    if (error || !data) {
-      return localItems;
+      if (data) {
+        dbItems = data as FollowedArtistRow[];
+      }
+    } catch {
+      // Ignore fetch error
     }
-
-    const mergedMap = new Map<string, FollowedArtistRow>();
-    for (const item of localItems) {
-      mergedMap.set(item.artist_slug, item);
-    }
-    for (const item of data as FollowedArtistRow[]) {
-      mergedMap.set(item.artist_slug, item);
-    }
-
-    const merged = Array.from(mergedMap.values()).sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-    );
-
-    setLocalFollowedArtists(merged, userId);
-    return merged;
-  } catch (err) {
-    return localItems;
   }
+
+  const mergedMap = new Map<string, FollowedArtistRow>();
+  for (const item of localItems) {
+    mergedMap.set(item.artist_slug, item);
+  }
+  for (const item of dbItems) {
+    mergedMap.set(item.artist_slug, item);
+  }
+
+  let merged = Array.from(mergedMap.values()).sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
+
+  // Follow stores a one-time avatar snapshot. Refresh from profiles so
+  // guest and client dashboards show up-to-date artist profile pictures.
+  if (isSupabaseConfigured() && merged.length > 0) {
+    try {
+      const ids = merged.map((m) => m.artist_slug);
+      const { data: live } = await supabase
+        .from("profiles")
+        .select("id, avatar_url, display_name")
+        .in("id", ids);
+      if (live?.length) {
+        const byId = new Map(live.map((row) => [row.id, row]));
+        merged = merged.map((row) => {
+          const current = byId.get(row.artist_slug);
+          if (!current) return row;
+          return {
+            ...row,
+            artist_image: current.avatar_url || row.artist_image,
+            artist_name: current.display_name?.trim() || row.artist_name,
+          };
+        });
+      }
+    } catch {
+      // Ignore live resolution error
+    }
+  }
+
+  setLocalFollowedArtists(merged, userId);
+  return merged;
 }
 

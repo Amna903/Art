@@ -127,39 +127,87 @@ export async function unsaveArtwork(userId: string | undefined | null, slug: str
 }
 
 export async function listSavedArtworks(userId: string | undefined | null): Promise<SavedArtworkRow[]> {
-  const localItems = getLocalSavedArtworks(userId);
+  let localItems = getLocalSavedArtworks(userId);
 
-  if (!userId || !isSupabaseConfigured()) {
-    return localItems;
+  // When a guest logs in, sync any guest localStorage items up to Supabase
+  if (userId && isSupabaseConfigured() && typeof window !== "undefined") {
+    try {
+      const guestRaw = localStorage.getItem(`${LOCAL_STORAGE_KEY_PREFIX}guest`);
+      if (guestRaw) {
+        const guestItems: SavedArtworkRow[] = JSON.parse(guestRaw);
+        if (guestItems.length > 0) {
+          const insertPayloads = guestItems.map((g) => ({
+            user_id: userId,
+            artwork_slug: g.artwork_slug,
+            artwork_title: g.artwork_title,
+            artist_name: g.artist_name,
+            artwork_image: g.artwork_image,
+          }));
+          await supabase.from("saved_artworks").upsert(insertPayloads, { onConflict: "user_id,artwork_slug" });
+          localStorage.removeItem(`${LOCAL_STORAGE_KEY_PREFIX}guest`);
+        }
+      }
+    } catch {
+      // Ignore migration errors
+    }
   }
 
-  try {
-    const { data, error } = await supabase
-      .from("saved_artworks")
-      .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
+  let dbItems: SavedArtworkRow[] = [];
+  if (userId && isSupabaseConfigured()) {
+    try {
+      const { data } = await supabase
+        .from("saved_artworks")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
 
-    if (error || !data) {
-      return localItems;
+      if (data) {
+        dbItems = data as SavedArtworkRow[];
+      }
+    } catch {
+      // Ignore fetch error
     }
-
-    const mergedMap = new Map<string, SavedArtworkRow>();
-    for (const item of localItems) {
-      mergedMap.set(item.artwork_slug, item);
-    }
-    for (const item of data as SavedArtworkRow[]) {
-      mergedMap.set(item.artwork_slug, item);
-    }
-
-    const merged = Array.from(mergedMap.values()).sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-    );
-
-    setLocalSavedArtworks(merged, userId);
-    return merged;
-  } catch (err) {
-    return localItems;
   }
+
+  const mergedMap = new Map<string, SavedArtworkRow>();
+  for (const item of localItems) {
+    mergedMap.set(item.artwork_slug, item);
+  }
+  for (const item of dbItems) {
+    mergedMap.set(item.artwork_slug, item);
+  }
+
+  let merged = Array.from(mergedMap.values()).sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
+
+  // Snapshots freeze the image at save-time. Re-resolve from artworks so
+  // guest and client dashboards don't keep showing replaced photos forever.
+  if (isSupabaseConfigured() && merged.length > 0) {
+    try {
+      const slugs = merged.map((m) => m.artwork_slug);
+      const { data: live } = await supabase
+        .from("artworks")
+        .select("slug, image_url, title")
+        .in("slug", slugs);
+      if (live?.length) {
+        const bySlug = new Map(live.map((row) => [row.slug, row]));
+        merged = merged.map((row) => {
+          const current = bySlug.get(row.artwork_slug);
+          if (!current) return row;
+          return {
+            ...row,
+            artwork_image: current.image_url || row.artwork_image,
+            artwork_title: current.title || row.artwork_title,
+          };
+        });
+      }
+    } catch {
+      // Ignore live resolution error
+    }
+  }
+
+  setLocalSavedArtworks(merged, userId);
+  return merged;
 }
 

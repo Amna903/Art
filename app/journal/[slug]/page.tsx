@@ -9,6 +9,8 @@ import { JournalArticle } from "@/components/journal/JournalArticle";
 
 type Props = { params: Promise<{ slug: string }> };
 
+export const revalidate = 60;
+
 /** Priority: Sanity CMS → real Supabase post → static demo story, same chain as artworks/collections. */
 async function resolvePost(slug: string): Promise<JournalArticleData | null> {
   const cms = await getJournalPostBySlug(slug);

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase/client";
+import { pingRevalidate } from "@/lib/utils/revalidate";
 
 export function EditableImage({
   page,
@@ -72,6 +73,7 @@ export function EditableImage({
         { page, block_key: blockKey, value: draftSrc, alt_text: draftAlt },
         { onConflict: "page,block_key" },
       );
+    await pingRevalidate("page-blocks", { page });
     setSaving(false);
     setEditing(false);
     router.refresh();

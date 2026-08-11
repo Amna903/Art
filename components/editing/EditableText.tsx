@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase/client";
+import { pingRevalidate } from "@/lib/utils/revalidate";
 
 type Tag = "p" | "h1" | "h2" | "h3" | "span" | "blockquote" | "cite" | "div";
 
@@ -44,6 +45,7 @@ export function EditableText({
     await supabase
       .from("page_blocks")
       .upsert({ page, block_key: blockKey, value: draft }, { onConflict: "page,block_key" });
+    await pingRevalidate("page-blocks", { page });
     setSaving(false);
     setEditing(false);
     router.refresh();

@@ -113,6 +113,10 @@ export function ArtistDashboard({ userId }: { userId: string }) {
     };
     await supabase.from("profiles").upsert(payload, { onConflict: "id" });
     await load();
+    // Avatar/bio live under the same unstable_cache("artworks") as published
+    // works — without this, homepage/artists pages keep serving the old photo
+    // for up to 60s (and longer on Vercel Full Route Cache).
+    pingRevalidate("artworks");
     setProfileSaving(false);
     closeProfileEditor();
   };

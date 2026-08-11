@@ -11,6 +11,8 @@ import { getDirectoryArtists } from "@/lib/data/directory";
 import Link from "next/link";
 import Image from "next/image";
 
+export const revalidate = 60;
+
 type Props = { params: Promise<{ slug: string }> };
 
 type ArtistWork = {

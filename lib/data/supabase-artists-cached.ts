@@ -23,20 +23,23 @@ export const getPublishedArtworks = unstable_cache(fetchPublishedArtworks, ["pub
   tags: ["artworks"],
 });
 
-export const getPublishedArtworksByIds = unstable_cache(fetchPublishedArtworksByIds, ["published-artworks-by-ids"], {
-  revalidate: 60,
-  tags: ["artworks"],
-});
+export const getPublishedArtworksByIds = (ids: string[]) =>
+  unstable_cache(() => fetchPublishedArtworksByIds(ids), ["published-artworks-by-ids", ids.join(",")], {
+    revalidate: 60,
+    tags: ["artworks"],
+  })();
 
-export const getMostRequestedArtworks = unstable_cache(fetchMostRequestedArtworks, ["most-requested-artworks"], {
-  revalidate: 60,
-  tags: ["artworks"],
-});
+export const getMostRequestedArtworks = (limit = 6) =>
+  unstable_cache(() => fetchMostRequestedArtworks(limit), ["most-requested-artworks", String(limit)], {
+    revalidate: 60,
+    tags: ["artworks"],
+  })();
 
-export const getPublishedArtworkBySlug = unstable_cache(fetchPublishedArtworkBySlug, ["published-artwork-by-slug"], {
-  revalidate: 60,
-  tags: ["artworks"],
-});
+export const getPublishedArtworkBySlug = (slug: string) =>
+  unstable_cache(() => fetchPublishedArtworkBySlug(slug), ["published-artwork-by-slug", slug], {
+    revalidate: 60,
+    tags: ["artworks"],
+  })();
 
 export const getRealArtists = unstable_cache(fetchRealArtists, ["real-artists"], {
   revalidate: 60,

@@ -10,6 +10,8 @@ import { getMostRequestedArtworks } from "@/lib/data/supabase-artists-cached";
 import { getPageBlocks } from "@/lib/data/pageBlocks";
 import { mergeSlots } from "@/lib/utils/mergeSlots";
 
+export const revalidate = 60;
+
 function ThreadDivider() {
   return (
     <div className="py-14">

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { supabase } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/types";
 import { slugify } from "@/lib/utils/slugify";
+import { pingRevalidate } from "@/lib/utils/revalidate";
 import { F } from "./FormField";
 import { ListRowSkeleton } from "@/components/ui/Skeleton";
 
@@ -82,6 +83,7 @@ export function CollectionsAdmin() {
     setTitle("");
     setDescription("");
     setCoverUrl("");
+    pingRevalidate("collections");
   };
 
   const deleteCollection = async (id: string) => {
@@ -98,6 +100,7 @@ export function CollectionsAdmin() {
       return next;
     });
     if (managing === id) setManaging(null);
+    pingRevalidate("collections");
   };
 
   const toggleArtwork = async (collectionId: string, artworkId: string) => {
@@ -127,6 +130,8 @@ export function CollectionsAdmin() {
         return next;
       });
       alert(error.message);
+    } else {
+      pingRevalidate("collections");
     }
   };
 

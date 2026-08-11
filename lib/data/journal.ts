@@ -47,8 +47,8 @@ export const getPublishedJournalPosts = unstable_cache(fetchPublishedJournalPost
   tags: ["journal-posts"],
 });
 
-export const getPublishedJournalPostBySlug = unstable_cache(
-  fetchPublishedJournalPostBySlug,
-  ["published-journal-post-by-slug"],
-  { revalidate: 60, tags: ["journal-posts"] },
-);
+export const getPublishedJournalPostBySlug = (slug: string) =>
+  unstable_cache(() => fetchPublishedJournalPostBySlug(slug), ["published-journal-post-by-slug", slug], {
+    revalidate: 60,
+    tags: ["journal-posts"],
+  })();

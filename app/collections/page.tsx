@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   description: "NU-ART — contemporary African art movement.",
 };
 
+// Match discover/journal — without this, cover image updates can stick until redeploy.
+export const revalidate = 60;
+
 export default async function CollectionsPage() {
   const collections = await getPublishedCollections();
   return <CollectionsView initialItems={collections} />;

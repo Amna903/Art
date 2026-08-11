@@ -3,12 +3,16 @@ import type { Metadata } from "next";
 import { ArtistDirectory } from "@/components/sections/artists/ArtistDirectory";
 import { ARTIST_COUNT, COUNTRY_COUNT, ARTISTS, type Technique } from "@/lib/data/artists";
 import { getArtists } from "@/lib/sanity/queries";
-import { getRealArtists } from "@/lib/data/supabase-artists"; // 👈 naya import
+import { getRealArtists } from "@/lib/data/supabase-artists-cached";
 
 export const metadata: Metadata = {
   title: "Artists | NU-ART",
   description: `${ARTIST_COUNT} contemporary African artists across ${COUNTRY_COUNT} nations.`,
 };
+
+// Same 60s window + artworks tag as homepage/detail — profile avatar edits
+// invalidate via pingRevalidate("artworks").
+export const revalidate = 60;
 
 export default async function ArtistsPage() {
   // Priority: real Supabase self-service artists → Sanity CMS → static fallback

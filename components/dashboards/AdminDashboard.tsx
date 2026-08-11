@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/types";
+import { pingRevalidate } from "@/lib/utils/revalidate";
 import { EnquiriesAdmin } from "./EnquiriesAdmin";
 import { CollectionsAdmin } from "./CollectionsAdmin";
 import { ListRowSkeleton } from "@/components/ui/Skeleton";
@@ -95,6 +96,7 @@ export function AdminDashboard() {
   const setArtworkStatus = async (id: string, status: Artwork["status"]) => {
     await supabase.from("artworks").update({ status }).eq("id", id);
     load();
+    pingRevalidate("artworks");
   };
 
   return (
