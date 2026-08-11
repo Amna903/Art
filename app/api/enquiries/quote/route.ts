@@ -77,6 +77,8 @@ export async function POST(req: Request) {
   let emailSent = false;
   let emailNote = "";
 
+  const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "nuarte51@gmail.com";
+
   if (resendApiKey) {
     try {
       const resendRes = await fetch("https://api.resend.com/emails", {
@@ -88,6 +90,7 @@ export async function POST(req: Request) {
         body: JSON.stringify({
           from: "NU-ART Concierge <onboarding@resend.dev>",
           to: [updated.email],
+          reply_to: adminEmail,
           subject: `Your quote for "${updated.artwork_title}" is ready`,
           html: `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e5e5; border-radius: 8px; overflow: hidden; background-color: #ffffff;">

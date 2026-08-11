@@ -43,8 +43,8 @@ export async function POST(req: Request) {
       }
     }
 
-    // 2. Dispatch email to target receiver (aseaamk75@gmail.com)
-    const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "aseaamk75@gmail.com";
+    // 2. Dispatch email to target receiver (nuarte51@gmail.com)
+    const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "nuarte51@gmail.com";
     const resendApiKey = process.env.RESEND_API_KEY;
 
     let emailSent = false;
