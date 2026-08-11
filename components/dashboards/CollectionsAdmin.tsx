@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/types";
@@ -13,6 +14,7 @@ type Collection = Database["public"]["Tables"]["collections"]["Row"];
 type Artwork = Database["public"]["Tables"]["artworks"]["Row"];
 
 export function CollectionsAdmin() {
+  const router = useRouter();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   // collection id -> set of artwork ids currently in that collection
@@ -83,7 +85,8 @@ export function CollectionsAdmin() {
     setTitle("");
     setDescription("");
     setCoverUrl("");
-    pingRevalidate("collections");
+    await pingRevalidate("collections");
+    router.refresh();
   };
 
   const deleteCollection = async (id: string) => {
@@ -100,7 +103,8 @@ export function CollectionsAdmin() {
       return next;
     });
     if (managing === id) setManaging(null);
-    pingRevalidate("collections");
+    await pingRevalidate("collections");
+    router.refresh();
   };
 
   const toggleArtwork = async (collectionId: string, artworkId: string) => {
@@ -131,7 +135,8 @@ export function CollectionsAdmin() {
       });
       alert(error.message);
     } else {
-      pingRevalidate("collections");
+      await pingRevalidate("collections");
+      router.refresh();
     }
   };
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase/client";
 import { AFRICAN_COUNTRIES } from "@/lib/data/africa";
@@ -23,6 +24,7 @@ const RESERVED_MEDIA = [
 ] as const;
 
 export function ArtistDashboard({ userId }: { userId: string }) {
+  const router = useRouter();
   const [items, setItems] = useState<Artwork[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [profileDraft, setProfileDraft] = useState<Profile | null>(null);
@@ -113,10 +115,8 @@ export function ArtistDashboard({ userId }: { userId: string }) {
     };
     await supabase.from("profiles").upsert(payload, { onConflict: "id" });
     await load();
-    // Avatar/bio live under the same unstable_cache("artworks") as published
-    // works — without this, homepage/artists pages keep serving the old photo
-    // for up to 60s (and longer on Vercel Full Route Cache).
-    pingRevalidate("artworks");
+    await pingRevalidate("artworks");
+    router.refresh();
     setProfileSaving(false);
     closeProfileEditor();
   };
@@ -161,15 +161,17 @@ export function ArtistDashboard({ userId }: { userId: string }) {
       await supabase.from("artworks").insert(payload);
     }
     setEditing(null);
-    load();
-    pingRevalidate("artworks");
+    await load();
+    await pingRevalidate("artworks");
+    router.refresh();
   };
 
   const remove = async (id: string) => {
     if (!confirm("Delete this artwork?")) return;
     await supabase.from("artworks").delete().eq("id", id);
-    load();
-    pingRevalidate("artworks");
+    await load();
+    await pingRevalidate("artworks");
+    router.refresh();
   };
 
   const upload = async (file: File) => {

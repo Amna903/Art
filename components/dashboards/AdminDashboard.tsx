@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/types";
 import { pingRevalidate } from "@/lib/utils/revalidate";
@@ -21,6 +22,7 @@ type ProfileRow = {
 type Artwork = Database["public"]["Tables"]["artworks"]["Row"];
 
 export function AdminDashboard() {
+  const router = useRouter();
   const [profiles, setProfiles] = useState<ProfileRow[]>([]);
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [enquiryCount, setEnquiryCount] = useState(0);
@@ -95,8 +97,9 @@ export function AdminDashboard() {
 
   const setArtworkStatus = async (id: string, status: Artwork["status"]) => {
     await supabase.from("artworks").update({ status }).eq("id", id);
-    load();
-    pingRevalidate("artworks");
+    await load();
+    await pingRevalidate("artworks");
+    router.refresh();
   };
 
   return (

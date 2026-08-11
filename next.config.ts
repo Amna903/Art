@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    staleTimes: {
+      dynamic: 0,
+    },
+  },
   images: {
     // Cover/avatar images can be any admin-pasted URL (the "…or paste an
     // image URL" inputs in JournalGrid/ExhibitionsGrid/CollectionsAdmin/
