@@ -8,6 +8,7 @@ import { ReviewsSection } from "@/components/artwork/ReviewsSection";
 import { getArtworkBySlug, getArtworksByArtistSlug } from "@/lib/sanity/queries";
 import { getPublishedArtworkBySlug, getPublishedArtworks } from "@/lib/data/supabase-artists-cached";
 import { ARTWORKS as STATIC_ARTWORKS } from "@/lib/data/content";
+import { getArtistSlugByName } from "@/lib/data/artists";
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
@@ -38,6 +39,7 @@ type RelatedWork = {
 type ResolvedWork = {
   title: string;
   artist: string;
+  artistSlug: string;
   medium: string;
   year: string;
   image: string;
@@ -58,6 +60,7 @@ async function resolveArtwork(slug: string): Promise<ResolvedWork> {
     return {
       title: cms.title,
       artist: cms.artistName ?? FALLBACK.artist,
+      artistSlug: cms.artistSlug || getArtistSlugByName(cms.artistName ?? FALLBACK.artist),
       medium: cms.medium ?? FALLBACK.medium,
       year: cms.year ? String(cms.year) : FALLBACK.year,
       image: cms.imageUrl ?? FALLBACK.image,
@@ -84,6 +87,7 @@ async function resolveArtwork(slug: string): Promise<ResolvedWork> {
     return {
       title: real.title,
       artist: real.artistName,
+      artistSlug: real.artistId || getArtistSlugByName(real.artistName),
       medium: real.medium ?? FALLBACK.medium,
       year: real.year ? String(real.year) : FALLBACK.year,
       image: real.imageUrl,
@@ -108,6 +112,7 @@ async function resolveArtwork(slug: string): Promise<ResolvedWork> {
     return {
       title: staticWork.title,
       artist: staticWork.artist,
+      artistSlug: getArtistSlugByName(staticWork.artist),
       medium: staticWork.medium,
       year: String(staticWork.year),
       image: staticWork.image,
@@ -126,7 +131,7 @@ async function resolveArtwork(slug: string): Promise<ResolvedWork> {
     };
   }
 
-  return { ...FALLBACK, artistBio: null, artistStatement: null, relatedWorks: [] };
+  return { ...FALLBACK, artistSlug: "adebayo-oluwaseun", artistBio: null, artistStatement: null, relatedWorks: [] };
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -140,7 +145,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ArtworkDetailPage({ params }: Props) {
   const { slug } = await params;
-  const { title, artist, medium, year, image, imageAlt, artistBio, artistStatement, relatedWorks } = await resolveArtwork(slug);
+  const { title, artist, artistSlug, medium, year, image, imageAlt, artistBio, artistStatement, relatedWorks } = await resolveArtwork(slug);
 
   return (
     <main className="max-w-container-max mx-auto px-gutter-page pt-24 md:pt-28">
@@ -171,7 +176,12 @@ export default async function ArtworkDetailPage({ params }: Props) {
           </nav>
           <h1 className="font-headline-md text-headline-md mb-2">{title}</h1>
           <div className="flex items-center gap-4 mb-8 red-thread thread-h">
-            <span className="font-body-lg text-body-lg text-secondary">{artist}</span>
+            <Link
+              href={`/artists/${artistSlug}`}
+              className="font-body-lg text-body-lg text-secondary hover:underline transition-colors font-semibold"
+            >
+              {artist}
+            </Link>
             <span className="text-on-surface-variant">•</span>
             <span className="font-label-caps text-label-caps uppercase tracking-widest">Lagos, Nigeria</span>
           </div>

@@ -7,6 +7,7 @@ import type { Database } from "@/lib/supabase/types";
 import { pingRevalidate } from "@/lib/utils/revalidate";
 import { EnquiriesAdmin } from "./EnquiriesAdmin";
 import { CollectionsAdmin } from "./CollectionsAdmin";
+import { CountrySoundsAdmin } from "./CountrySoundsAdmin";
 import { ListRowSkeleton } from "@/components/ui/Skeleton";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
@@ -27,7 +28,7 @@ export function AdminDashboard() {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [enquiryCount, setEnquiryCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"users" | "artworks" | "collections" | "enquiries">("users");
+  const [tab, setTab] = useState<"users" | "artworks" | "collections" | "enquiries" | "country sounds">("users");
 
   const load = async () => {
     setLoading(true);
@@ -110,13 +111,13 @@ export function AdminDashboard() {
         <Stat label="Enquiries" value={enquiryCount} />
       </section>
 
-      <nav className="flex gap-8 border-b border-primary/10">
-        {(["users", "artworks", "collections", "enquiries"] as const).map((t) => (
+      <nav className="flex gap-8 border-b border-primary/10 overflow-x-auto">
+        {(["users", "artworks", "collections", "enquiries", "country sounds"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
             className={
-              "py-3 text-xs uppercase tracking-[0.2em] " +
+              "py-3 text-xs uppercase tracking-[0.2em] whitespace-nowrap " +
               (tab === t ? "text-secondary border-b border-secondary -mb-px" : "text-on-surface-variant")
             }
           >
@@ -228,8 +229,10 @@ export function AdminDashboard() {
         </section>
       ) : tab === "collections" ? (
         <CollectionsAdmin />
-      ) : (
+      ) : tab === "enquiries" ? (
         <EnquiriesAdmin />
+      ) : (
+        <CountrySoundsAdmin />
       )}
     </div>
   );

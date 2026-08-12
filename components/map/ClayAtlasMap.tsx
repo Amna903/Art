@@ -14,18 +14,13 @@ import "@/components/map/clay-atlas.css";
 const W = 1000;
 const H = 1000;
 
-function roundSvg(n: number): number {
-  return Math.round(n * 1000) / 1000;
-}
-
 type FeatureLike = {
   type: "Feature";
   properties: { ADMIN: string; ISO_A3: string };
   geometry: GeoJSON.Geometry;
 };
 
-// countrySlug -> set of techniques present, so the medium filter chips can
-// dim out countries with no matching artists.
+// Map country -> set of techniques
 const TECHNIQUES_BY_COUNTRY: Record<string, Set<Technique>> = {};
 for (const artist of ARTISTS) {
   const set = TECHNIQUES_BY_COUNTRY[artist.countrySlug] ?? new Set<Technique>();
@@ -33,7 +28,6 @@ for (const artist of ARTISTS) {
   TECHNIQUES_BY_COUNTRY[artist.countrySlug] = set;
 }
 
-// Deterministic pseudo-random per slug for stable per-country sound seeds.
 function hashStr(s: string): number {
   let h = 2166136261;
   for (let i = 0; i < s.length; i++) {
@@ -43,8 +37,6 @@ function hashStr(s: string): number {
   return h >>> 0;
 }
 
-// Same warm pluck+drone cue as the homepage Atlas section, so hovering a
-// country here feels consistent with the rest of the site.
 function playCountryCue(slug: string, ctx: AudioContext, master: GainNode) {
   const seed = hashStr(slug);
   const rand = (n: number) => ((seed >> n) & 0xff) / 255;
@@ -55,7 +47,7 @@ function playCountryCue(slug: string, ctx: AudioContext, master: GainNode) {
   const detune = (rand(5) - 0.5) * 12;
 
   const now = ctx.currentTime;
-  const dur = 1.5;
+  const dur = 1.8;
 
   const osc1 = ctx.createOscillator();
   osc1.type = rand(7) > 0.5 ? "triangle" : "sine";
@@ -69,7 +61,7 @@ function playCountryCue(slug: string, ctx: AudioContext, master: GainNode) {
 
   const g = ctx.createGain();
   g.gain.setValueAtTime(0.0001, now);
-  g.gain.exponentialRampToValueAtTime(0.5, now + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.45, now + 0.03);
   g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
 
   const filter = ctx.createBiquadFilter();
@@ -86,53 +78,20 @@ function playCountryCue(slug: string, ctx: AudioContext, master: GainNode) {
   osc2.start(now);
   osc1.stop(now + dur + 0.05);
   osc2.stop(now + dur + 0.05);
-
-  const noiseBuf = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
-  const data = noiseBuf.getChannelData(0);
-  for (let i = 0; i < data.length; i++) {
-    const t = i / data.length;
-    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, 2) * 0.15;
-  }
-  const noise = ctx.createBufferSource();
-  noise.buffer = noiseBuf;
-  const nGain = ctx.createGain();
-  nGain.gain.value = 0.12;
-  const nFilt = ctx.createBiquadFilter();
-  nFilt.type = "bandpass";
-  nFilt.frequency.value = 1800 + rand(13) * 2000;
-  nFilt.Q.value = 0.8;
-  noise.connect(nFilt);
-  nFilt.connect(nGain);
-  nGain.connect(master);
-  noise.start(now);
 }
-
-// Curated route order that flows south → east → north → west, avoiding self-crossings.
-const THREAD_ROUTE = [
-  "south-africa",
-  "kenya",
-  "ethiopia",
-  "egypt",
-  "morocco",
-  "senegal",
-  "ghana",
-  "nigeria",
-];
 
 export function ClayAtlasMap() {
   const router = useRouter();
   const features = (africaGeo as unknown as { features: FeatureLike[] }).features;
 
   const projection = useMemo(() => {
-    // Conic Equal Area centred on Africa — silhouette reads faithfully,
-    // North Africa isn't stretched the way Mercator flattens it.
     const p = geoConicEqualArea()
       .rotate([-20, 0])
       .parallels([-15, 30]);
     p.fitExtent(
       [
         [40, 50],
-        [W - 40, H - 60],
+        [W - 40, H - 50],
       ],
       { type: "FeatureCollection", features } as unknown as GeoJSON.FeatureCollection,
     );
@@ -140,7 +99,6 @@ export function ClayAtlasMap() {
   }, [features]);
   const path = useMemo(() => geoPath(projection), [projection]);
 
-  // Continental country shards — real geojson geometry, earthy palette.
   const shards = useMemo<Shard[]>(() => {
     const inputs: CountryInput[] = [];
     features.forEach((f) => {
@@ -161,8 +119,6 @@ export function ClayAtlasMap() {
     return buildCountryShards(inputs);
   }, [features, path]);
 
-  // Small island pins projected in the same space — Cabo Verde, São Tomé,
-  // Comoros, Mauritius, Seychelles. Madagascar comes from the geojson above.
   const islands = useMemo(() => {
     return Object.entries(ISLAND_PINS)
       .map(([slug, [lon, lat]]) => {
@@ -171,37 +127,18 @@ export function ClayAtlasMap() {
         const seed = slug.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
         return { slug, x: pt[0], y: pt[1], seed };
       })
-      .filter((isle): isle is { slug: string; x: number; y: number; seed: number } => Boolean(isle))
-      .map((isle) => ({
-        ...isle,
-        x: roundSvg(isle.x),
-        y: roundSvg(isle.y),
-      }));
+      .filter(Boolean) as { slug: string; x: number; y: number; seed: number }[];
   }, [projection]);
 
-  const centroids = useMemo(() => {
-    const out = new Map<string, [number, number]>();
-    shards.forEach((s) => out.set(s.slug, s.centroid));
-    islands.forEach((i) => out.set(i.slug, [i.x, i.y]));
-    return out;
-  }, [shards, islands]);
-
   const [hover, setHover] = useState<string | null>(null);
-  const [tooltip, setTooltip] = useState<{ x: number; y: number } | null>(null);
-  const [visited, setVisited] = useState<Set<string>>(new Set());
-  const [soundOn, setSoundOn] = useState(false);
+  const [hoverPosition, setHoverPosition] = useState<{ x: number; y: number } | null>(null);
+  const [search, setSearch] = useState("");
+  const [soundOn, setSoundOn] = useState(true);
   const [activeFilter, setActiveFilter] = useState<Technique | null>(null);
   const [zoom, setZoom] = useState(1);
-  const ZOOM_MIN = 1;
-  const ZOOM_MAX = 2.5;
-  const ZOOM_STEP = 0.5;
-  const zoomIn = () => setZoom((z) => Math.min(ZOOM_MAX, roundSvg(z + ZOOM_STEP)));
-  const zoomOut = () => setZoom((z) => Math.max(ZOOM_MIN, roundSvg(z - ZOOM_STEP)));
-  const zoomReset = () => setZoom(1);
+
   const audioRef = useRef<{ ctx: AudioContext; master: GainNode } | null>(null);
   const lastHoverRef = useRef<string | null>(null);
-  const svgRef = useRef<SVGSVGElement>(null);
-  const mapContainerRef = useRef<HTMLDivElement>(null);
   const uploadedSounds = useCountrySoundUrls();
   const htmlAudioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -214,32 +151,33 @@ export function ClayAtlasMap() {
     if (!AC) return null;
     const ctx = new AC();
     const master = ctx.createGain();
-    master.gain.value = 0.35;
+    master.gain.value = 0.4;
     master.connect(ctx.destination);
     audioRef.current = { ctx, master };
     return audioRef.current;
   };
 
+  const stopUploadedAudio = () => {
+    if (!htmlAudioRef.current) return;
+    htmlAudioRef.current.pause();
+    htmlAudioRef.current.currentTime = 0;
+    htmlAudioRef.current = null;
+  };
+
   const toggleSound = () => {
     const next = !soundOn;
     setSoundOn(next);
-    if (next) {
-      const a = ensureAudio();
-      if (a?.ctx.state === "suspended") a.ctx.resume();
-    } else if (htmlAudioRef.current) {
-      htmlAudioRef.current.pause();
-    }
+    if (!next) stopUploadedAudio();
   };
 
   const triggerCue = (slug: string) => {
     if (!soundOn) return;
+    stopUploadedAudio();
+
     const uploaded = uploadedSounds[slug];
     if (uploaded) {
-      if (htmlAudioRef.current) {
-        htmlAudioRef.current.pause();
-      }
       const el = new Audio(uploaded);
-      el.volume = 0.7;
+      el.volume = 0.8;
       el.play().catch(() => {});
       htmlAudioRef.current = el;
       return;
@@ -251,516 +189,333 @@ export function ClayAtlasMap() {
   };
 
   const enterCountry = (slug: string) => {
-    setVisited((v) => {
-      if (v.has(slug)) return v;
-      const n = new Set(v);
-      n.add(slug);
-      return n;
-    });
+    stopUploadedAudio();
     router.push(`/discover/${slug}`);
   };
 
-  const isDimmed = (slug: string) => !!activeFilter && !TECHNIQUES_BY_COUNTRY[slug]?.has(activeFilter);
+  const handleCountryLeave = () => {
+    lastHoverRef.current = null;
+    stopUploadedAudio();
+  };
 
-  const threadPoints = useMemo(() => {
-    const pts: { slug: string; x: number; y: number }[] = [];
-    THREAD_ROUTE.forEach((slug) => {
-      const c = centroids.get(slug);
-      if (c) pts.push({ slug, x: c[0], y: c[1] });
-    });
-    return pts;
-  }, [centroids]);
-
-  // Build a smooth Catmull-Rom path with a hand-drawn wobble on the control points.
-  const threadPath = useMemo(() => {
-    if (threadPoints.length < 2) return "";
-    const p = threadPoints;
-    const seedRand = (i: number) => {
-      const s = Math.sin(i * 91.37 + 12.9898) * 43758.5453;
-      return (s - Math.floor(s)) * 2 - 1; // -1..1
-    };
-    let d = `M ${p[0].x.toFixed(2)} ${p[0].y.toFixed(2)}`;
-    for (let i = 0; i < p.length - 1; i++) {
-      const p0 = p[i - 1] ?? p[i];
-      const p1 = p[i];
-      const p2 = p[i + 1];
-      const p3 = p[i + 2] ?? p2;
-      let c1x = p1.x + (p2.x - p0.x) / 6;
-      let c1y = p1.y + (p2.y - p0.y) / 6;
-      let c2x = p2.x - (p3.x - p1.x) / 6;
-      let c2y = p2.y - (p3.y - p1.y) / 6;
-      const dx = p2.x - p1.x;
-      const dy = p2.y - p1.y;
-      const len = Math.hypot(dx, dy) || 1;
-      const nx = -dy / len;
-      const ny = dx / len;
-      const amp = Math.min(28, len * 0.14);
-      c1x += nx * amp * seedRand(i * 2 + 1);
-      c1y += ny * amp * seedRand(i * 2 + 1);
-      c2x += nx * amp * seedRand(i * 2 + 2);
-      c2y += ny * amp * seedRand(i * 2 + 2);
-      d += ` C ${c1x.toFixed(2)} ${c1y.toFixed(2)}, ${c2x.toFixed(2)} ${c2y.toFixed(2)}, ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+  const isDimmed = (slug: string) => {
+    if (search && !getCountryBySlug(slug)?.name.toLowerCase().includes(search.toLowerCase())) {
+      return true;
     }
-    return d;
-  }, [threadPoints]);
+    if (activeFilter && !TECHNIQUES_BY_COUNTRY[slug]?.has(activeFilter)) {
+      return true;
+    }
+    return false;
+  };
 
   const hoveredCountry = hover ? getCountryBySlug(hover) : null;
   const hoveredStats = hover ? getStats(hover) : null;
 
+  const updateHoverPosition = (event: React.MouseEvent<HTMLDivElement>) => {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const cardWidth = Math.min(320, bounds.width - 32);
+    const cardHeight = 180;
+    const pointerX = event.clientX - bounds.left;
+    const pointerY = event.clientY - bounds.top;
+    const showToLeft = pointerX > bounds.width / 2;
+
+    setHoverPosition({
+      x: Math.max(16, Math.min(showToLeft ? pointerX - cardWidth - 16 : pointerX + 16, bounds.width - cardWidth - 16)),
+      y: Math.max(16, Math.min(pointerY + 16, bounds.height - cardHeight - 16)),
+    });
+  };
+
   return (
-    <div className="nu-atlas">
-      <div className="flex justify-end mb-4">
-        <button
-          onClick={toggleSound}
-          aria-pressed={soundOn}
-          className="inline-flex items-center gap-2 px-4 py-2 border border-[color:var(--atlas-border)] text-[color:var(--atlas-fg)] font-label-caps text-[10px] tracking-[0.28em] uppercase hover:border-[#D4AF78] hover:text-[#D4AF78] transition-colors"
-        >
-          <span className="material-symbols-outlined text-[16px]">
-            {soundOn ? "volume_up" : "volume_off"}
+    <div
+      className="nu-atlas space-y-6"
+      style={{
+        backgroundColor: "var(--atlas-bg)",
+        color: "var(--atlas-fg)",
+      }}
+    >
+      {/* Top Bar: Search, Sound Toggle, Zoom Controls */}
+      <div className="flex flex-wrap items-center justify-between gap-4 p-4 border" style={{ borderColor: "var(--atlas-border)", backgroundColor: "var(--atlas-hover)" }}>
+        <div className="flex items-center gap-3 flex-1 min-w-[260px]">
+          <span className="material-symbols-outlined text-[18px]" style={{ color: "var(--atlas-accent)" }}>
+            search
           </span>
-          {soundOn ? "Sound On" : "Sound Off"}
-        </button>
+          <input
+            type="text"
+            placeholder="Search 54 African countries…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="bg-transparent font-mono text-xs uppercase tracking-widest focus:outline-none w-full"
+            style={{ color: "var(--atlas-fg)" }}
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="text-xs opacity-60 hover:opacity-100"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={toggleSound}
+            aria-label={soundOn ? "Mute sound" : "Unmute sound"}
+            className="inline-flex items-center gap-2 px-3 py-1.5 border text-[10px] font-mono tracking-[0.2em] uppercase transition-colors"
+            style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-accent)" }}
+          >
+            <span className="material-symbols-outlined text-[16px]">
+              {soundOn ? "volume_up" : "volume_off"}
+            </span>
+            {soundOn ? "Sound On" : "Muted"}
+          </button>
+
+          <div className="flex items-center border" style={{ borderColor: "var(--atlas-border)" }}>
+            <button
+              onClick={() => setZoom((z) => Math.min(2.2, z + 0.3))}
+              className="px-2.5 py-1 text-xs border-r hover:opacity-70"
+              style={{ borderColor: "var(--atlas-border)" }}
+              title="Zoom In"
+            >
+              +
+            </button>
+            <button
+              onClick={() => setZoom((z) => Math.max(1, z - 0.3))}
+              className="px-2.5 py-1 text-xs border-r hover:opacity-70"
+              style={{ borderColor: "var(--atlas-border)" }}
+              title="Zoom Out"
+            >
+              -
+            </button>
+            <button
+              onClick={() => setZoom(1)}
+              className="px-2.5 py-1 text-xs hover:opacity-70"
+              title="Reset Zoom"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
       </div>
 
+      {/* Main 3D Canvas */}
       <div
-        ref={mapContainerRef}
-        className="relative rounded-sm overflow-auto border border-[color:var(--atlas-border)] nu-atlas-canvas"
+        className="relative overflow-hidden border nu-atlas-canvas min-h-[580px]"
+        style={{ borderColor: "var(--atlas-border)" }}
+        onMouseMove={updateHoverPosition}
         onMouseLeave={() => {
           setHover(null);
-          setTooltip(null);
+          setHoverPosition(null);
+          handleCountryLeave();
         }}
       >
         <div
           style={{
             transform: `scale(${zoom})`,
             transformOrigin: "50% 50%",
-            transition: "transform 250ms ease",
+            transition: "transform 0.3s ease",
           }}
         >
-        <svg
-          ref={svgRef}
-          viewBox={`0 0 ${W} ${H}`}
-          className="w-full h-auto block select-none"
-          role="img"
-          aria-label="Interactive sculptural map of the 54 African countries"
-        >
-          <defs>
-            <radialGradient id="atlasVignetteFull" cx="50%" cy="45%" r="70%">
-              <stop offset="0%" stopColor="var(--atlas-vignette-in)" />
-              <stop offset="55%" stopColor="rgba(0,0,0,0)" />
-              <stop offset="100%" stopColor="var(--atlas-vignette-out)" />
-            </radialGradient>
+          <svg
+            viewBox={`0 0 ${W} ${H}`}
+            className="w-full h-auto block select-none"
+            role="img"
+            aria-label="3D Interactive Atlas of Africa"
+          >
+            <defs>
+              <filter id="clay3dExtrudeFull" x="-20%" y="-20%" width="140%" height="140%">
+                <feMorphology in="SourceGraphic" operator="erode" radius="2" result="eroded" />
+                <feMorphology in="SourceAlpha" operator="erode" radius="2" result="erodedAlpha" />
+                <feGaussianBlur in="erodedAlpha" stdDeviation="0.9" result="blurA" />
+                <feSpecularLighting
+                  in="blurA"
+                  surfaceScale="4"
+                  specularConstant="0.65"
+                  specularExponent="22"
+                  lightingColor="#fff4e0"
+                  result="spec"
+                >
+                  <feDistantLight azimuth="135" elevation="55" />
+                </feSpecularLighting>
+                <feComposite in="spec" in2="erodedAlpha" operator="in" result="specMasked" />
+                <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="7" result="grain" />
+                <feColorMatrix
+                  in="grain"
+                  type="matrix"
+                  values="0 0 0 0 0.06
+                          0 0 0 0 0.04
+                          0 0 0 0 0.02
+                          0 0 0 0.15 0"
+                  result="grainDark"
+                />
+                <feComposite in="grainDark" in2="erodedAlpha" operator="in" result="grainMasked" />
+                <feMerge>
+                  <feMergeNode in="eroded" />
+                  <feMergeNode in="grainMasked" />
+                  <feMergeNode in="specMasked" />
+                </feMerge>
+              </filter>
 
-            <filter id="clayFull" x="-10%" y="-10%" width="120%" height="120%">
-              <feGaussianBlur in="SourceAlpha" stdDeviation="0.6" result="blurA" />
-              <feSpecularLighting
-                in="blurA"
-                surfaceScale="3"
-                specularConstant="0.55"
-                specularExponent="18"
-                lightingColor="#fff2dc"
-                result="spec"
-              >
-                <feDistantLight azimuth="135" elevation="55" />
-              </feSpecularLighting>
-              <feComposite in="spec" in2="SourceAlpha" operator="in" result="specMasked" />
-              <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="4" result="grain" />
-              <feColorMatrix
-                in="grain"
-                type="matrix"
-                values="0 0 0 0 0.05
-                        0 0 0 0 0.03
-                        0 0 0 0 0.02
-                        0 0 0 0.12 0"
-                result="grainDark"
-              />
-              <feComposite in="grainDark" in2="SourceAlpha" operator="in" result="grainMasked" />
-              <feMerge>
-                <feMergeNode in="SourceGraphic" />
-                <feMergeNode in="grainMasked" />
-                <feMergeNode in="specMasked" />
-              </feMerge>
-            </filter>
+              <filter id="clay3dShadowFull" x="-30%" y="-30%" width="160%" height="160%">
+                <feDropShadow dx="2" dy="4" stdDeviation="2" floodColor="#000000" floodOpacity="0.8" />
+                <feDropShadow dx="6" dy="12" stdDeviation="8" floodColor="#000000" floodOpacity="0.5" />
+              </filter>
 
-            <filter id="shardShadowFull" x="-30%" y="-30%" width="160%" height="160%">
-              <feDropShadow dx="0.6" dy="1.2" stdDeviation="0.9" floodColor="#000" floodOpacity="0.55" />
-              <feDropShadow dx="1.2" dy="3" stdDeviation="3.5" floodColor="#000" floodOpacity="0.35" />
-            </filter>
+              {shards.map((s) => (
+                <linearGradient key={s.slug} id={`full-shard-clay-${s.slug}`} x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor={s.fill} />
+                  <stop offset="100%" stopColor={s.fillDark} />
+                </linearGradient>
+              ))}
 
-            <filter id="shardErodeFull" x="-10%" y="-10%" width="120%" height="120%">
-              <feMorphology in="SourceGraphic" operator="erode" radius="2" />
-            </filter>
-
-            <filter id="clayErodeFull" x="-10%" y="-10%" width="120%" height="120%">
-              <feMorphology in="SourceGraphic" operator="erode" radius="2" result="eroded" />
-              <feMorphology in="SourceAlpha" operator="erode" radius="2" result="erodedAlpha" />
-              <feGaussianBlur in="erodedAlpha" stdDeviation="0.6" result="blurA" />
-              <feSpecularLighting
-                in="blurA"
-                surfaceScale="3"
-                specularConstant="0.55"
-                specularExponent="18"
-                lightingColor="#fff2dc"
-                result="spec"
-              >
-                <feDistantLight azimuth="135" elevation="55" />
-              </feSpecularLighting>
-              <feComposite in="spec" in2="erodedAlpha" operator="in" result="specMasked" />
-              <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="4" result="grain" />
-              <feColorMatrix
-                in="grain"
-                type="matrix"
-                values="0 0 0 0 0.05
-                        0 0 0 0 0.03
-                        0 0 0 0 0.02
-                        0 0 0 0.12 0"
-                result="grainDark"
-              />
-              <feComposite in="grainDark" in2="erodedAlpha" operator="in" result="grainMasked" />
-              <feMerge>
-                <feMergeNode in="eroded" />
-                <feMergeNode in="grainMasked" />
-                <feMergeNode in="specMasked" />
-              </feMerge>
-            </filter>
-
-            {shards.map((s) => (
-              <linearGradient key={s.slug} id={`full-fill-${s.slug}`} x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor={s.fill} />
-                <stop offset="100%" stopColor={s.fillDark} />
+              <linearGradient id="fullActiveGoldFill" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#e8c794" />
+                <stop offset="100%" stopColor="#b3874b" />
               </linearGradient>
-            ))}
-          </defs>
+            </defs>
 
-          <rect width={W} height={H} fill="url(#atlasVignetteFull)" />
+            {shards.map((shard) => {
+              const country = getCountryBySlug(shard.slug);
+              if (!country) return null;
+              const isHover = hover === country.slug;
+              const dimmed = isDimmed(country.slug);
+              const stats = getStats(country.slug);
+              const [dx, dy] = shard.drift;
+              const transform = `translate(${dx} ${dy}) rotate(${shard.rotation} ${shard.centroid[0]} ${shard.centroid[1]})`;
 
-          {shards.map((shard) => {
-            const country = getCountryBySlug(shard.slug);
-            if (!country) return null;
-            const isHover = hover === country.slug;
-            const isVisited = visited.has(country.slug);
-            const dimmed = isDimmed(country.slug);
-            const stats = getStats(country.slug);
-            const [dx, dy] = shard.drift;
-            const centroidX = roundSvg(shard.centroid[0]);
-            const centroidY = roundSvg(shard.centroid[1]);
-            const transform = `translate(${roundSvg(dx)} ${roundSvg(dy)}) rotate(${roundSvg(shard.rotation)} ${centroidX} ${centroidY})`;
-            const delay = (0.15 + shard.distFromCenter * 0.9).toFixed(2);
-
-            return (
-              <g
-                key={country.slug}
-                transform={transform}
-                className={`nu-shard${isHover ? " is-hover" : ""}${isVisited ? " is-visited" : ""}${dimmed ? " is-dimmed" : ""}`}
-                style={{ cursor: "pointer", animationDelay: `${delay}s` } as React.CSSProperties}
-                onMouseEnter={(e) => {
-                  setHover(country.slug);
-                  const rect = mapContainerRef.current!.getBoundingClientRect();
-                  setTooltip({
-                    x: ((e.clientX - rect.left) / rect.width) * 100,
-                    y: ((e.clientY - rect.top) / rect.height) * 100,
-                  });
-                  if (lastHoverRef.current !== country.slug) {
-                    lastHoverRef.current = country.slug;
-                    triggerCue(country.slug);
-                  }
-                }}
-                onMouseMove={(e) => {
-                  const rect = mapContainerRef.current!.getBoundingClientRect();
-                  setTooltip({
-                    x: ((e.clientX - rect.left) / rect.width) * 100,
-                    y: ((e.clientY - rect.top) / rect.height) * 100,
-                  });
-                }}
-                onMouseLeave={() => {
-                  if (lastHoverRef.current === country.slug) lastHoverRef.current = null;
-                }}
-                onClick={() => enterCountry(country.slug)}
-                tabIndex={0}
-                role="button"
-                aria-label={`${country.name} — ${stats.artistsCount} artists`}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    triggerCue(country.slug);
-                    enterCountry(country.slug);
-                  }
-                }}
-              >
-                <path
-                  d={shard.path}
-                  fill="#000"
-                  opacity={0.55}
-                  filter="url(#shardShadowFull)"
-                  pointerEvents="none"
-                />
-                <path
-                  d={shard.path}
-                  fill={`url(#full-fill-${shard.slug})`}
-                  stroke="rgba(0,0,0,0.6)"
-                  strokeWidth={0.4}
-                  strokeLinejoin="round"
-                  filter="url(#clayErodeFull)"
-                />
-                <path
-                  d={shard.path}
-                  className="nu-shard-hover-wash"
-                  fill="#f2c078"
-                  filter="url(#shardErodeFull)"
-                  pointerEvents="none"
-                />
-                <path
-                  d={shard.path}
-                  className="nu-shard-select-rim"
-                  fill="none"
-                  stroke="#D4AF78"
-                  strokeWidth={1.4}
-                  strokeLinejoin="round"
-                  filter="url(#shardErodeFull)"
-                  pointerEvents="none"
-                />
-                {stats.hasNew && (
-                  <circle
-                    cx={centroidX}
-                    cy={roundSvg(centroidY - 6)}
-                    r={3}
-                    fill="#9F0D12"
-                    stroke="#F5F2EE"
-                    strokeWidth={0.6}
+              return (
+                <g
+                  key={country.slug}
+                  transform={transform}
+                  className={`nu-shard${isHover ? " is-hover" : ""}${dimmed ? " is-dimmed" : ""}`}
+                  style={{ cursor: "pointer", opacity: dimmed ? 0.2 : 1 }}
+                  onMouseEnter={() => {
+                    setHover(country.slug);
+                    if (lastHoverRef.current !== country.slug) {
+                      lastHoverRef.current = country.slug;
+                      triggerCue(country.slug);
+                    }
+                  }}
+                  onMouseLeave={handleCountryLeave}
+                  onClick={() => enterCountry(country.slug)}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`${country.name} — ${stats.artistsCount} artists`}
+                >
+                  <path
+                    d={shard.path}
+                    transform="translate(3, 5)"
+                    fill="#18130e"
+                    opacity={0.85}
+                    filter="url(#clay3dShadowFull)"
                     pointerEvents="none"
                   />
-                )}
-                <title>{country.name}</title>
-              </g>
-            );
-          })}
+                  <path
+                    d={shard.path}
+                    fill={isHover ? "url(#fullActiveGoldFill)" : `url(#full-shard-clay-${shard.slug})`}
+                    stroke={isHover ? "var(--atlas-accent)" : "rgba(0,0,0,0.6)"}
+                    strokeWidth={isHover ? 1.4 : 0.4}
+                    strokeLinejoin="round"
+                    filter="url(#clay3dExtrudeFull)"
+                    style={{
+                      transform: isHover ? "translate(-2px, -4px) scale(1.04)" : "translate(0, 0) scale(1)",
+                      transformOrigin: `${shard.centroid[0]}px ${shard.centroid[1]}px`,
+                      transition: "transform 0.25s cubic-bezier(0.22,1,0.36,1), fill 0.25s ease",
+                    }}
+                  />
+                  <title>{country.name}</title>
+                </g>
+              );
+            })}
 
-          {islands.map((isle) => {
-            const country = getCountryBySlug(isle.slug);
-            if (!country) return null;
-            const isHover = hover === isle.slug;
-            const isVisited = visited.has(isle.slug);
-            const dimmed = isDimmed(isle.slug);
-            const stats = getStats(isle.slug);
-            const palette = [
-              ["#b8703a", "#6b3a18"],
-              ["#c9a24a", "#7a5a1e"],
-              ["#a37542", "#5a3818"],
-              ["#d6b078", "#8a6a3a"],
-              ["#8a5a2c", "#4a2f16"],
-            ];
-            const [fill, fillDark] = palette[isle.seed % palette.length];
-            const gradId = `full-fill-isle-${isle.slug}`;
-            const r = 4.5;
-            const delay = (0.7 + (isle.seed % 5) * 0.08).toFixed(2);
-            return (
-              <g
-                key={isle.slug}
-                className={`nu-shard nu-island${isHover ? " is-hover" : ""}${isVisited ? " is-visited" : ""}${dimmed ? " is-dimmed" : ""}`}
-                style={{ cursor: "pointer", animationDelay: `${delay}s` } as React.CSSProperties}
-                onMouseEnter={(e) => {
-                  setHover(isle.slug);
-                  const rect = mapContainerRef.current!.getBoundingClientRect();
-                  setTooltip({
-                    x: ((e.clientX - rect.left) / rect.width) * 100,
-                    y: ((e.clientY - rect.top) / rect.height) * 100,
-                  });
-                  if (lastHoverRef.current !== isle.slug) {
-                    lastHoverRef.current = isle.slug;
-                    triggerCue(isle.slug);
-                  }
-                }}
-                onMouseMove={(e) => {
-                  const rect = mapContainerRef.current!.getBoundingClientRect();
-                  setTooltip({
-                    x: ((e.clientX - rect.left) / rect.width) * 100,
-                    y: ((e.clientY - rect.top) / rect.height) * 100,
-                  });
-                }}
-                onMouseLeave={() => {
-                  if (lastHoverRef.current === isle.slug) lastHoverRef.current = null;
-                }}
-                onClick={() => enterCountry(isle.slug)}
-                tabIndex={0}
-                role="button"
-                aria-label={`${country.name} — ${stats.artistsCount} artists`}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    triggerCue(isle.slug);
-                    enterCountry(isle.slug);
-                  }
-                }}
-              >
-                <defs>
-                  <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor={fill} />
-                    <stop offset="100%" stopColor={fillDark} />
-                  </linearGradient>
-                </defs>
-                <circle cx={isle.x} cy={isle.y} r={15} fill="transparent" />
-                <circle
-                  cx={isle.x}
-                  cy={isle.y}
-                  r={r}
-                  fill={`url(#${gradId})`}
-                  stroke="rgba(0,0,0,0.6)"
-                  strokeWidth={0.8}
-                  filter="url(#clayFull)"
-                  pointerEvents="none"
-                />
-                <circle
-                  cx={isle.x}
-                  cy={isle.y}
-                  r={r}
-                  className="nu-shard-select-rim"
-                  fill="none"
-                  stroke="#D4AF78"
-                  strokeWidth={1.2}
-                  pointerEvents="none"
-                />
-                <title>{country.name}</title>
-              </g>
-            );
-          })}
-
-          {/* Hand-drawn red thread — subtly animated, connects curated hubs */}
-          {threadPath && (
-            <g pointerEvents="none" className="nu-thread-route" aria-hidden="true">
-              <path
-                d={threadPath}
-                fill="none"
-                stroke="#9F0D12"
-                strokeOpacity={0.14}
-                strokeWidth={5}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ filter: "blur(2px)" }}
-              />
-              <path
-                className="nu-thread-line"
-                d={threadPath}
-                fill="none"
-                stroke="#9F0D12"
-                strokeWidth={1.4}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              {threadPoints.map((pt, i) => (
-                <circle
-                  key={pt.slug}
-                  className="nu-thread-node"
-                  cx={roundSvg(pt.x)}
-                  cy={roundSvg(pt.y)}
-                  r={2.4}
-                  fill="#F5F2EE"
-                  stroke="#9F0D12"
-                  strokeWidth={1.1}
-                  style={{ animationDelay: `${1.6 + i * 0.18}s` }}
-                />
-              ))}
-            </g>
-          )}
-        </svg>
+            {islands.map((isle) => {
+              const country = getCountryBySlug(isle.slug);
+              if (!country) return null;
+              const isHover = hover === isle.slug;
+              const dimmed = isDimmed(isle.slug);
+              return (
+                <g
+                  key={isle.slug}
+                  style={{ cursor: "pointer", opacity: dimmed ? 0.2 : 1 }}
+                  onMouseEnter={() => {
+                    setHover(isle.slug);
+                    if (lastHoverRef.current !== isle.slug) {
+                      lastHoverRef.current = isle.slug;
+                      triggerCue(isle.slug);
+                    }
+                  }}
+                  onMouseLeave={handleCountryLeave}
+                  onClick={() => enterCountry(isle.slug)}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={country.name}
+                >
+                  <circle cx={isle.x} cy={isle.y} r={14} fill="transparent" />
+                  <circle
+                    cx={isle.x}
+                    cy={isle.y}
+                    r={isHover ? 6.5 : 4.5}
+                    fill={isHover ? "var(--atlas-accent)" : "#998363"}
+                    stroke="#000000"
+                    strokeWidth={0.8}
+                    filter="url(#clay3dExtrudeFull)"
+                  />
+                  <title>{country.name}</title>
+                </g>
+              );
+            })}
+          </svg>
         </div>
 
-        <div className="absolute top-4 right-4 flex flex-col border backdrop-blur-sm" style={{ background: "var(--atlas-tooltip-bg)", borderColor: "var(--atlas-border)" }}>
-          <button
-            type="button"
-            onClick={zoomIn}
-            disabled={zoom >= ZOOM_MAX}
-            aria-label="Zoom in"
-            className="material-symbols-outlined w-10 h-10 flex items-center justify-center text-[color:var(--atlas-fg)] hover:text-[#D4AF78] disabled:opacity-30 transition-colors border-b"
-            style={{ borderColor: "var(--atlas-border)" }}
-          >
-            add
-          </button>
-          <button
-            type="button"
-            onClick={zoomOut}
-            disabled={zoom <= ZOOM_MIN}
-            aria-label="Zoom out"
-            className="material-symbols-outlined w-10 h-10 flex items-center justify-center text-[color:var(--atlas-fg)] hover:text-[#D4AF78] disabled:opacity-30 transition-colors border-b"
-            style={{ borderColor: "var(--atlas-border)" }}
-          >
-            remove
-          </button>
-          <button
-            type="button"
-            onClick={zoomReset}
-            disabled={zoom === 1}
-            aria-label="Reset zoom"
-            className="material-symbols-outlined w-10 h-10 flex items-center justify-center text-[color:var(--atlas-fg)] hover:text-[#D4AF78] disabled:opacity-30 transition-colors"
-          >
-            filter_center_focus
-          </button>
-        </div>
-
-        {hoveredCountry && tooltip && (
+        {/* Hover Information Spotlight Box */}
+        {hoveredCountry && hoverPosition && (
           <div
-            className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-full"
+            className="nu-atlas-hover-card absolute p-4 border backdrop-blur-md shadow-2xl transition-all pointer-events-none"
             style={{
-              left: `${tooltip.x}%`,
-              top: `${tooltip.y}%`,
-              marginTop: "-14px",
+              backgroundColor: "var(--atlas-tooltip-bg)",
+              borderColor: "var(--atlas-border)",
+              left: hoverPosition.x,
+              top: hoverPosition.y,
             }}
           >
-            <div
-              className="px-3 py-2 border backdrop-blur-md shadow-2xl min-w-[180px]"
-              style={{ background: "var(--atlas-tooltip-bg)", borderColor: "var(--atlas-border)" }}
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-base">{hoveredCountry.flag}</span>
-                <span className="font-display text-sm" style={{ color: "var(--atlas-fg)" }}>
-                  {hoveredCountry.name}
-                </span>
-              </div>
-              <div
-                className="mt-1 font-label-caps text-[9px] tracking-[0.24em] uppercase"
-                style={{ color: "var(--atlas-accent)" }}
-              >
-                {hoveredStats?.artistsCount} Artists · {hoveredStats?.worksCount} Works
-              </div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xl">{hoveredCountry.flag}</span>
+              <h3 className="font-serif text-lg font-bold" style={{ color: "var(--atlas-fg)" }}>
+                {hoveredCountry.name}
+              </h3>
+            </div>
+            <p className="text-xs italic leading-relaxed mb-3" style={{ color: "var(--atlas-fg-muted)" }}>
+              &ldquo;{hoveredCountry.blurb}&rdquo;
+            </p>
+            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest pt-2 border-t" style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-accent)" }}>
+              <span>{hoveredStats?.artistsCount} Artists</span>
+              <span>{hoveredStats?.worksCount} Works</span>
             </div>
           </div>
         )}
-
-        <div
-          className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 border backdrop-blur-sm"
-          style={{ background: "var(--atlas-tooltip-bg)", borderColor: "var(--atlas-border)" }}
-        >
-          <span className="font-display text-lg leading-none" style={{ color: "var(--atlas-accent)" }}>
-            54
-          </span>
-          <span
-            className="font-label-caps text-[9px] tracking-[0.28em] uppercase"
-            style={{ color: "var(--atlas-fg-muted)" }}
-          >
-            Countries
-          </span>
-        </div>
       </div>
 
-      {/* Quick filters by medium */}
-      <div className="mt-5 flex flex-wrap gap-2">
+      {/* Medium Quick Filters */}
+      <div className="flex flex-wrap gap-2 pt-2">
         <button
           onClick={() => setActiveFilter(null)}
-          className={`px-3 py-2 min-h-[40px] font-label-caps text-[10px] uppercase tracking-widest border transition-colors ${
+          className={`px-3 py-2 text-[10px] font-mono uppercase tracking-widest border transition-colors ${
             !activeFilter
               ? "bg-[#9F0D12] text-[#F5F2EE] border-[#9F0D12]"
-              : "border-[color:var(--atlas-border)] text-[color:var(--atlas-fg)] hover:border-[#D4AF78]"
+              : "border-[color:var(--atlas-border)] hover:border-[color:var(--atlas-accent)]"
           }`}
         >
-          All
+          All Mediums
         </button>
         {TECHNIQUES.map((t) => (
           <button
             key={t}
             onClick={() => setActiveFilter(activeFilter === t ? null : t)}
-            className={`px-3 py-2 min-h-[40px] font-label-caps text-[10px] uppercase tracking-widest border transition-colors ${
+            className={`px-3 py-2 text-[10px] font-mono uppercase tracking-widest border transition-colors ${
               activeFilter === t
                 ? "bg-[#9F0D12] text-[#F5F2EE] border-[#9F0D12]"
-                : "border-[color:var(--atlas-border)] text-[color:var(--atlas-fg)] hover:border-[#D4AF78]"
+                : "border-[color:var(--atlas-border)] hover:border-[color:var(--atlas-accent)]"
             }`}
           >
             {t}

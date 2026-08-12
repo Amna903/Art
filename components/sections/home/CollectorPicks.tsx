@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { getArtistSlugByName } from "@/lib/data/artists";
 import { EnquiryModal } from "@/components/enquiry/EnquiryModal";
 
 export type CollectorPick = {
@@ -59,7 +61,12 @@ export function CollectorPicks({ picks }: CollectorPicksProps) {
                   >
                     {pick.title}
                   </h4>
-                  <p className="font-body-md text-on-surface-variant italic">{pick.artist}</p>
+                  <Link
+                    href={`/artists/${getArtistSlugByName(pick.artist)}`}
+                    className="font-body-md text-on-surface-variant italic hover:text-secondary hover:underline transition-colors block mt-0.5"
+                  >
+                    {pick.artist}
+                  </Link>
                 </div>
                 <div className="text-right shrink-0">
                   <button

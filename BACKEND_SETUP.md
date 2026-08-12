@@ -67,6 +67,7 @@ All schema files live in `supabase/migrations/`, in order:
 | `20260804000001_create_journal_exhibitions_buckets.sql` | Creates the `journal` and `exhibitions` storage buckets |
 | `20260804000002_journal_exhibitions_bucket_policies.sql` | Storage policies for the `journal` and `exhibitions` buckets |
 | `20260805000000_page_blocks.sql` | `page_blocks` table (backs inline on-page editing on `/journal` and `/exhibitions`) |
+| `20260812000000_create_country_sounds_bucket.sql` | Creates the `country-sounds` storage bucket |
 
 **Easiest way to run them — paste into the SQL Editor:**
 1. In Supabase Dashboard, open **SQL Editor**.

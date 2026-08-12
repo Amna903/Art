@@ -57,6 +57,100 @@
   background: var(--atlas-canvas);
   box-shadow: var(--atlas-canvas-shadow);
 }
+.nu-atlas-hover-card {
+  width: min(20rem, calc(100% - 2rem));
+}
+.atlas-showcase-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.atlas-showcase-intro {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  color: var(--atlas-accent);
+  font-family: var(--font-label-caps);
+  font-size: 0.6rem;
+  letter-spacing: 0.28em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+.atlas-showcase-intro::before {
+  width: 2.5rem;
+  height: 1px;
+  background: var(--atlas-accent);
+  content: "";
+}
+.atlas-sculpture-stage {
+  min-height: min(70vw, 720px);
+  border: 1px solid var(--atlas-border);
+}
+.atlas-sculpture-stage::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border: 1px solid rgba(212, 175, 120, 0.08);
+  box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.46);
+  content: "";
+  pointer-events: none;
+}
+.atlas-country-directory {
+  align-self: center;
+  padding: 1rem 0;
+}
+.atlas-country-directory-title {
+  color: var(--atlas-accent);
+}
+.atlas-country-directory-link {
+  min-height: 3.55rem;
+}
+.atlas-country-directory-link > div > div:first-child {
+  font-family: var(--font-label-caps);
+  font-size: 0.62rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+.nu-atlas-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 50% 45% at 50% 38%, rgba(178, 126, 61, 0.15), transparent 70%),
+    var(--atlas-bg);
+}
+.nu-atlas-page .nu-atlas-canvas {
+  border: 1px solid var(--atlas-border);
+}
+@media (min-width: 1024px) {
+  .atlas-showcase-shell {
+    grid-template-columns: 8.25rem minmax(0, 1fr);
+    column-gap: 2.5rem;
+  }
+  .atlas-showcase-intro {
+    grid-row: 1 / span 2;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    margin: 0;
+  }
+  .atlas-showcase-intro::before {
+    width: 1px;
+    height: 3.25rem;
+  }
+  .atlas-showcase-header {
+    margin-bottom: 2.5rem;
+  }
+  .atlas-sculpture-stage {
+    min-height: 0;
+  }
+}
+@media (max-width: 768px) {
+  .atlas-sculpture-stage {
+    min-height: 78vw;
+  }
+  .atlas-country-directory {
+    padding-top: 0;
+  }
+}
 .nu-thread-line {
   stroke-dasharray: 1400;
   stroke-dashoffset: 1400;

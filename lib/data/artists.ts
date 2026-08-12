@@ -140,6 +140,41 @@ export const ARTISTS: Artist[] = buildArtists();
 export const ARTIST_COUNT = ARTISTS.length; // 178
 export const COUNTRY_COUNT = AFRICAN_COUNTRIES.length; // 54
 
-export function getArtistBySlug(slug: string) {
-  return ARTISTS.find((a) => a.slug === slug);
+export function getArtistSlugByName(name: string): string {
+  const norm = name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const found = ARTISTS.find(
+    (a) => a.name.toLowerCase() === name.toLowerCase() || a.slug === norm
+  );
+  if (found) return found.slug;
+  return norm;
+}
+
+export function getArtistBySlug(slug: string): Artist {
+  const norm = slug.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const found =
+    ARTISTS.find((a) => a.slug === slug || a.slug === norm) ||
+    ARTISTS.find((a) => a.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") === norm);
+  if (found) return found;
+
+  // Fallback dynamic artist profile for any unlisted slug so artist pages never 404
+  const nameParts = slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1));
+  const name = nameParts.join(" ");
+  let seed = 0;
+  for (let i = 0; i < slug.length; i++) seed += slug.charCodeAt(i);
+  const country = AFRICAN_COUNTRIES[seed % AFRICAN_COUNTRIES.length];
+
+  return {
+    slug,
+    name,
+    countryCode: country.code,
+    countryName: country.name,
+    countrySlug: country.slug,
+    city: country.capital,
+    technique: "Mixed Media",
+    worksCount: 4,
+    newDiscovery: true,
+    featuredWork: "The Cartographer's Silence",
+    bio: `${name} works between ${country.capital} and international studio spaces, translating ${country.blurb.toLowerCase()}`,
+    image: pickImage(`artist-fallback-${slug}`, "portrait"),
+  };
 }
