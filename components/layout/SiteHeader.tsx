@@ -64,8 +64,8 @@ export function SiteHeader() {
       >
         <Link href="/" className="flex items-center shrink-0 justify-self-start">
           <Image
-            src="https://nu-artcollective.lovable.app/__l5e/assets-v1/f3356572-f5e6-4aa2-947a-5a9818d83640/logo.png"
-            alt="NU-ART Collective"
+            src="/images/artlogo.png"
+            alt="NU-ARTE"
             width={160}
             height={40}
             priority

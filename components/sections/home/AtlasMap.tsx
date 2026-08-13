@@ -268,13 +268,13 @@ export function AfricaMapSection() {
           {/* Logo Branding */}
           <div>
             <h2 className="font-serif text-2xl md:text-3xl tracking-[0.25em] font-light uppercase" style={{ color: "var(--atlas-fg)" }}>
-              NU <span className="inline-block mx-1 text-xs opacity-50 font-sans">—</span> ART
+              NU <span className="inline-block mx-1 text-xs opacity-50 font-sans">—</span> ARTE
             </h2>
             <span
               className="block font-mono text-[9px] tracking-[0.45em] uppercase mt-1"
               style={{ color: "var(--atlas-accent)" }}
             >
-              COLLECTIVE
+              CURATED AFRICAN ART
             </span>
           </div>
 

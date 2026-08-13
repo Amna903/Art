@@ -3,10 +3,10 @@ import { EditableText } from "@/components/editing/EditableText";
 import { EditableImage } from "@/components/editing/EditableImage";
 import { blockText, blockImage, type PageBlocks } from "@/lib/data/pageBlocks";
 
-const LOGO_SRC = "https://nu-artcollective.lovable.app/__l5e/assets-v1/f3356572-f5e6-4aa2-947a-5a9818d83640/logo.png";
+const LOGO_SRC = "/images/artlogo.png";
 
 export function Hero({ blocks }: { blocks: PageBlocks }) {
-  const image = blockImage(blocks, "hero_image", { src: LOGO_SRC, alt: "NU-ART Collective" });
+  const image = blockImage(blocks, "hero_image", { src: LOGO_SRC, alt: "NU-ARTE" });
 
   return (
     <section className="nu-hero relative w-screen mx-[calc(50%-50vw)] overflow-hidden bg-background text-on-background transition-colors">
