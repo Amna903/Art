@@ -90,8 +90,8 @@ export function ClayAtlasMap() {
       .parallels([-15, 30]);
     p.fitExtent(
       [
-        [40, 50],
-        [W - 40, H - 50],
+        [65, 55],
+        [W - 65, H - 55],
       ],
       { type: "FeatureCollection", features } as unknown as GeoJSON.FeatureCollection,
     );
@@ -129,6 +129,12 @@ export function ClayAtlasMap() {
       })
       .filter(Boolean) as { slug: string; x: number; y: number; seed: number }[];
   }, [projection]);
+
+  const shardMap = useMemo(() => {
+    const map = new Map<string, Shard>();
+    shards.forEach((s) => map.set(s.slug, s));
+    return map;
+  }, [shards]);
 
   const [hover, setHover] = useState<string | null>(null);
   const [hoverPosition, setHoverPosition] = useState<{ x: number; y: number } | null>(null);
@@ -233,10 +239,16 @@ export function ClayAtlasMap() {
         color: "var(--atlas-fg)",
       }}
     >
-      {/* Top Bar: Search, Sound Toggle, Zoom Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 border" style={{ borderColor: "var(--atlas-border)", backgroundColor: "var(--atlas-hover)" }}>
+      {/* Top Controls Bar: Search, Sound Toggle, Zoom Controls */}
+      <div
+        className="flex flex-wrap items-center justify-between gap-4 p-4 border rounded-sm shadow-xs transition-colors"
+        style={{
+          borderColor: "var(--atlas-border)",
+          backgroundColor: "var(--atlas-card-bg)",
+        }}
+      >
         <div className="flex items-center gap-3 flex-1 min-w-[260px]">
-          <span className="material-symbols-outlined text-[18px]" style={{ color: "var(--atlas-accent)" }}>
+          <span className="material-symbols-outlined text-[19px]" style={{ color: "var(--atlas-accent)" }}>
             search
           </span>
           <input
@@ -250,7 +262,8 @@ export function ClayAtlasMap() {
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="text-xs opacity-60 hover:opacity-100"
+              className="text-xs opacity-60 hover:opacity-100 px-1 py-0.5"
+              style={{ color: "var(--atlas-fg)" }}
             >
               ✕
             </button>
@@ -262,38 +275,43 @@ export function ClayAtlasMap() {
             type="button"
             onClick={toggleSound}
             aria-label={soundOn ? "Mute sound" : "Unmute sound"}
-            className="inline-flex items-center gap-2 px-3 py-1.5 border text-[10px] font-mono tracking-[0.2em] uppercase transition-colors"
-            style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-accent)" }}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 border rounded text-[10px] font-mono tracking-[0.2em] uppercase transition-all shadow-2xs"
+            style={{
+              borderColor: "var(--atlas-border)",
+              color: soundOn ? "var(--atlas-accent)" : "var(--atlas-fg-muted)",
+              backgroundColor: "var(--atlas-card-bg)",
+            }}
           >
             <span className="material-symbols-outlined text-[16px]">
               {soundOn ? "volume_up" : "volume_off"}
             </span>
-            {soundOn ? "Sound On" : "Muted"}
+            <span className="font-semibold">{soundOn ? "Sound On" : "Muted"}</span>
           </button>
 
-          <div className="flex items-center border" style={{ borderColor: "var(--atlas-border)" }}>
+          <div className="flex items-center border rounded overflow-hidden shadow-2xs" style={{ borderColor: "var(--atlas-border)", backgroundColor: "var(--atlas-card-bg)" }}>
             <button
-              onClick={() => setZoom((z) => Math.min(2.2, z + 0.3))}
-              className="px-2.5 py-1 text-xs border-r hover:opacity-70"
-              style={{ borderColor: "var(--atlas-border)" }}
+              onClick={() => setZoom((z) => Math.min(2.2, z + 0.25))}
+              className="px-3 py-1 text-xs border-r font-bold hover:opacity-75"
+              style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-fg)" }}
               title="Zoom In"
             >
               +
             </button>
             <button
-              onClick={() => setZoom((z) => Math.max(1, z - 0.3))}
-              className="px-2.5 py-1 text-xs border-r hover:opacity-70"
-              style={{ borderColor: "var(--atlas-border)" }}
+              onClick={() => setZoom((z) => Math.max(1, z - 0.25))}
+              className="px-3 py-1 text-xs border-r font-bold hover:opacity-75"
+              style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-fg)" }}
               title="Zoom Out"
             >
-              -
+              −
             </button>
             <button
               onClick={() => setZoom(1)}
-              className="px-2.5 py-1 text-xs hover:opacity-70"
+              className="px-3 py-1 text-xs font-mono tracking-wider hover:opacity-75"
+              style={{ color: "var(--atlas-fg)" }}
               title="Reset Zoom"
             >
-              Reset
+              RESET
             </button>
           </div>
         </div>
@@ -301,7 +319,7 @@ export function ClayAtlasMap() {
 
       {/* Main 3D Canvas */}
       <div
-        className="relative overflow-hidden border nu-atlas-canvas min-h-[580px]"
+        className="relative overflow-hidden border rounded-sm nu-atlas-canvas min-h-[600px] flex items-center justify-center transition-colors"
         style={{ borderColor: "var(--atlas-border)" }}
         onMouseMove={updateHoverPosition}
         onMouseLeave={() => {
@@ -311,6 +329,7 @@ export function ClayAtlasMap() {
         }}
       >
         <div
+          className="w-full max-w-[960px] mx-auto p-4 md:p-8"
           style={{
             transform: `scale(${zoom})`,
             transformOrigin: "50% 50%",
@@ -324,72 +343,54 @@ export function ClayAtlasMap() {
             aria-label="3D Interactive Atlas of Africa"
           >
             <defs>
-              <filter id="clay3dExtrudeFull" x="-20%" y="-20%" width="140%" height="140%">
-                <feMorphology in="SourceGraphic" operator="erode" radius="2" result="eroded" />
-                <feMorphology in="SourceAlpha" operator="erode" radius="2" result="erodedAlpha" />
-                <feGaussianBlur in="erodedAlpha" stdDeviation="0.9" result="blurA" />
-                <feSpecularLighting
-                  in="blurA"
-                  surfaceScale="4"
-                  specularConstant="0.65"
-                  specularExponent="22"
-                  lightingColor="#fff4e0"
-                  result="spec"
-                >
-                  <feDistantLight azimuth="135" elevation="55" />
-                </feSpecularLighting>
-                <feComposite in="spec" in2="erodedAlpha" operator="in" result="specMasked" />
-                <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="7" result="grain" />
-                <feColorMatrix
-                  in="grain"
-                  type="matrix"
-                  values="0 0 0 0 0.06
-                          0 0 0 0 0.04
-                          0 0 0 0 0.02
-                          0 0 0 0.15 0"
-                  result="grainDark"
-                />
-                <feComposite in="grainDark" in2="erodedAlpha" operator="in" result="grainMasked" />
-                <feMerge>
-                  <feMergeNode in="eroded" />
-                  <feMergeNode in="grainMasked" />
-                  <feMergeNode in="specMasked" />
-                </feMerge>
+              {/* Soft Multi-Layer Drop Shadows */}
+              <filter id="detailShadowDefault" x="-30%" y="-30%" width="170%" height="170%">
+                <feDropShadow dx="2.5" dy="6" stdDeviation="4.5" floodColor="var(--atlas-shadow-color)" floodOpacity="var(--atlas-shadow-opacity-a)" />
+                <feDropShadow dx="1" dy="2" stdDeviation="1.5" floodColor="#000000" floodOpacity="var(--atlas-shadow-opacity-b)" />
+              </filter>
+              <filter id="detailShadowActive" x="-40%" y="-40%" width="190%" height="190%">
+                <feDropShadow dx="5" dy="12" stdDeviation="8" floodColor="var(--atlas-shadow-color)" floodOpacity="var(--atlas-shadow-active-a)" />
+                <feDropShadow dx="1" dy="3" stdDeviation="2" floodColor="#000000" floodOpacity="var(--atlas-shadow-active-b)" />
+              </filter>
+              <filter id="detailIslandShadow" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="1.5" dy="3" stdDeviation="2" floodColor="var(--atlas-shadow-color)" floodOpacity="var(--atlas-shadow-opacity-a)" />
               </filter>
 
-              <filter id="clay3dShadowFull" x="-30%" y="-30%" width="160%" height="160%">
-                <feDropShadow dx="2" dy="4" stdDeviation="2" floodColor="#000000" floodOpacity="0.8" />
-                <feDropShadow dx="6" dy="12" stdDeviation="8" floodColor="#000000" floodOpacity="0.5" />
-              </filter>
-
+              {/* 135-degree Gradients */}
               {shards.map((s) => (
-                <linearGradient key={s.slug} id={`full-shard-clay-${s.slug}`} x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor={s.fill} />
-                  <stop offset="100%" stopColor={s.fillDark} />
+                <linearGradient
+                  key={`detail-grad-${s.slug}`}
+                  id={`detail-grad-${s.slug}`}
+                  x1="15%"
+                  y1="10%"
+                  x2="85%"
+                  y2="90%"
+                >
+                  <stop offset="0%" stopColor={s.palette.topLight} />
+                  <stop offset="45%" stopColor={s.palette.topBase} />
+                  <stop offset="100%" stopColor={s.palette.topDark} />
                 </linearGradient>
               ))}
-
-              <linearGradient id="fullActiveGoldFill" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#e8c794" />
-                <stop offset="100%" stopColor="#b3874b" />
-              </linearGradient>
             </defs>
 
+            {/* 3D Country Puzzle Blocks */}
             {shards.map((shard) => {
               const country = getCountryBySlug(shard.slug);
               if (!country) return null;
-              const isHover = hover === country.slug;
+              const isHovered = hover === country.slug;
               const dimmed = isDimmed(country.slug);
-              const stats = getStats(country.slug);
-              const [dx, dy] = shard.drift;
-              const transform = `translate(${dx} ${dy}) rotate(${shard.rotation} ${shard.centroid[0]} ${shard.centroid[1]})`;
 
               return (
                 <g
                   key={country.slug}
-                  transform={transform}
-                  className={`nu-shard${isHover ? " is-hover" : ""}${dimmed ? " is-dimmed" : ""}`}
-                  style={{ cursor: "pointer", opacity: dimmed ? 0.2 : 1 }}
+                  className={`nu-clay-piece ${isHovered ? "is-active" : ""}`}
+                  style={{
+                    cursor: "pointer",
+                    transformOrigin: `${shard.centroid[0]}px ${shard.centroid[1]}px`,
+                    transform: isHovered ? "translateY(-6px) scale(1.02)" : "translateY(0) scale(1)",
+                    filter: isHovered ? "url(#detailShadowActive)" : "url(#detailShadowDefault)",
+                    opacity: dimmed ? 0.22 : 1,
+                  }}
                   onMouseEnter={() => {
                     setHover(country.slug);
                     if (lastHoverRef.current !== country.slug) {
@@ -401,43 +402,101 @@ export function ClayAtlasMap() {
                   onClick={() => enterCountry(country.slug)}
                   tabIndex={0}
                   role="button"
-                  aria-label={`${country.name} — ${stats.artistsCount} artists`}
+                  aria-label={country.name}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      enterCountry(country.slug);
+                    }
+                  }}
                 >
+                  {/* 3D Extrusion Depth Layers */}
                   <path
                     d={shard.path}
-                    transform="translate(3, 5)"
-                    fill="#18130e"
-                    opacity={0.85}
-                    filter="url(#clay3dShadowFull)"
+                    transform="translate(0, 6)"
+                    fill={shard.palette.sideDark}
+                    stroke={shard.palette.sideDark}
+                    strokeWidth="1.6"
+                    strokeLinejoin="round"
                     pointerEvents="none"
                   />
                   <path
                     d={shard.path}
-                    fill={isHover ? "url(#fullActiveGoldFill)" : `url(#full-shard-clay-${shard.slug})`}
-                    stroke={isHover ? "var(--atlas-accent)" : "rgba(0,0,0,0.6)"}
-                    strokeWidth={isHover ? 1.4 : 0.4}
+                    transform="translate(0, 4)"
+                    fill={shard.palette.sideMid}
+                    stroke={shard.palette.sideMid}
+                    strokeWidth="1.6"
                     strokeLinejoin="round"
-                    filter="url(#clay3dExtrudeFull)"
-                    style={{
-                      transform: isHover ? "translate(-2px, -4px) scale(1.04)" : "translate(0, 0) scale(1)",
-                      transformOrigin: `${shard.centroid[0]}px ${shard.centroid[1]}px`,
-                      transition: "transform 0.25s cubic-bezier(0.22,1,0.36,1), fill 0.25s ease",
-                    }}
+                    pointerEvents="none"
                   />
+                  <path
+                    d={shard.path}
+                    transform="translate(0, 2)"
+                    fill={shard.palette.sideMid}
+                    stroke={shard.palette.sideMid}
+                    strokeWidth="1.6"
+                    strokeLinejoin="round"
+                    pointerEvents="none"
+                  />
+                  <path
+                    d={shard.path}
+                    transform="translate(0, 1)"
+                    fill={shard.palette.sideMid}
+                    stroke={shard.palette.sideMid}
+                    strokeWidth="1.6"
+                    strokeLinejoin="round"
+                    pointerEvents="none"
+                  />
+
+                  {/* Main Top Face */}
+                  <path
+                    d={shard.path}
+                    fill={`url(#detail-grad-${shard.slug})`}
+                    stroke={isHovered ? "var(--atlas-accent)" : "rgba(25, 15, 10, 0.75)"}
+                    strokeWidth={isHovered ? 2.2 : 1.2}
+                    strokeLinejoin="round"
+                    className="nu-clay-top"
+                  />
+
+                  {/* Chamfered Top Bevel Highlight */}
+                  <path
+                    d={shard.path}
+                    fill="none"
+                    stroke={isHovered ? "rgba(255, 255, 255, 0.85)" : shard.palette.bevelHighlight}
+                    strokeWidth={0.75}
+                    strokeLinejoin="round"
+                    pointerEvents="none"
+                  />
+
                   <title>{country.name}</title>
                 </g>
               );
             })}
 
+            {/* Island Droplets */}
             {islands.map((isle) => {
               const country = getCountryBySlug(isle.slug);
               if (!country) return null;
-              const isHover = hover === isle.slug;
+              const isHovered = hover === isle.slug;
               const dimmed = isDimmed(isle.slug);
+              const palette = shardMap.get(isle.slug)?.palette || {
+                topLight: "#E8C59A",
+                topBase: "#DEB484",
+                topDark: "#C69966",
+                sideDark: "#342215",
+              };
+
               return (
                 <g
                   key={isle.slug}
-                  style={{ cursor: "pointer", opacity: dimmed ? 0.2 : 1 }}
+                  style={{
+                    cursor: "pointer",
+                    transformOrigin: `${isle.x}px ${isle.y}px`,
+                    transition: "transform 0.25s ease, opacity 0.2s ease",
+                    transform: isHovered ? "translateY(-4px) scale(1.2)" : "translateY(0) scale(1)",
+                    filter: isHovered ? "url(#detailShadowActive)" : "url(#detailIslandShadow)",
+                    opacity: dimmed ? 0.22 : 1,
+                  }}
                   onMouseEnter={() => {
                     setHover(isle.slug);
                     if (lastHoverRef.current !== isle.slug) {
@@ -452,14 +511,21 @@ export function ClayAtlasMap() {
                   aria-label={country.name}
                 >
                   <circle cx={isle.x} cy={isle.y} r={14} fill="transparent" />
+                  <circle cx={isle.x} cy={isle.y + 2} r={isHovered ? 6 : 4.5} fill={palette.sideDark} pointerEvents="none" />
                   <circle
                     cx={isle.x}
                     cy={isle.y}
-                    r={isHover ? 6.5 : 4.5}
-                    fill={isHover ? "var(--atlas-accent)" : "#998363"}
-                    stroke="#000000"
-                    strokeWidth={0.8}
-                    filter="url(#clay3dExtrudeFull)"
+                    r={isHovered ? 6 : 4.5}
+                    fill={palette.topBase}
+                    stroke={isHovered ? "var(--atlas-accent)" : "rgba(35, 22, 14, 0.75)"}
+                    strokeWidth={isHovered ? 1.4 : 1}
+                  />
+                  <circle
+                    cx={isle.x - (isHovered ? 1.8 : 1.3)}
+                    cy={isle.y - (isHovered ? 1.8 : 1.3)}
+                    r={isHovered ? 1.8 : 1.3}
+                    fill="rgba(255, 255, 255, 0.65)"
+                    pointerEvents="none"
                   />
                   <title>{country.name}</title>
                 </g>
@@ -468,43 +534,52 @@ export function ClayAtlasMap() {
           </svg>
         </div>
 
-        {/* Hover Information Spotlight Box */}
+        {/* Hover Information Card */}
         {hoveredCountry && hoverPosition && (
           <div
-            className="nu-atlas-hover-card absolute p-4 border backdrop-blur-md shadow-2xl transition-all pointer-events-none"
+            className="nu-atlas-hover-card absolute p-4.5 border rounded shadow-xl transition-all pointer-events-none z-30 backdrop-blur-md"
             style={{
               backgroundColor: "var(--atlas-tooltip-bg)",
-              borderColor: "var(--atlas-border)",
+              borderColor: "var(--atlas-border-strong)",
               left: hoverPosition.x,
               top: hoverPosition.y,
             }}
           >
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-xl">{hoveredCountry.flag}</span>
-              <h3 className="font-serif text-lg font-bold" style={{ color: "var(--atlas-fg)" }}>
-                {hoveredCountry.name}
-              </h3>
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">{hoveredCountry.flag}</span>
+                <h3 className="font-serif text-xl font-bold" style={{ color: "var(--atlas-fg)" }}>
+                  {hoveredCountry.name}
+                </h3>
+              </div>
+              <span className="text-[10px] font-mono tracking-widest uppercase font-semibold text-[color:var(--atlas-accent)]">
+                {hoveredCountry.region}
+              </span>
             </div>
             <p className="text-xs italic leading-relaxed mb-3" style={{ color: "var(--atlas-fg-muted)" }}>
               &ldquo;{hoveredCountry.blurb}&rdquo;
             </p>
-            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest pt-2 border-t" style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-accent)" }}>
-              <span>{hoveredStats?.artistsCount} Artists</span>
-              <span>{hoveredStats?.worksCount} Works</span>
+            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest pt-2.5 border-t" style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-accent)" }}>
+              <span className="font-semibold">{hoveredStats?.artistsCount} Artists</span>
+              <span className="font-semibold">{hoveredStats?.worksCount} Works</span>
             </div>
           </div>
         )}
       </div>
 
-      {/* Medium Quick Filters */}
-      <div className="flex flex-wrap gap-2 pt-2">
+      {/* Medium Quick Filters Bar */}
+      <div className="flex flex-wrap items-center gap-2 pt-2">
+        <span className="font-mono text-[10px] tracking-widest uppercase mr-2" style={{ color: "var(--atlas-fg-muted)" }}>
+          Filter by Medium:
+        </span>
         <button
           onClick={() => setActiveFilter(null)}
-          className={`px-3 py-2 text-[10px] font-mono uppercase tracking-widest border transition-colors ${
+          className={`px-3.5 py-2 text-[10px] font-mono uppercase tracking-widest border rounded transition-all cursor-pointer ${
             !activeFilter
-              ? "bg-[#9F0D12] text-[#F5F2EE] border-[#9F0D12]"
-              : "border-[color:var(--atlas-border)] hover:border-[color:var(--atlas-accent)]"
+              ? "bg-[#9F0D12] text-[#F5F2EE] border-[#9F0D12] shadow-xs font-semibold"
+              : "border-[color:var(--atlas-border)] hover:border-[color:var(--atlas-accent)] hover:opacity-80"
           }`}
+          style={activeFilter ? { backgroundColor: "var(--atlas-card-bg)", color: "var(--atlas-fg)" } : {}}
         >
           All Mediums
         </button>
@@ -512,11 +587,12 @@ export function ClayAtlasMap() {
           <button
             key={t}
             onClick={() => setActiveFilter(activeFilter === t ? null : t)}
-            className={`px-3 py-2 text-[10px] font-mono uppercase tracking-widest border transition-colors ${
+            className={`px-3.5 py-2 text-[10px] font-mono uppercase tracking-widest border rounded transition-all cursor-pointer ${
               activeFilter === t
-                ? "bg-[#9F0D12] text-[#F5F2EE] border-[#9F0D12]"
-                : "border-[color:var(--atlas-border)] hover:border-[color:var(--atlas-accent)]"
+                ? "bg-[#9F0D12] text-[#F5F2EE] border-[#9F0D12] shadow-xs font-semibold"
+                : "border-[color:var(--atlas-border)] hover:border-[color:var(--atlas-accent)] hover:opacity-80"
             }`}
+            style={activeFilter !== t ? { backgroundColor: "var(--atlas-card-bg)", color: "var(--atlas-fg)" } : {}}
           >
             {t}
           </button>

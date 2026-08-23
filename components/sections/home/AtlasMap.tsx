@@ -19,7 +19,7 @@ type FeatureLike = {
   geometry: GeoJSON.Geometry;
 };
 
-// 9 Featured countries matching the right panel in the reference design image
+// 9 Featured countries for the right directory panel
 const FEATURED_SLUGS = [
   "cabo-verde",
   "senegal",
@@ -32,7 +32,7 @@ const FEATURED_SLUGS = [
   "angola",
 ];
 
-// Left vertical navigation links matching reference design image
+// Left vertical navigation links
 const NAV_ITEMS = [
   { label: "EXPLORE AFRICA", href: "#atlas", active: true },
   { label: "ARTISTS", href: "/artists" },
@@ -52,7 +52,6 @@ function hashStr(s: string): number {
   return h >>> 0;
 }
 
-// Procedural audio pluck cue fallback if no custom sound uploaded
 function playCountryCue(slug: string, ctx: AudioContext, master: GainNode) {
   const seed = hashStr(slug);
   const rand = (n: number) => ((seed >> n) & 0xff) / 255;
@@ -106,8 +105,8 @@ export function AfricaMapSection() {
       .parallels([-15, 30]);
     p.fitExtent(
       [
-        [50, 50],
-        [W - 50, H - 50],
+        [65, 55],
+        [W - 65, H - 55],
       ],
       { type: "FeatureCollection", features } as unknown as GeoJSON.FeatureCollection,
     );
@@ -115,7 +114,7 @@ export function AfricaMapSection() {
   }, [features]);
   const path = useMemo(() => geoPath(projection), [projection]);
 
-  // Build continental country 3D shards
+  // Build continental country 3D pieces with exact borders and custom reference palettes
   const shards = useMemo<Shard[]>(() => {
     const inputs: CountryInput[] = [];
     features.forEach((f) => {
@@ -136,7 +135,7 @@ export function AfricaMapSection() {
     return buildCountryShards(inputs);
   }, [features, path]);
 
-  // Build island pins (e.g. Cabo Verde, Sao Tome, Seychelles)
+  // Island droplet pins
   const islands = useMemo(() => {
     return Object.entries(ISLAND_PINS)
       .map(([slug, [lon, lat]]) => {
@@ -248,61 +247,62 @@ export function AfricaMapSection() {
   return (
     <section
       id="atlas"
-      className="nu-atlas relative w-screen mx-[calc(50%-50vw)] py-10 md:py-16 overflow-hidden font-sans select-none"
+      className="nu-atlas relative w-screen mx-[calc(50%-50vw)] py-12 md:py-20 overflow-hidden font-sans select-none"
       style={{
         backgroundColor: "var(--atlas-bg)",
         color: "var(--atlas-fg)",
       }}
     >
-      {/* Theme-aware background radial spotlight */}
+      {/* Soft Background Radial Lighting */}
       <div
         aria-hidden
         className="absolute inset-0 pointer-events-none nu-atlas-bg"
       />
 
       {/* Main Container */}
-      <div className="relative max-w-[1440px] mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-[250px_1fr_340px] gap-6 lg:gap-10 items-center min-h-[660px]">
+      <div className="relative max-w-[1440px] mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-[260px_1fr_340px] gap-8 lg:gap-12 items-center min-h-[700px]">
         
-        {/* LEFT COLUMN: Logo, Vertical Navigation & Floating Callout */}
+        {/* LEFT COLUMN: Brand Identity, Vertical Timeline Navigation & Country Callout */}
         <div className="flex flex-col justify-between h-full space-y-8 z-10 self-stretch py-2">
           {/* Logo Branding */}
           <div>
             <h2 className="font-serif text-2xl md:text-3xl tracking-[0.25em] font-light uppercase" style={{ color: "var(--atlas-fg)" }}>
-              NU <span className="inline-block mx-1 text-xs opacity-50 font-sans">—</span> ARTE
+              NU <span className="inline-block mx-1 text-xs opacity-40 font-sans">—</span> ARTE
             </h2>
             <span
-              className="block font-mono text-[9px] tracking-[0.45em] uppercase mt-1"
+              className="block font-mono text-[9px] tracking-[0.45em] uppercase mt-1 font-semibold"
               style={{ color: "var(--atlas-accent)" }}
             >
               CURATED AFRICAN ART
             </span>
           </div>
 
-          {/* Left Vertical Navigation Menu with Timeline Line */}
+          {/* Left Vertical Timeline Navigation */}
           <div className="relative flex flex-col space-y-5 my-auto pl-2">
             <div
               className="absolute left-[7.5px] top-2 bottom-2 w-px pointer-events-none"
-              style={{ backgroundColor: "var(--atlas-border)" }}
+              style={{ backgroundColor: "var(--atlas-border-strong)" }}
             />
 
             {NAV_ITEMS.map((item) => (
               <a
                 key={item.label}
                 href={item.href}
-                className="group flex items-center gap-3 text-[11px] tracking-[0.24em] uppercase font-mono transition-colors relative z-10"
+                className="group flex items-center gap-3.5 text-[11px] tracking-[0.24em] uppercase font-mono transition-all relative z-10"
               >
                 {/* Dot Indicator */}
                 <span
-                  className="w-3 h-3 rounded-full transition-all duration-300 flex items-center justify-center border"
+                  className="w-3.5 h-3.5 rounded-full transition-all duration-300 flex items-center justify-center border shadow-xs"
                   style={{
-                    backgroundColor: item.active ? "var(--atlas-accent)" : "transparent",
-                    borderColor: item.active ? "var(--atlas-accent)" : "var(--atlas-border)",
+                    backgroundColor: item.active ? "var(--atlas-accent)" : "var(--atlas-card-bg)",
+                    borderColor: item.active ? "var(--atlas-accent)" : "var(--atlas-border-strong)",
                   }}
                 >
-                  {item.active && <span className="w-1 h-1 rounded-full" style={{ backgroundColor: "var(--atlas-bg)" }} />}
+                  {item.active && <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "var(--atlas-bg)" }} />}
                 </span>
 
                 <span
+                  className="transition-colors"
                   style={{
                     color: item.active ? "var(--atlas-accent)" : "var(--atlas-fg-muted)",
                     fontWeight: item.active ? 600 : 400,
@@ -314,133 +314,124 @@ export function AfricaMapSection() {
             ))}
           </div>
 
-          {/* Floating Pointer Callout Box for Active / Hovered Country */}
-          <div className="pt-4 border-t transition-all duration-300" style={{ borderColor: "var(--atlas-border)" }}>
-            <div className="flex items-center gap-2 text-[11px] font-mono tracking-[0.22em] uppercase mb-1.5" style={{ color: "var(--atlas-accent)" }}>
-              <span className="text-base leading-none">⤤</span>
-              <span className="font-semibold">{activeCountry.name}</span>
+          {/* Floating Callout Card for Active Country */}
+          <div
+            className="p-4 border rounded-sm transition-all duration-300 shadow-xs"
+            style={{
+              borderColor: "var(--atlas-border-strong)",
+              backgroundColor: "var(--atlas-card-bg)",
+            }}
+          >
+            <div className="flex items-center justify-between text-[11px] font-mono tracking-[0.22em] uppercase mb-2" style={{ color: "var(--atlas-accent)" }}>
+              <div className="flex items-center gap-2 font-bold">
+                <span className="text-base leading-none">⤤</span>
+                <span>{activeCountry.name}</span>
+              </div>
+              <span className="text-sm">{activeCountry.flag}</span>
             </div>
-            <p className="text-xs leading-relaxed font-light italic min-h-[50px]" style={{ color: "var(--atlas-fg-muted)" }}>
+            <p className="text-xs leading-relaxed font-light italic min-h-[48px]" style={{ color: "var(--atlas-fg-muted)" }}>
               &ldquo;{activeCountry.blurb}&rdquo;
             </p>
+            <button
+              type="button"
+              onClick={() => enterCountry(activeCountry.slug)}
+              className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-mono tracking-[0.2em] uppercase font-semibold transition-colors hover:underline"
+              style={{ color: "var(--atlas-accent)" }}
+            >
+              Explore Artists & Works →
+            </button>
           </div>
         </div>
 
-        {/* CENTER COLUMN: 3D Sculptural Clay/Wooden Africa Map */}
-        <div className="relative flex items-center justify-center w-full h-full min-h-[520px] lg:min-h-[640px]">
-          {/* Audio Mute/Unmute Control */}
+        {/* CENTER COLUMN: 3D Sculptural Africa Relief Map */}
+        <div className="relative flex items-center justify-center w-full h-full min-h-[560px] lg:min-h-[680px]">
+          {/* Audio Control */}
           <button
             type="button"
             onClick={toggleSound}
             aria-label={soundOn ? "Mute audio" : "Unmute audio"}
-            className="absolute top-0 right-0 z-20 flex items-center gap-2 px-3 py-1.5 border rounded text-[10px] font-mono tracking-[0.2em] uppercase transition-colors backdrop-blur-sm"
+            className="absolute top-0 right-0 z-20 flex items-center gap-2 px-3.5 py-1.5 border rounded text-[10px] font-mono tracking-[0.2em] uppercase transition-all shadow-xs backdrop-blur-sm"
             style={{
-              backgroundColor: "var(--atlas-tooltip-bg)",
+              backgroundColor: "var(--atlas-card-bg)",
               borderColor: "var(--atlas-border)",
-              color: "var(--atlas-accent)",
+              color: soundOn ? "var(--atlas-accent)" : "var(--atlas-fg-muted)",
             }}
           >
             <span className="material-symbols-outlined text-[15px]">
               {soundOn ? "volume_up" : "volume_off"}
             </span>
-            <span>{soundOn ? "Sound On" : "Muted"}</span>
+            <span className="font-medium">{soundOn ? "Sound On" : "Muted"}</span>
           </button>
 
           <svg
             viewBox={`0 0 ${W} ${H}`}
-            className="w-full h-auto max-h-[640px] block select-none"
+            className="w-full h-auto max-h-[680px] block select-none"
             role="img"
-            aria-label="3D Sculptural Interactive Map of Africa"
-            onMouseLeave={() => {
-              handleCountryLeave();
-            }}
+            aria-label="3D Sculptural Clay & Wood Map of Africa"
+            onMouseLeave={handleCountryLeave}
           >
             <defs>
-              {/* 3D Clay Texture & Specular Lighting Filter */}
-              <filter id="clay3dExtrude" x="-20%" y="-20%" width="140%" height="140%">
-                <feMorphology in="SourceGraphic" operator="erode" radius="2" result="eroded" />
-                <feMorphology in="SourceAlpha" operator="erode" radius="2" result="erodedAlpha" />
-                <feGaussianBlur in="erodedAlpha" stdDeviation="0.9" result="blurA" />
-                <feSpecularLighting
-                  in="blurA"
-                  surfaceScale="4"
-                  specularConstant="0.65"
-                  specularExponent="22"
-                  lightingColor="#fff4e0"
-                  result="spec"
-                >
-                  <feDistantLight azimuth="135" elevation="55" />
-                </feSpecularLighting>
-                <feComposite in="spec" in2="erodedAlpha" operator="in" result="specMasked" />
-                <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="7" result="grain" />
-                <feColorMatrix
-                  in="grain"
-                  type="matrix"
-                  values="0 0 0 0 0.06
-                          0 0 0 0 0.04
-                          0 0 0 0 0.02
-                          0 0 0 0.15 0"
-                  result="grainDark"
-                />
-                <feComposite in="grainDark" in2="erodedAlpha" operator="in" result="grainMasked" />
-                <feMerge>
-                  <feMergeNode in="eroded" />
-                  <feMergeNode in="grainMasked" />
-                  <feMergeNode in="specMasked" />
-                </feMerge>
+              {/* Soft Multi-Layer Cast Drop Shadows */}
+              <filter id="clayShadowDefault" x="-30%" y="-30%" width="170%" height="170%">
+                <feDropShadow dx="2.5" dy="6" stdDeviation="4.5" floodColor="var(--atlas-shadow-color)" floodOpacity="var(--atlas-shadow-opacity-a)" />
+                <feDropShadow dx="1" dy="2" stdDeviation="1.5" floodColor="#000000" floodOpacity="var(--atlas-shadow-opacity-b)" />
+              </filter>
+              <filter id="clayShadowActive" x="-40%" y="-40%" width="190%" height="190%">
+                <feDropShadow dx="5" dy="12" stdDeviation="8" floodColor="var(--atlas-shadow-color)" floodOpacity="var(--atlas-shadow-active-a)" />
+                <feDropShadow dx="1" dy="3" stdDeviation="2" floodColor="#000000" floodOpacity="var(--atlas-shadow-active-b)" />
+              </filter>
+              <filter id="islandShadow" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="1.5" dy="3" stdDeviation="2" floodColor="var(--atlas-shadow-color)" floodOpacity="var(--atlas-shadow-opacity-a)" />
               </filter>
 
-              {/* Heavy 3D Drop Shadow for Depth & Extrusion */}
-              <filter id="clay3dShadow" x="-30%" y="-30%" width="160%" height="160%">
-                <feDropShadow dx="2" dy="4" stdDeviation="2" floodColor="#000000" floodOpacity="0.75" />
-                <feDropShadow dx="6" dy="12" stdDeviation="8" floodColor="#000000" floodOpacity="0.45" />
-              </filter>
-
-              {/* Shard Gradients matching warm earthy palette */}
+              {/* 135-degree Light Gradients for All Countries */}
               {shards.map((s) => (
-                <linearGradient key={s.slug} id={`shard-clay-${s.slug}`} x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor={s.fill} />
-                  <stop offset="100%" stopColor={s.fillDark} />
+                <linearGradient
+                  key={`grad-${s.slug}`}
+                  id={`clay-grad-${s.slug}`}
+                  x1="15%"
+                  y1="10%"
+                  x2="85%"
+                  y2="90%"
+                >
+                  <stop offset="0%" stopColor={s.palette.topLight} />
+                  <stop offset="45%" stopColor={s.palette.topBase} />
+                  <stop offset="100%" stopColor={s.palette.topDark} />
                 </linearGradient>
               ))}
-
-              {/* Active Highlight Gradient */}
-              <linearGradient id="activeGoldFill" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#e8c794" />
-                <stop offset="100%" stopColor="#b3874b" />
-              </linearGradient>
             </defs>
 
             {/* Connecting Pointer Line from active country centroid to floating left callout */}
             {activePoint && (
               <g pointerEvents="none" className="transition-all duration-300">
                 <path
-                  d={`M ${activePoint.x} ${activePoint.y} L ${Math.max(60, activePoint.x - 120)} ${activePoint.y + 40} L 20 ${activePoint.y + 40}`}
+                  d={`M ${activePoint.x} ${activePoint.y} L ${Math.max(60, activePoint.x - 130)} ${activePoint.y + 45} L 15 ${activePoint.y + 45}`}
                   fill="none"
                   stroke="var(--atlas-accent)"
-                  strokeWidth="1.2"
-                  strokeDasharray="3 3"
-                  opacity={0.7}
+                  strokeWidth="1.4"
+                  strokeDasharray="4 4"
+                  opacity={0.8}
                 />
-                <circle cx={activePoint.x} cy={activePoint.y} r={3.5} fill="var(--atlas-accent)" />
+                <circle cx={activePoint.x} cy={activePoint.y} r={4} fill="var(--atlas-accent)" />
+                <circle cx={activePoint.x} cy={activePoint.y} r={7.5} fill="none" stroke="var(--atlas-accent)" strokeWidth="1" opacity={0.5} />
               </g>
             )}
 
-            {/* Render 3D Continental Shards */}
+            {/* 3D Relief Country Puzzle Pieces */}
             {shards.map((shard) => {
               const country = getCountryBySlug(shard.slug);
               if (!country) return null;
               const isActive = activeSlug === country.slug;
-              const [dx, dy] = shard.drift;
-              const transform = `translate(${dx} ${dy}) rotate(${shard.rotation} ${shard.centroid[0]} ${shard.centroid[1]})`;
 
               return (
                 <g
                   key={country.slug}
-                  transform={transform}
+                  className={`nu-clay-piece ${isActive ? "is-active" : ""}`}
                   style={{
                     cursor: "pointer",
-                    transition: "transform 0.3s ease",
+                    transformOrigin: `${shard.centroid[0]}px ${shard.centroid[1]}px`,
+                    transform: isActive ? "translateY(-6px) scale(1.02)" : "translateY(0) scale(1)",
+                    filter: isActive ? "url(#clayShadowActive)" : "url(#clayShadowDefault)",
                   }}
                   onMouseEnter={() => handleCountryHover(country.slug)}
                   onMouseLeave={handleCountryLeave}
@@ -455,44 +446,91 @@ export function AfricaMapSection() {
                     }
                   }}
                 >
-                  {/* 3D Extrusion Side Wall Layer */}
+                  {/* 3D Extrusion Side Walls */}
                   <path
                     d={shard.path}
-                    transform="translate(3, 5)"
-                    fill="#18130e"
-                    opacity={0.85}
-                    filter="url(#clay3dShadow)"
+                    transform="translate(0, 6)"
+                    fill={shard.palette.sideDark}
+                    stroke={shard.palette.sideDark}
+                    strokeWidth="1.6"
+                    strokeLinejoin="round"
+                    pointerEvents="none"
+                  />
+                  <path
+                    d={shard.path}
+                    transform="translate(0, 4)"
+                    fill={shard.palette.sideMid}
+                    stroke={shard.palette.sideMid}
+                    strokeWidth="1.6"
+                    strokeLinejoin="round"
+                    pointerEvents="none"
+                  />
+                  <path
+                    d={shard.path}
+                    transform="translate(0, 2)"
+                    fill={shard.palette.sideMid}
+                    stroke={shard.palette.sideMid}
+                    strokeWidth="1.6"
+                    strokeLinejoin="round"
+                    pointerEvents="none"
+                  />
+                  <path
+                    d={shard.path}
+                    transform="translate(0, 1)"
+                    fill={shard.palette.sideMid}
+                    stroke={shard.palette.sideMid}
+                    strokeWidth="1.6"
+                    strokeLinejoin="round"
                     pointerEvents="none"
                   />
 
-                  {/* Top Face 3D Clay Body */}
+                  {/* Main Top Face with Reference Matte Finish */}
                   <path
                     d={shard.path}
-                    fill={isActive ? "url(#activeGoldFill)" : `url(#shard-clay-${shard.slug})`}
-                    stroke={isActive ? "var(--atlas-accent)" : "rgba(0,0,0,0.6)"}
-                    strokeWidth={isActive ? 1.4 : 0.4}
+                    fill={`url(#clay-grad-${shard.slug})`}
+                    stroke={isActive ? "var(--atlas-accent)" : "rgba(25, 15, 10, 0.75)"}
+                    strokeWidth={isActive ? 2.2 : 1.2}
                     strokeLinejoin="round"
-                    filter="url(#clay3dExtrude)"
-                    style={{
-                      transform: isActive ? "translate(-2px, -4px) scale(1.04)" : "translate(0, 0) scale(1)",
-                      transformOrigin: `${shard.centroid[0]}px ${shard.centroid[1]}px`,
-                      transition: "transform 0.25s cubic-bezier(0.22,1,0.36,1), fill 0.25s ease",
-                    }}
+                    className="nu-clay-top"
                   />
+
+                  {/* Top Bevel Highlight (Reflective Rim) */}
+                  <path
+                    d={shard.path}
+                    fill="none"
+                    stroke={isActive ? "rgba(255, 255, 255, 0.85)" : shard.palette.bevelHighlight}
+                    strokeWidth={0.75}
+                    strokeLinejoin="round"
+                    pointerEvents="none"
+                  />
+
                   <title>{country.name}</title>
                 </g>
               );
             })}
 
-            {/* Island Pins */}
+            {/* Island Droplet Pebble Pins */}
             {islands.map((isle) => {
               const country = getCountryBySlug(isle.slug);
               if (!country) return null;
               const isActive = activeSlug === isle.slug;
+              const palette = shardMap.get(isle.slug)?.palette || {
+                topLight: "#E8C59A",
+                topBase: "#DEB484",
+                topDark: "#C69966",
+                sideDark: "#342215",
+              };
+
               return (
                 <g
                   key={isle.slug}
-                  style={{ cursor: "pointer" }}
+                  style={{
+                    cursor: "pointer",
+                    transformOrigin: `${isle.x}px ${isle.y}px`,
+                    transition: "transform 0.25s ease",
+                    transform: isActive ? "translateY(-4px) scale(1.2)" : "translateY(0) scale(1)",
+                    filter: isActive ? "url(#clayShadowActive)" : "url(#islandShadow)",
+                  }}
                   onMouseEnter={() => handleCountryHover(isle.slug)}
                   onMouseLeave={handleCountryLeave}
                   onClick={() => enterCountry(isle.slug)}
@@ -501,23 +539,24 @@ export function AfricaMapSection() {
                   aria-label={country.name}
                 >
                   <circle cx={isle.x} cy={isle.y} r={14} fill="transparent" />
-                  <circle
-                    cx={isle.x + 2}
-                    cy={isle.y + 3}
-                    r={isActive ? 7 : 5}
-                    fill="#0c0a08"
-                    opacity={0.8}
-                    pointerEvents="none"
-                  />
+                  {/* Bottom extrusion */}
+                  <circle cx={isle.x} cy={isle.y + 2} r={isActive ? 6 : 4.5} fill={palette.sideDark} pointerEvents="none" />
+                  {/* Top face */}
                   <circle
                     cx={isle.x}
                     cy={isle.y}
-                    r={isActive ? 6.5 : 4.5}
-                    fill={isActive ? "var(--atlas-accent)" : "#998363"}
-                    stroke="#000000"
-                    strokeWidth={0.8}
-                    filter="url(#clay3dExtrude)"
-                    style={{ transition: "r 0.2s ease, fill 0.2s ease" }}
+                    r={isActive ? 6 : 4.5}
+                    fill={palette.topBase}
+                    stroke={isActive ? "var(--atlas-accent)" : "rgba(35, 22, 14, 0.75)"}
+                    strokeWidth={isActive ? 1.4 : 1}
+                  />
+                  {/* Specular highlight */}
+                  <circle
+                    cx={isle.x - (isActive ? 1.8 : 1.3)}
+                    cy={isle.y - (isActive ? 1.8 : 1.3)}
+                    r={isActive ? 1.8 : 1.3}
+                    fill="rgba(255, 255, 255, 0.65)"
+                    pointerEvents="none"
                   />
                   <title>{country.name}</title>
                 </g>
@@ -526,16 +565,16 @@ export function AfricaMapSection() {
           </svg>
         </div>
 
-        {/* RIGHT COLUMN: Kicker, Headline, Paragraph, Country List Menu */}
-        <div className="flex flex-col justify-between h-full space-y-5 z-10 self-stretch py-2">
+        {/* RIGHT COLUMN: Kicker, Headline, Paragraph, Country Directory */}
+        <div className="flex flex-col justify-between h-full space-y-6 z-10 self-stretch py-2">
           {/* Header */}
           <div>
             {/* Kicker */}
             <div className="mb-2">
-              <span className="text-[9px] tracking-[0.38em] uppercase font-mono block" style={{ color: "var(--atlas-accent)" }}>
+              <span className="text-[9px] tracking-[0.38em] uppercase font-mono block font-bold" style={{ color: "var(--atlas-accent)" }}>
                 ONE CONTINENT.
               </span>
-              <span className="text-[9px] tracking-[0.38em] uppercase font-mono block mt-0.5" style={{ color: "var(--atlas-accent)" }}>
+              <span className="text-[9px] tracking-[0.38em] uppercase font-mono block mt-0.5 font-bold" style={{ color: "var(--atlas-accent)" }}>
                 INFINITE VOICES.
               </span>
               <hr className="border-t w-8 mt-2" style={{ borderColor: "var(--atlas-accent)" }} />
@@ -555,8 +594,8 @@ export function AfricaMapSection() {
 
           <hr className="border-t" style={{ borderColor: "var(--atlas-border)" }} />
 
-          {/* Interactive Country List with Mini 3D Shape Thumbnails */}
-          <div className="flex flex-col space-y-1 my-1">
+          {/* Interactive Country Directory List */}
+          <div className="flex flex-col space-y-1.5 my-1">
             {featuredCountries.map((country) => {
               const isActive = activeSlug === country.slug;
               const shard = shardMap.get(country.slug);
@@ -567,37 +606,40 @@ export function AfricaMapSection() {
                   onMouseEnter={() => handleCountryHover(country.slug)}
                   onMouseLeave={handleCountryLeave}
                   onClick={() => enterCountry(country.slug)}
-                  className="group flex items-center justify-between py-2 px-2.5 rounded transition-all cursor-pointer"
+                  className="group flex items-center justify-between py-2 px-3 rounded-sm transition-all cursor-pointer shadow-2xs"
                   style={{
-                    backgroundColor: isActive ? "var(--atlas-hover)" : "transparent",
-                    borderLeft: isActive ? "2px solid var(--atlas-accent)" : "2px solid transparent",
+                    backgroundColor: isActive ? "var(--atlas-card-bg-hover)" : "var(--atlas-card-bg)",
+                    borderLeft: isActive ? "3px solid var(--atlas-accent)" : "3px solid transparent",
+                    borderTop: "1px solid var(--atlas-border)",
+                    borderRight: "1px solid var(--atlas-border)",
+                    borderBottom: "1px solid var(--atlas-border)",
                   }}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    {/* Active Dot Indicator */}
+                    {/* Active Indicator Dot */}
                     <span
                       className={`w-2 h-2 rounded-full transition-all ${
-                        isActive ? "scale-110" : "opacity-40"
+                        isActive ? "scale-125" : "opacity-40"
                       }`}
                       style={{
-                        backgroundColor: isActive ? "var(--atlas-accent)" : "var(--atlas-border)",
+                        backgroundColor: isActive ? "var(--atlas-accent)" : "var(--atlas-border-strong)",
                       }}
                     />
 
-                    {/* Mini 3D Shape Thumbnail */}
+                    {/* Mini 3D Badge Shape */}
                     {shard ? (
-                      <div className="w-6 h-6 flex items-center justify-center shrink-0 opacity-85 group-hover:opacity-100 transition-opacity">
+                      <div className="w-5 h-5 flex items-center justify-center shrink-0 opacity-90 group-hover:opacity-100 transition-opacity">
                         <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-full">
                           <path
                             d={shard.path}
-                            fill={isActive ? "var(--atlas-accent)" : shard.fill}
-                            stroke="rgba(0,0,0,0.6)"
+                            fill={isActive ? "var(--atlas-accent)" : shard.palette.topBase}
+                            stroke="rgba(35, 22, 14, 0.65)"
                             strokeWidth={4}
                           />
                         </svg>
                       </div>
                     ) : (
-                      <span className="text-sm">{country.flag}</span>
+                      <span className="text-xs">{country.flag}</span>
                     )}
 
                     <span
@@ -627,7 +669,7 @@ export function AfricaMapSection() {
           {/* Bottom link: View All Countries */}
           <Link
             href="/map"
-            className="inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.25em] uppercase transition-colors pt-2"
+            className="inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.25em] uppercase transition-colors pt-2 font-semibold hover:underline"
             style={{ color: "var(--atlas-accent)" }}
           >
             VIEW ALL COUNTRIES
@@ -639,19 +681,19 @@ export function AfricaMapSection() {
 
       {/* BOTTOM DIVIDED STATS BAR */}
       <div
-        className="mt-12 pt-8 border-t max-w-[1440px] mx-auto px-6 md:px-12 grid grid-cols-2 md:grid-cols-5 gap-6 text-center md:text-left"
+        className="mt-14 pt-8 border-t max-w-[1440px] mx-auto px-6 md:px-12 grid grid-cols-2 md:grid-cols-5 gap-6 text-center md:text-left"
         style={{ borderColor: "var(--atlas-border)" }}
       >
         {/* Stat 1 */}
-        <div className="flex flex-col md:flex-row items-center gap-3 md:pr-4 md:border-r" style={{ borderColor: "var(--atlas-border)" }}>
+        <div className="flex flex-col md:flex-row items-center gap-3.5 md:pr-4 md:border-r" style={{ borderColor: "var(--atlas-border)" }}>
           <div
-            className="w-10 h-10 rounded-full border flex items-center justify-center shrink-0"
-            style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-accent)" }}
+            className="w-10 h-10 rounded-full border flex items-center justify-center shrink-0 shadow-xs"
+            style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-accent)", backgroundColor: "var(--atlas-card-bg)" }}
           >
             <span className="material-symbols-outlined text-[20px]">person</span>
           </div>
           <div>
-            <div className="font-mono text-[9px] tracking-[0.25em] uppercase" style={{ color: "var(--atlas-fg-muted)" }}>
+            <div className="font-mono text-[9px] tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
               ARTISTS REPRESENTED
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
@@ -661,15 +703,15 @@ export function AfricaMapSection() {
         </div>
 
         {/* Stat 2 */}
-        <div className="flex flex-col md:flex-row items-center gap-3 md:px-4 md:border-r" style={{ borderColor: "var(--atlas-border)" }}>
+        <div className="flex flex-col md:flex-row items-center gap-3.5 md:px-4 md:border-r" style={{ borderColor: "var(--atlas-border)" }}>
           <div
-            className="w-10 h-10 rounded-full border flex items-center justify-center shrink-0"
-            style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-accent)" }}
+            className="w-10 h-10 rounded-full border flex items-center justify-center shrink-0 shadow-xs"
+            style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-accent)", backgroundColor: "var(--atlas-card-bg)" }}
           >
             <span className="material-symbols-outlined text-[20px]">crop_square</span>
           </div>
           <div>
-            <div className="font-mono text-[9px] tracking-[0.25em] uppercase" style={{ color: "var(--atlas-fg-muted)" }}>
+            <div className="font-mono text-[9px] tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
               ARTWORKS AVAILABLE
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
@@ -679,15 +721,15 @@ export function AfricaMapSection() {
         </div>
 
         {/* Stat 3 */}
-        <div className="flex flex-col md:flex-row items-center gap-3 md:px-4 md:border-r" style={{ borderColor: "var(--atlas-border)" }}>
+        <div className="flex flex-col md:flex-row items-center gap-3.5 md:px-4 md:border-r" style={{ borderColor: "var(--atlas-border)" }}>
           <div
-            className="w-10 h-10 rounded-full border flex items-center justify-center shrink-0"
-            style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-accent)" }}
+            className="w-10 h-10 rounded-full border flex items-center justify-center shrink-0 shadow-xs"
+            style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-accent)", backgroundColor: "var(--atlas-card-bg)" }}
           >
             <span className="material-symbols-outlined text-[20px]">language</span>
           </div>
           <div>
-            <div className="font-mono text-[9px] tracking-[0.25em] uppercase" style={{ color: "var(--atlas-fg-muted)" }}>
+            <div className="font-mono text-[9px] tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
               COUNTRIES
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
@@ -697,15 +739,15 @@ export function AfricaMapSection() {
         </div>
 
         {/* Stat 4 */}
-        <div className="flex flex-col md:flex-row items-center gap-3 md:px-4 md:border-r" style={{ borderColor: "var(--atlas-border)" }}>
+        <div className="flex flex-col md:flex-row items-center gap-3.5 md:px-4 md:border-r" style={{ borderColor: "var(--atlas-border)" }}>
           <div
-            className="w-10 h-10 rounded-full border flex items-center justify-center shrink-0"
-            style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-accent)" }}
+            className="w-10 h-10 rounded-full border flex items-center justify-center shrink-0 shadow-xs"
+            style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-accent)", backgroundColor: "var(--atlas-card-bg)" }}
           >
             <span className="material-symbols-outlined text-[20px]">groups</span>
           </div>
           <div>
-            <div className="font-mono text-[9px] tracking-[0.25em] uppercase" style={{ color: "var(--atlas-fg-muted)" }}>
+            <div className="font-mono text-[9px] tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
               COLLECTORS WORLDWIDE
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
@@ -717,12 +759,12 @@ export function AfricaMapSection() {
         {/* Stat 5: Scroll Indicator */}
         <div className="flex items-center justify-center md:justify-end gap-3 col-span-2 md:col-span-1">
           <div
-            className="w-10 h-10 rounded-full border flex items-center justify-center shrink-0 animate-bounce"
-            style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-fg)" }}
+            className="w-10 h-10 rounded-full border flex items-center justify-center shrink-0 animate-bounce shadow-xs"
+            style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-fg)", backgroundColor: "var(--atlas-card-bg)" }}
           >
             <span className="material-symbols-outlined text-[18px]">arrow_downward</span>
           </div>
-          <div className="font-mono text-[9px] tracking-[0.25em] uppercase text-left leading-tight" style={{ color: "var(--atlas-fg-muted)" }}>
+          <div className="font-mono text-[9px] tracking-[0.25em] uppercase text-left leading-tight font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
             SCROLL TO <br /> EXPLORE
           </div>
         </div>
