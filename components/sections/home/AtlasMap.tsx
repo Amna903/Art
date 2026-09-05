@@ -702,7 +702,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
               ARTISTS REPRESENTED
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
-              {stats.artists.toLocaleString()}
+              {stats.artists.toLocaleString()}+
             </div>
           </div>
         </div>
@@ -720,7 +720,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
               ARTWORKS AVAILABLE
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
-              {stats.artworks.toLocaleString()}
+              {stats.artworks.toLocaleString()}+
             </div>
           </div>
         </div>
