@@ -95,7 +95,12 @@ function playCountryCue(slug: string, ctx: AudioContext, master: GainNode) {
   osc2.stop(now + dur + 0.05);
 }
 
-export function AfricaMapSection() {
+type AtlasStats = {
+  artists: number;
+  artworks: number;
+};
+
+export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
   const router = useRouter();
   const features = (africaGeo as unknown as { features: FeatureLike[] }).features;
 
@@ -697,7 +702,7 @@ export function AfricaMapSection() {
               ARTISTS REPRESENTED
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
-              120+
+              {stats.artists.toLocaleString()}
             </div>
           </div>
         </div>
@@ -715,7 +720,7 @@ export function AfricaMapSection() {
               ARTWORKS AVAILABLE
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
-              350+
+              {stats.artworks.toLocaleString()}
             </div>
           </div>
         </div>

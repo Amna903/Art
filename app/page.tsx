@@ -7,6 +7,7 @@ import { MissionStats } from "@/components/sections/home/MissionStats";
 import { ProcessSteps, Newsletter } from "@/components/sections/home/ProcessAndNewsletter";
 import { ARTWORKS } from "@/lib/data/content";
 import { getMostRequestedArtworks } from "@/lib/data/supabase-artists-cached";
+import { getPublishedArtworks } from "@/lib/data/supabase-artists";
 import { getPageBlocks } from "@/lib/data/pageBlocks";
 import { mergeSlots } from "@/lib/utils/mergeSlots";
 
@@ -21,7 +22,15 @@ function ThreadDivider() {
 }
 
 export default async function HomePage() {
-  const [mostRequested, blocks] = await Promise.all([getMostRequestedArtworks(6), getPageBlocks("home")]);
+  const [mostRequested, publishedArtworks, blocks] = await Promise.all([
+    getMostRequestedArtworks(6),
+    getPublishedArtworks(),
+    getPageBlocks("home"),
+  ]);
+  const atlasStats = {
+    artists: new Set(publishedArtworks.map((artwork) => artwork.artistId)).size,
+    artworks: publishedArtworks.length,
+  };
 
   // The code decides Collector Picks: artworks ranked by "Request Price"
   // enquiry volume take over the static demo slots one-for-one — same
@@ -46,7 +55,7 @@ export default async function HomePage() {
     <>
       <Hero blocks={blocks} />
       <ThreadDivider />
-      <AfricaMapSection />
+      <AfricaMapSection stats={atlasStats} />
       <ThreadDivider />
       <FeaturedArtists />
       <CollectorPicks picks={picks} />
