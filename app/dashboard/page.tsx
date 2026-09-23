@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase/client";
 import { ArtistDashboard } from "@/components/dashboards/ArtistDashboard";
@@ -12,10 +11,9 @@ import { AdminDashboard } from "@/components/dashboards/AdminDashboard";
 import { CardGridSkeleton, Skeleton } from "@/components/ui/Skeleton";
 
 export default function DashboardPage() {
-  const { user, role, loading, updateRole, signOut } = useAuth();
+  const { user, role, loading, signOut } = useAuth();
   const router = useRouter();
   const [displayName, setDisplayName] = useState<string>("");
-  const [switching, setSwitching] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) router.push("/auth");
@@ -30,17 +28,6 @@ export default function DashboardPage() {
       .maybeSingle()
       .then(({ data }) => setDisplayName(data?.display_name ?? ""));
   }, [user]);
-
-  const handleRoleSwitch = async (newRole: "artist" | "client") => {
-    setSwitching(true);
-    const res = await updateRole(newRole);
-    setSwitching(false);
-    if (res.error) {
-      toast("Couldn't update role: " + res.error);
-    } else {
-      toast(`Switched role to ${newRole === "artist" ? "Artist Studio" : "Collector"}`);
-    }
-  };
 
   if (loading || !user) {
     return (
@@ -67,22 +54,12 @@ export default function DashboardPage() {
             {role && (
               <>
                 {" "}
-                · role <span className="text-secondary uppercase tracking-widest font-bold">{role}</span>
+                · role <span className="text-secondary uppercase tracking-widest font-bold">{role === "client" ? "buyer" : role}</span>
               </>
             )}
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          {role !== "admin" && (
-            <button
-              type="button"
-              disabled={switching}
-              onClick={() => handleRoleSwitch(role === "artist" ? "client" : "artist")}
-              className="border border-secondary/50 text-secondary hover:bg-secondary hover:text-on-secondary px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] transition-all disabled:opacity-50"
-            >
-              {switching ? "Updating…" : `Switch to ${role === "artist" ? "Collector" : "Artist Studio"}`}
-            </button>
-          )}
           <Link
             href="/"
             className="border border-primary/20 px-4 py-2 text-xs uppercase tracking-[0.2em] hover:border-secondary transition-colors"
@@ -103,21 +80,7 @@ export default function DashboardPage() {
       {role === "admin" && <AdminDashboard />}
       {!role && (
         <div className="py-12 text-center border border-primary/10 rounded-2xl p-8 bg-surface-container-low">
-          <p className="text-on-surface-variant mb-4">No role assigned yet. Select your account type below:</p>
-          <div className="flex justify-center gap-4">
-            <button
-              onClick={() => handleRoleSwitch("artist")}
-              className="bg-tertiary text-on-tertiary px-6 py-2.5 font-navigation text-xs uppercase tracking-widest hover:bg-secondary transition-colors"
-            >
-              Set as Artist Studio
-            </button>
-            <button
-              onClick={() => handleRoleSwitch("client")}
-              className="border border-primary/30 px-6 py-2.5 font-navigation text-xs uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-colors"
-            >
-              Set as Collector
-            </button>
-          </div>
+          <p className="text-on-surface-variant">Your account role has not been assigned. Please contact the gallery team for assistance.</p>
         </div>
       )}
     </main>

@@ -166,6 +166,7 @@ export function AdminDashboard() {
                       <div className="flex gap-2 justify-end flex-wrap">
                         {(["admin", "artist", "client"] as AppRole[])
                           .filter((r) => !roles.includes(r))
+                          .filter((r) => r === "admin" || !roles.some((assigned) => assigned === "artist" || assigned === "client"))
                           .map((r) => (
                             <button
                               key={r}

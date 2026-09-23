@@ -140,7 +140,7 @@ export default function AuthPage() {
                       : "border-primary/15 text-on-surface-variant hover:border-primary/40")
                   }
                 >
-                  <div className="font-headline-sm text-headline-sm text-primary capitalize">{r}</div>
+                  <div className="font-headline-sm text-headline-sm text-primary">{r === "client" ? "Buyer" : "Artist"}</div>
                   <div className="text-xs mt-1 opacity-80">
                     {r === "client"
                       ? "Discover, save and acquire artworks."
