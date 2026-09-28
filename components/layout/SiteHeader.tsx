@@ -61,7 +61,7 @@ export function SiteHeader() {
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${shellClass}`}>
       <nav
-        className={`relative flex items-center justify-between w-full px-gutter-page max-w-container-max mx-auto transition-all duration-300 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] ${
+        className={`relative flex items-center justify-between w-full px-gutter-page max-w-container-max mx-auto transition-all duration-300 lg:grid lg:grid-cols-[1fr_auto_1fr] ${
           scrolled ? "py-2" : "py-3"
         }`}
       >
@@ -76,7 +76,7 @@ export function SiteHeader() {
           />
         </Link>
 
-        <div className="hidden xl:flex xl:absolute xl:left-1/2 xl:-translate-x-1/2 items-center justify-center whitespace-nowrap gap-4 2xl:gap-6">
+        <div className="hidden lg:flex items-center justify-center whitespace-nowrap gap-4 xl:gap-6 2xl:gap-9">
           {NAV.map((item) => {
             const active = pathname === item.href;
             return (
@@ -156,7 +156,7 @@ export function SiteHeader() {
             )}
           </div>
 
-          <div className="flex xl:hidden">
+          <div className="flex lg:hidden">
             <button
               type="button"
               onClick={() => {
@@ -199,7 +199,7 @@ export function SiteHeader() {
       )}
 
       {mobileOpen && (
-        <div className="xl:hidden border-t border-[var(--brand-cinza)]/30 bg-[var(--brand-marfim)]/95 backdrop-blur-xl">
+        <div className="lg:hidden border-t border-[var(--brand-cinza)]/30 bg-[var(--brand-marfim)]/95 backdrop-blur-xl">
           <div className="max-w-container-max mx-auto px-gutter-page py-6 flex flex-col gap-1">
             {NAV.map((item) => {
               const active = pathname === item.href;
