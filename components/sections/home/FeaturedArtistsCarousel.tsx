@@ -110,15 +110,17 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
       >
         {cards.map((artist) => (
           <div key={artist.slug} className="min-w-[400px] snap-center group cursor-pointer">
-            <div className="aspect-[4/5] overflow-hidden mb-6 relative">
-              <Image
-                fill
-                sizes="400px"
-                draggable={false}
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-                alt={artist.name}
-                src={artist.image}
-              />
+            <div className="aspect-[4/5] overflow-hidden mb-6 relative bg-surface-container">
+              {artist.image ? (
+                <Image
+                  fill
+                  sizes="400px"
+                  draggable={false}
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  alt={artist.name}
+                  src={artist.image}
+                />
+              ) : null}
               {artist.badge && (
                 <div className="absolute bottom-4 left-4 bg-primary text-on-primary px-3 py-1 font-label-caps text-[10px]">
                   {t(artist.badge)}
