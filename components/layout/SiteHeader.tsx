@@ -61,22 +61,26 @@ export function SiteHeader() {
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${shellClass}`}>
       <nav
-        className={`relative flex items-center justify-between w-full px-gutter-page max-w-container-max mx-auto transition-all duration-300 lg:grid lg:grid-cols-[1fr_auto_1fr] ${
+        className={`flex items-center gap-6 w-full px-gutter-page max-w-container-max mx-auto transition-all duration-300 ${
           scrolled ? "py-2" : "py-3"
         }`}
       >
-        <Link href="/" className="flex items-center shrink-0 justify-self-start">
-          <Image
-            src="/images/ChatGPT%20Image%20Sep%2028,%202026,%2010_18_38%20PM.png"
-            alt="NUA-ARTE"
-            width={1103}
-            height={1426}
-            priority
-            className={`w-auto object-contain transition-all duration-300 ${scrolled ? "h-8" : "h-10"}`}
-          />
-        </Link>
+        {/* Left — logo */}
+        <div className="flex-1 flex items-center justify-start min-w-0">
+          <Link href="/" className="flex items-center shrink-0">
+            <Image
+              src="/images/ChatGPT%20Image%20Sep%2028,%202026,%2010_18_38%20PM.png"
+              alt="NUA-ARTE"
+              width={1103}
+              height={1426}
+              priority
+              className={`w-auto object-contain transition-all duration-300 ${scrolled ? "h-8" : "h-10"}`}
+            />
+          </Link>
+        </div>
 
-        <div className="hidden lg:flex items-center justify-center whitespace-nowrap gap-4 xl:gap-6 2xl:gap-9">
+        {/* Center — primary nav */}
+        <div className="hidden lg:flex items-center justify-center shrink-0 gap-5 xl:gap-8">
           {NAV.map((item) => {
             const active = pathname === item.href;
             return (
@@ -84,7 +88,7 @@ export function SiteHeader() {
                 key={item.label}
                 href={item.href}
                 className={
-                  "relative font-navigation text-navigation uppercase transition-colors duration-300 " +
+                  "relative whitespace-nowrap font-navigation text-navigation uppercase transition-colors duration-300 " +
                   (active ? "text-secondary" : "text-on-surface hover:text-secondary")
                 }
               >
@@ -97,7 +101,8 @@ export function SiteHeader() {
           })}
         </div>
 
-        <div className="flex items-center justify-end gap-1 md:gap-2 shrink-0 lg:col-start-3 lg:col-end-4 lg:justify-self-end">
+        {/* Right — search / lang / auth */}
+        <div className="flex-1 flex items-center justify-end gap-2 md:gap-3 min-w-0">
           <button
             type="button"
             onClick={() => {
@@ -106,23 +111,23 @@ export function SiteHeader() {
             }}
             aria-label={searchOpen ? t("Close search") : t("Search")}
             aria-expanded={searchOpen}
-            className="material-symbols-outlined w-11 h-11 flex items-center justify-center text-on-surface hover:text-secondary transition-colors"
+            className="material-symbols-outlined w-10 h-10 flex items-center justify-center text-on-surface hover:text-secondary transition-colors shrink-0"
           >
             {searchOpen ? "close" : "search"}
           </button>
 
-          <div className="hidden lg:block">
+          <div className="hidden lg:flex items-center gap-3 shrink-0">
             <ThemeToggle />
+            <LanguageSwitcher />
           </div>
-          <div className="hidden lg:block"><LanguageSwitcher /></div>
 
-          <div className="hidden lg:flex items-center gap-3 md:gap-4">
+          <div className="hidden lg:flex items-center gap-3 shrink-0">
             {user ? (
               <>
                 <div className="flex flex-col items-end leading-tight">
                   <Link
                     href="/dashboard"
-                    className="font-navigation text-navigation uppercase text-on-surface hover:text-secondary"
+                    className="font-navigation text-navigation uppercase text-on-surface hover:text-secondary whitespace-nowrap"
                   >
                     {t("Dashboard")}
                   </Link>
@@ -141,7 +146,7 @@ export function SiteHeader() {
                 </div>
                 <button
                   onClick={() => signOut().then(() => router.push("/"))}
-                  className="bg-primary text-on-primary px-4 py-2 font-navigation text-navigation uppercase"
+                  className="bg-primary text-on-primary px-4 py-2 font-navigation text-navigation uppercase whitespace-nowrap"
                 >
                   {t("Sign out")}
                 </button>
@@ -149,14 +154,14 @@ export function SiteHeader() {
             ) : (
               <Link
                 href="/auth"
-                className="bg-primary text-on-primary px-5 py-2 font-navigation text-navigation uppercase hover:scale-[0.97] duration-200 transition-transform"
+                className="bg-primary text-on-primary px-5 py-2 font-navigation text-navigation uppercase hover:scale-[0.97] duration-200 transition-transform whitespace-nowrap"
               >
                 {t("Join the Circle")}
               </Link>
             )}
           </div>
 
-          <div className="flex lg:hidden">
+          <div className="flex lg:hidden shrink-0">
             <button
               type="button"
               onClick={() => {
@@ -165,7 +170,7 @@ export function SiteHeader() {
               }}
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileOpen}
-              className="material-symbols-outlined w-11 h-11 flex items-center justify-center text-on-surface hover:text-secondary transition-colors"
+              className="material-symbols-outlined w-10 h-10 flex items-center justify-center text-on-surface hover:text-secondary transition-colors"
             >
               {mobileOpen ? "close" : "menu"}
             </button>
