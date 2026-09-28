@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/lib/i18n";
 
 const FAQS = [
   {
@@ -18,14 +19,14 @@ const FAQS = [
   },
   {
     q: "How are artists selected?",
-    a: "Our curators travel to source work directly — nothing on NU-ART is submitted through an open call. Every artist is discovered, vetted, and onboarded by our team before their work appears on the platform.",
+    a: "Our curators travel to source work directly — nothing on NUA-ARTE is submitted through an open call. Every artist is discovered, vetted, and onboarded by our team before their work appears on the platform.",
   },
   {
     q: "Do artists get paid directly?",
-    a: "Yes. NU-ART pays artists directly rather than routing sales through traditional gallery margins, so more of every acquisition supports the artist's practice.",
+    a: "Yes. NUA-ARTE pays artists directly rather than routing sales through traditional gallery margins, so more of every acquisition supports the artist's practice.",
   },
   {
-    q: "Can I become an artist on NU-ART?",
+    q: "Can I become an artist on NUA-ARTE?",
     a: "Sign up at /auth and choose the 'artist' role to set up a studio profile. Our curatorial team reviews new artist accounts before their work goes live.",
   },
   {
@@ -36,17 +37,20 @@ const FAQS = [
 
 export default function FaqPage() {
   const [open, setOpen] = useState<number | null>(0);
+  const { t } = useLanguage();
 
   return (
     <main className="max-w-3xl mx-auto px-gutter-page py-16 md:py-24">
-      <span className="font-label-caps text-label-caps text-secondary uppercase block mb-4">Support</span>
-      <h1 className="font-display-lg text-display-lg mb-6">Frequently Asked Questions</h1>
+      <span className="font-label-caps text-label-caps text-secondary uppercase block mb-4">
+        {t("Support")}
+      </span>
+      <h1 className="font-display-lg text-display-lg mb-6">{t("Frequently Asked Questions")}</h1>
       <p className="text-on-surface-variant mb-14">
-        Can&apos;t find what you&apos;re looking for?{" "}
+        {t("Can't find what you're looking for?")}{" "}
         <Link href="/about" className="text-secondary underline underline-offset-4">
-          Learn more about us
+          {t("Learn more about us")}
         </Link>{" "}
-        or reach out through any artwork&apos;s enquiry form.
+        {t("or reach out through any artwork's enquiry form.")}
       </p>
 
       <div className="divide-y divide-outline-variant border-t border-b border-outline-variant">
@@ -59,7 +63,7 @@ export default function FaqPage() {
                 aria-expanded={isOpen}
                 className="w-full flex items-center justify-between gap-4 py-6 text-left min-h-[44px]"
               >
-                <span className="font-headline-sm text-headline-sm">{item.q}</span>
+                <span className="font-headline-sm text-headline-sm">{t(item.q)}</span>
                 <span
                   className={`material-symbols-outlined text-secondary shrink-0 transition-transform duration-300 ${
                     isOpen ? "rotate-45" : ""
@@ -75,7 +79,7 @@ export default function FaqPage() {
                 style={{ display: "grid" }}
               >
                 <div className="overflow-hidden">
-                  <p className="text-on-surface-variant leading-relaxed max-w-xl">{item.a}</p>
+                  <p className="text-on-surface-variant leading-relaxed max-w-xl">{t(item.a)}</p>
                 </div>
               </div>
             </div>

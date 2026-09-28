@@ -41,7 +41,7 @@ export const JOURNAL_FALLBACK_STORIES: JournalFallbackStory[] = [
     tag: "Exhibitions",
     date: "April 29, 2024",
     read: "15 Min Read",
-    title: "Inside the Studio: 24 Hours with the NU-ART Collective",
+    title: "Inside the Studio: 24 Hours with the NUA-ARTE Collective",
     body: "A photographic essay documenting the creative chaos and quiet moments of art creation.",
     img: `${A}/53f7015e-08e4-4a34-b1a9-68d47a7f1a78/afr-sculpture.jpg`,
     alt: "A bright, high-key image of a modern art studio filled with colorful canvases and art supplies, overlooking a green urban garden.",

@@ -80,9 +80,9 @@ export const revalidate = 60;
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const resolved = await resolveCollection(slug);
-  if (!resolved) return { title: "Collection | NU-ART" };
+  if (!resolved) return { title: "Collection | NUA-ARTE" };
   return {
-    title: `${resolved.collection.title} | NU-ART`,
+    title: `${resolved.collection.title} | NUA-ARTE`,
     description: resolved.collection.description,
   };
 }

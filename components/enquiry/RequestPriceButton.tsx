@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLanguage } from "@/lib/i18n";
 import { EnquiryModal } from "./EnquiryModal";
 
 type Props = {
@@ -21,6 +22,7 @@ export function RequestPriceButton({
   children,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const { t } = useLanguage();
 
   return (
     <>
@@ -32,7 +34,7 @@ export function RequestPriceButton({
           "bg-primary text-on-primary font-navigation text-navigation uppercase tracking-widest py-4 px-8 hover:bg-secondary transition-colors duration-300"
         }
       >
-        {children ?? "Request Price"}
+        {children ?? t("Request Price")}
       </button>
       <EnquiryModal
         open={open}

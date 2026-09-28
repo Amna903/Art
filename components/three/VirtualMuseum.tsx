@@ -96,7 +96,7 @@ const LIGHT_PALETTE: Palette = {
 };
 
 
-// Module-level cached placeholder textures (NU-ART red brush motif on ivory)
+// Module-level cached placeholder textures (NUA-ARTE red brush motif on ivory)
 let _phLoading: THREE.CanvasTexture | null = null;
 let _phError: THREE.CanvasTexture | null = null;
 let _plasterTex: THREE.CanvasTexture | null = null;

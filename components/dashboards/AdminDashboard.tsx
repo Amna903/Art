@@ -9,6 +9,7 @@ import { EnquiriesAdmin } from "./EnquiriesAdmin";
 import { CollectionsAdmin } from "./CollectionsAdmin";
 import { CountrySoundsAdmin } from "./CountrySoundsAdmin";
 import { ListRowSkeleton } from "@/components/ui/Skeleton";
+import { AFRICAN_COUNTRIES } from "@/lib/data/africa";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -28,6 +29,9 @@ export function AdminDashboard() {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [enquiryCount, setEnquiryCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [managedName, setManagedName] = useState("");
+  const [managedCountry, setManagedCountry] = useState("");
+  const [managedFeedback, setManagedFeedback] = useState("");
   const [tab, setTab] = useState<"users" | "artworks" | "collections" | "enquiries" | "country sounds">("users");
 
   const load = async () => {
@@ -103,6 +107,17 @@ export function AdminDashboard() {
     router.refresh();
   };
 
+  const createManagedArtist = async () => {
+    if (!managedName.trim() || !managedCountry) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { error } = await supabase.from("managed_artists" as never).insert({
+      display_name: managedName.trim(), country: managedCountry, managed_by: user.id,
+    } as never);
+    setManagedFeedback(error ? error.message : "Artist profile created. You can now manage it from the represented artists record.");
+    if (!error) { setManagedName(""); setManagedCountry(""); }
+  };
+
   return (
     <div className="space-y-12">
       <section className="grid grid-cols-2 md:grid-cols-3 gap-6">
@@ -130,6 +145,18 @@ export function AdminDashboard() {
         <ListRowSkeleton count={4} />
       ) : tab === "users" ? (
         <section>
+          <div className="mb-8 border border-primary/10 bg-surface-container-low p-5 max-w-2xl">
+            <p className="text-xs uppercase tracking-widest text-secondary mb-3">Represented artist — no account required</p>
+            <div className="grid sm:grid-cols-[1fr_1fr_auto] gap-3">
+              <input value={managedName} onChange={(e) => setManagedName(e.target.value)} placeholder="Artist name" className="bg-transparent border border-primary/20 px-3 py-2 text-sm" />
+              <select value={managedCountry} onChange={(e) => setManagedCountry(e.target.value)} className="bg-transparent border border-primary/20 px-3 py-2 text-sm">
+                <option value="">Country</option>
+                {AFRICAN_COUNTRIES.map((country) => <option key={country.slug} value={country.name}>{country.name}</option>)}
+              </select>
+              <button onClick={createManagedArtist} className="bg-primary text-on-primary px-4 py-2 text-xs uppercase tracking-widest">Create profile</button>
+            </div>
+            {managedFeedback && <p className="mt-3 text-xs text-on-surface-variant">{managedFeedback}</p>}
+          </div>
           <table className="w-full text-sm">
             <thead className="text-xs uppercase tracking-widest text-on-surface-variant">
               <tr className="border-b border-primary/10">
@@ -218,6 +245,7 @@ export function AdminDashboard() {
                       className="bg-transparent border border-primary/20 text-xs px-2 py-1"
                     >
                       <option value="draft">draft</option>
+                      <option value="pending_review">pending review</option>
                       <option value="published">published</option>
                       <option value="sold">sold</option>
                       <option value="archived">archived</option>

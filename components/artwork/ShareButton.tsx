@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
+import { useLanguage } from "@/lib/i18n";
 
 type Props = {
   artworkTitle: string;
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export function ShareButton({ artworkTitle, artistName }: Props) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
 
   return (
@@ -22,7 +24,7 @@ export function ShareButton({ artworkTitle, artistName }: Props) {
         <span className="material-symbols-outlined text-primary group-hover:text-secondary transition-colors">
           share
         </span>
-        <span className="font-label-caps text-label-caps uppercase">Share</span>
+        <span className="font-label-caps text-label-caps uppercase">{t("Share")}</span>
       </button>
       {open && <ShareModal artworkTitle={artworkTitle} artistName={artistName} onClose={() => setOpen(false)} />}
     </>
@@ -38,15 +40,16 @@ function ShareModal({
   artistName?: string;
   onClose: () => void;
 }) {
+  const { t } = useLanguage();
   const url = typeof window !== "undefined" ? window.location.href : "";
-  const shareText = artistName ? `${artworkTitle} by ${artistName} — NU-ART` : `${artworkTitle} — NU-ART`;
+  const shareText = artistName ? `${artworkTitle} by ${artistName} — NUA-ARTE` : `${artworkTitle} — NUA-ARTE`;
 
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(url);
-      toast("Link copied to clipboard");
+      toast(t("Link copied to clipboard"));
     } catch {
-      toast("Couldn't copy the link");
+      toast(t("Couldn't copy the link"));
     }
   };
 

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
+import { useLanguage } from "@/lib/i18n";
 import { isArtistFollowed, followArtist, unfollowArtist } from "@/lib/data/followed-artists";
 
 type Props = {
@@ -26,6 +27,7 @@ export function FollowArtistButton({
   variant = "primary",
 }: Props) {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
   const [followed, setFollowed] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -56,7 +58,7 @@ export function FollowArtistButton({
       : unfollowArtist(user?.id, artistSlug));
 
     setBusy(false);
-    toast(next ? `Now following ${artistName}` : `Unfollowed ${artistName}`);
+    toast(next ? `${t("Following")} ${artistName}` : `${t("Unfollow")} ${artistName}`);
   };
 
   const defaultClasses =
@@ -78,7 +80,7 @@ export function FollowArtistButton({
       aria-pressed={followed}
       className={className ?? defaultClasses}
     >
-      {busy ? "…" : followed ? "Following" : "Follow Artist"}
+      {busy ? "…" : followed ? t("Following") : t("Follow Artist")}
     </button>
   );
 }

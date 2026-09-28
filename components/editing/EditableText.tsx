@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
+import { useLanguage } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase/client";
 import { pingRevalidate } from "@/lib/utils/revalidate";
 
@@ -24,6 +25,7 @@ export function EditableText({
   multiline?: boolean;
 }) {
   const { role } = useAuth();
+  const { t } = useLanguage();
   const isAdmin = role === "admin";
   const router = useRouter();
   const [editing, setEditing] = useState(false);
@@ -37,7 +39,7 @@ export function EditableText({
   }, [editing]);
 
   if (!isAdmin) {
-    return <Tag className={className}>{value}</Tag>;
+    return <Tag className={className}>{t(value)}</Tag>;
   }
 
   const save = async () => {
@@ -94,7 +96,7 @@ export function EditableText({
 
   return (
     <span className="relative group/edit block w-full">
-      <Tag className={className}>{value}</Tag>
+      <Tag className={className}>{t(value)}</Tag>
       <button
         onClick={() => setEditing(true)}
         title="Edit"

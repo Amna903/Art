@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1120" role="img" aria-labelledby="title">
+  <title id="title">NUA-ARTE</title>
+  <defs><clipPath id="mark"><rect x="80" y="0" width="840" height="840" rx="420"/></clipPath></defs>
+  <image href="/images/artlogo.png" x="0" y="0" width="1000" height="1000" preserveAspectRatio="xMidYMid slice" clip-path="url(#mark)"/>
+  <text x="500" y="965" text-anchor="middle" font-family="Georgia, serif" font-size="116" letter-spacing="11" fill="#211c19">NUA-ARTE</text>
+  <path d="M245 1005h510" stroke="#9f0d12" stroke-width="5"/>
+  <text x="500" y="1060" text-anchor="middle" font-family="Georgia, serif" font-size="28" letter-spacing="8" fill="#211c19">CURATED AFRICAN ART</text>
+</svg>

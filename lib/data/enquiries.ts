@@ -10,9 +10,11 @@ export type EnquiryInput = {
 
 export async function submitEnquiry(input: EnquiryInput): Promise<{ error?: string; success?: boolean }> {
   try {
+    const { supabase } = await import("@/lib/supabase/client");
+    const { data: { session } } = await supabase.auth.getSession();
     const res = await fetch("/api/enquiries", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) },
       body: JSON.stringify(input),
     });
 

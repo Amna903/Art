@@ -1,12 +1,16 @@
+"use client";
+
 import Link from "next/link";
+import { useLanguage } from "@/lib/i18n";
 import { EditableText } from "@/components/editing/EditableText";
 import { EditableImage } from "@/components/editing/EditableImage";
 import { blockText, blockImage, type PageBlocks } from "@/lib/data/pageBlocks";
 
-const LOGO_SRC = "/images/artlogo.png";
+const LOGO_SRC = "/images/ChatGPT%20Image%20Sep%2028,%202026,%2010_18_38%20PM.png";
 
 export function Hero({ blocks }: { blocks: PageBlocks }) {
-  const image = blockImage(blocks, "hero_image", { src: LOGO_SRC, alt: "NU-ARTE" });
+  const { t } = useLanguage();
+  const image = blockImage(blocks, "hero_image", { src: LOGO_SRC, alt: "NUA-ARTE" });
 
   return (
     <section className="nu-hero relative w-screen mx-[calc(50%-50vw)] overflow-hidden bg-background text-on-background transition-colors">
@@ -79,7 +83,7 @@ export function Hero({ blocks }: { blocks: PageBlocks }) {
                 href="/artists"
                 className="relative inline-flex items-center gap-2 px-6 py-3 text-[11px] font-label-caps tracking-[0.22em] uppercase bg-primary text-on-primary hover:bg-secondary hover:text-on-secondary transition-colors"
               >
-                Explore artists
+                {t("Explore artists")}
               </Link>
             </div>
           </div>
@@ -129,7 +133,7 @@ export function Hero({ blocks }: { blocks: PageBlocks }) {
                 fit="contain"
                 src={image.src}
                 alt={image.alt}
-                className="relative z-10 w-[68%] h-auto nu-logo-in nu-logo-img"
+                className="relative z-10 w-[62%] h-auto nu-logo-in nu-logo-img"
               />
             </div>
           </div>

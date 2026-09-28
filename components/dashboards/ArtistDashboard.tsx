@@ -86,7 +86,7 @@ export function ArtistDashboard({ userId }: { userId: string }) {
       year: new Date().getFullYear(),
       medium: "",
       dimensions: "",
-      country: "",
+      country: profile?.country ?? "",
       image_url: "",
       status: "draft",
     });
@@ -151,7 +151,7 @@ export function ArtistDashboard({ userId }: { userId: string }) {
       year: editing.year ?? null,
       medium: mediumValue || null,
       dimensions: editing.dimensions ?? null,
-      country: editing.country ?? null,
+      country: profile?.country ?? null,
       image_url: editing.image_url ?? "",
       status: (editing.status as Artwork["status"]) ?? "draft",
     };
@@ -359,21 +359,10 @@ export function ArtistDashboard({ userId }: { userId: string }) {
                     />
                   </div>
                 )}
-                <label className="block">
-                  <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">Country</span>
-                  <select
-                    value={editing.country ?? ""}
-                    onChange={(e) => setEditing({ ...editing, country: e.target.value })}
-                    className="w-full bg-transparent border-b border-primary/30 py-2 text-primary"
-                  >
-                    <option value="">Select a country</option>
-                    {AFRICAN_COUNTRIES.map((country) => (
-                      <option key={country.slug} value={country.name}>
-                        {country.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <div>
+                  <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">Artwork country</span>
+                  <div className="border-b border-primary/30 py-2 text-primary text-sm">{profile?.country || "Set your registered country in your profile first"}</div>
+                </div>
                 <label className="block">
                   <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">Status</span>
                   <select
@@ -382,9 +371,7 @@ export function ArtistDashboard({ userId }: { userId: string }) {
                     className="w-full bg-transparent border-b border-primary/30 py-2 text-primary"
                   >
                     <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                    <option value="sold">Sold</option>
-                    <option value="archived">Archived</option>
+                    <option value="pending_review">Submit for admin review</option>
                   </select>
                 </label>
               </div>
@@ -437,7 +424,7 @@ export function ArtistDashboard({ userId }: { userId: string }) {
                   title="Title, price, and an image are all required"
                   className="bg-primary text-on-primary px-5 py-2 text-xs uppercase tracking-[0.2em] disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  Save
+                  {editing.status === "pending_review" ? "Submit for review" : "Save draft"}
                 </button>
               </div>
             </div>

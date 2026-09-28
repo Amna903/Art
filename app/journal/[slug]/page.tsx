@@ -60,9 +60,9 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const post = await resolvePost(slug);
-  if (!post) return { title: "Journal | NU-ART" };
+  if (!post) return { title: "Journal | NUA-ARTE" };
   return {
-    title: `${post.title} | NU-ART Journal`,
+    title: `${post.title} | NUA-ARTE Journal`,
     description: post.paragraphs[0] ?? "",
   };
 }

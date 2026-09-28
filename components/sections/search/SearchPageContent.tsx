@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { Artist } from "@/lib/data/artists";
 import { AFRICAN_COUNTRIES } from "@/lib/data/africa";
 import type { DirectoryArtwork } from "@/lib/data/directory";
+import { useLanguage } from "@/lib/i18n";
 
 type Props = {
   artists: Artist[];
@@ -14,6 +15,7 @@ type Props = {
 };
 
 function SearchPageInner({ artists, artworks }: Props) {
+  const { t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialQ = searchParams.get("q") ?? "";
@@ -57,7 +59,7 @@ function SearchPageInner({ artists, artworks }: Props) {
   return (
     <main className="max-w-container-max mx-auto px-gutter-page py-16 md:py-24">
       <header className="mb-12">
-        <span className="font-label-caps text-label-caps text-secondary uppercase block mb-3">Search</span>
+        <span className="font-label-caps text-label-caps text-secondary uppercase block mb-3">{t("Search")}</span>
         <div className="relative max-w-2xl">
           <span className="material-symbols-outlined absolute left-0 top-1/2 -translate-y-1/2 text-on-surface-variant">
             search
@@ -67,13 +69,13 @@ function SearchPageInner({ artists, artworks }: Props) {
             type="text"
             value={query}
             onChange={(e) => handleChange(e.target.value)}
-            placeholder="Search artists, countries, artworks…"
+            placeholder={t("Search artists, countries, artworks…")}
             className="w-full bg-transparent border-b border-primary/30 focus:border-secondary outline-none py-4 pl-9 font-display text-2xl md:text-3xl text-primary placeholder:text-on-surface-variant/40 transition-colors"
           />
           {query && (
             <button
               onClick={() => handleChange("")}
-              aria-label="Clear search"
+              aria-label={t("Clear search")}
               className="absolute right-0 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant hover:text-secondary w-11 h-11 flex items-center justify-center"
             >
               close
@@ -82,21 +84,21 @@ function SearchPageInner({ artists, artworks }: Props) {
         </div>
         {needle && (
           <p className="font-label-caps text-[11px] uppercase tracking-widest text-on-surface-variant mt-4">
-            {totalCount} result{totalCount === 1 ? "" : "s"} for &ldquo;{query}&rdquo;
+            {totalCount} {totalCount === 1 ? t("result") : t("results")} {t("for")} &ldquo;{query}&rdquo;
           </p>
         )}
       </header>
 
       {!needle ? (
-        <p className="text-on-surface-variant">Start typing to search across artists, countries, and artworks.</p>
+        <p className="text-on-surface-variant">{t("Start typing to search across artists, countries, and artworks.")}</p>
       ) : totalCount === 0 ? (
-        <p className="text-on-surface-variant">No results for &ldquo;{query}&rdquo;. Try a different term.</p>
+        <p className="text-on-surface-variant">{t("No results for")} &ldquo;{query}&rdquo;. {t("Try a different term.")}</p>
       ) : (
         <div className="space-y-16">
           {artistResults.length > 0 && (
             <section>
               <h2 className="font-headline-sm text-headline-sm mb-6 pb-3 border-b border-outline-variant">
-                Artists
+                {t("Artists")}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {artistResults.map((a) => (
@@ -128,7 +130,7 @@ function SearchPageInner({ artists, artworks }: Props) {
           {countryResults.length > 0 && (
             <section>
               <h2 className="font-headline-sm text-headline-sm mb-6 pb-3 border-b border-outline-variant">
-                Countries
+                {t("Countries")}
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {countryResults.map((c) => (
@@ -148,7 +150,7 @@ function SearchPageInner({ artists, artworks }: Props) {
           {artworkResults.length > 0 && (
             <section>
               <h2 className="font-headline-sm text-headline-sm mb-6 pb-3 border-b border-outline-variant">
-                Artworks
+                {t("Artworks")}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {artworkResults.map((w) => (

@@ -5,9 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { geoConicEqualArea, geoPath } from "d3-geo";
 import africaGeo from "@/lib/data/africa-geo.json";
-import { ISLAND_PINS, getCountryByGeoName, getCountryBySlug } from "@/lib/data/africa";
+import { ISLAND_PINS, getCountryByGeoName, getCountryBySlug, getCountryDisplayName } from "@/lib/data/africa";
 import { buildCountryShards, type CountryInput, type Shard } from "@/lib/data/africa-shards";
 import { useCountrySoundUrls } from "@/lib/data/country-sounds";
+import { useLanguage } from "@/lib/i18n";
 import "@/components/map/clay-atlas.css";
 
 const W = 1000;
@@ -160,6 +161,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
 
   // Active hovered/selected country slug (defaults to Cabo Verde)
   const [activeSlug, setActiveSlug] = useState<string>("cabo-verde");
+  const { t, language } = useLanguage();
   const [soundOn, setSoundOn] = useState(true);
   const audioRef = useRef<{ ctx: AudioContext; master: GainNode } | null>(null);
   const lastHoverRef = useRef<string | null>(null);
@@ -278,7 +280,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
               className="block font-mono text-[9px] tracking-[0.45em] uppercase mt-1 font-semibold"
               style={{ color: "var(--atlas-accent)" }}
             >
-              CURATED AFRICAN ART
+              {t("CURATED AFRICAN ART", "ART AFRICAIN SÉLECTIONNÉ")}
             </span>
           </div>
 
@@ -313,7 +315,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                     fontWeight: item.active ? 600 : 400,
                   }}
                 >
-                  {item.label}
+                  {t(item.label)}
                 </span>
               </a>
             ))}
@@ -330,7 +332,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
             <div className="flex items-center justify-between text-[11px] font-mono tracking-[0.22em] uppercase mb-2" style={{ color: "var(--atlas-accent)" }}>
               <div className="flex items-center gap-2 font-bold">
                 <span className="text-base leading-none">⤤</span>
-                <span>{activeCountry.name}</span>
+                <span>{getCountryDisplayName(activeCountry, language)}</span>
               </div>
               <span className="text-sm">{activeCountry.flag}</span>
             </div>
@@ -343,7 +345,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
               className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-mono tracking-[0.2em] uppercase font-semibold transition-colors hover:underline"
               style={{ color: "var(--atlas-accent)" }}
             >
-              Explore Artists & Works →
+              {t("Explore Artists & Works →", "Explorer Artistes & Œuvres →")}
             </button>
           </div>
         </div>
@@ -577,23 +579,26 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
             {/* Kicker */}
             <div className="mb-2">
               <span className="text-[9px] tracking-[0.38em] uppercase font-mono block font-bold" style={{ color: "var(--atlas-accent)" }}>
-                ONE CONTINENT.
+                {t("ONE CONTINENT.", "UN CONTINENT.")}
               </span>
               <span className="text-[9px] tracking-[0.38em] uppercase font-mono block mt-0.5 font-bold" style={{ color: "var(--atlas-accent)" }}>
-                INFINITE VOICES.
+                {t("INFINITE VOICES.", "DES VOIX INFINIES.")}
               </span>
               <hr className="border-t w-8 mt-2" style={{ borderColor: "var(--atlas-accent)" }} />
             </div>
 
             {/* Title */}
             <h1 className="font-serif text-3xl lg:text-4xl leading-[1.15] font-light mt-3" style={{ color: "var(--atlas-fg)" }}>
-              Explore Africa. <br />
-              <span className="italic font-normal">Discover Art.</span>
+              {t("Explore Africa.")} <br />
+              <span className="italic font-normal">{t("Discover Art.")}</span>
             </h1>
 
             {/* Paragraph */}
             <p className="text-xs leading-relaxed mt-3 max-w-xs font-light" style={{ color: "var(--atlas-fg-muted)" }}>
-              A curated platform dedicated to contemporary African artists. Each country, each culture, each story.
+              {t(
+                "A curated platform dedicated to contemporary African artists. Each country, each culture, each story.",
+                "Une plateforme dédiée aux artistes contemporains africains. Chaque pays, chaque culture, chaque histoire."
+              )}
             </p>
           </div>
 
@@ -654,7 +659,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                         fontWeight: isActive ? 600 : 400,
                       }}
                     >
-                      {country.name}
+                      {getCountryDisplayName(country, language)}
                     </span>
                   </div>
 
@@ -677,7 +682,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
             className="inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.25em] uppercase transition-colors pt-2 font-semibold hover:underline"
             style={{ color: "var(--atlas-accent)" }}
           >
-            VIEW ALL COUNTRIES
+            {t("VIEW ALL COUNTRIES", "VOIR TOUS LES PAYS")}
             <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
           </Link>
         </div>
@@ -699,7 +704,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
           </div>
           <div>
             <div className="font-mono text-[9px] tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
-              ARTISTS REPRESENTED
+              {t("ARTISTS REPRESENTED", "ARTISTES REPRÉSENTÉS")}
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
               {stats.artists.toLocaleString()}+
@@ -717,7 +722,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
           </div>
           <div>
             <div className="font-mono text-[9px] tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
-              ARTWORKS AVAILABLE
+              {t("ARTWORKS AVAILABLE", "ŒUVRES DISPONIBLES")}
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
               {stats.artworks.toLocaleString()}+
@@ -735,7 +740,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
           </div>
           <div>
             <div className="font-mono text-[9px] tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
-              COUNTRIES
+              {t("COUNTRIES", "PAYS")}
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
               54
@@ -753,7 +758,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
           </div>
           <div>
             <div className="font-mono text-[9px] tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
-              COLLECTORS WORLDWIDE
+              {t("COLLECTORS WORLDWIDE", "COLLECTIONNEURS DANS LE MONDE")}
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
               1,000+
@@ -770,7 +775,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
             <span className="material-symbols-outlined text-[18px]">arrow_downward</span>
           </div>
           <div className="font-mono text-[9px] tracking-[0.25em] uppercase text-left leading-tight font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
-            SCROLL TO <br /> EXPLORE
+            {t("SCROLL TO EXPLORE", "DÉFILEZ POUR EXPLORER")}
           </div>
         </div>
       </div>

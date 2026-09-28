@@ -88,14 +88,14 @@ export async function POST(req: Request) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "NU-ART Concierge <onboarding@resend.dev>",
+          from: "NUA-ARTE Concierge <onboarding@resend.dev>",
           to: [updated.email],
           reply_to: adminEmail,
           subject: `Your quote for "${updated.artwork_title}" is ready`,
           html: `
             <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e5e5; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
               <div style="background-color: #1a1615; color: #f4efe6; padding: 24px 32px; text-align: center;">
-                <h1 style="margin: 0; font-size: 20px; font-weight: 300; letter-spacing: 2px; text-transform: uppercase;">NU-ART COLLECTIVE</h1>
+                <h1 style="margin: 0; font-size: 20px; font-weight: 300; letter-spacing: 2px; text-transform: uppercase;">NUA-ARTE COLLECTIVE</h1>
                 <p style="margin: 4px 0 0; font-size: 11px; opacity: 0.7; letter-spacing: 1.5px; text-transform: uppercase;">Your Private Quote</p>
               </div>
               <div style="padding: 32px;">

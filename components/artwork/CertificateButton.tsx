@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLanguage } from "@/lib/i18n";
 import { createPortal } from "react-dom";
 
 type Props = {
@@ -22,6 +23,7 @@ function certificateNumber(seed: string): string {
 }
 
 export function CertificateButton({ artworkTitle, artistName, medium, year }: Props) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
 
   return (
@@ -34,7 +36,7 @@ export function CertificateButton({ artworkTitle, artistName, medium, year }: Pr
         <span className="material-symbols-outlined text-primary group-hover:text-secondary transition-colors">
           description
         </span>
-        <span className="font-label-caps text-label-caps uppercase">Certificate</span>
+        <span className="font-label-caps text-label-caps uppercase">{t("Certificate")}</span>
       </button>
       {open && (
         <CertificateModal
@@ -56,6 +58,7 @@ function CertificateModal({
   year,
   onClose,
 }: Props & { onClose: () => void }) {
+  const { t } = useLanguage();
   const number = certificateNumber(`${artworkTitle}-${artistName ?? ""}`);
   const issued = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
@@ -77,7 +80,7 @@ function CertificateModal({
       >
         <button
           onClick={onClose}
-          aria-label="Close modal"
+          aria-label={t("Close modal")}
           className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-[#141110]/5 hover:bg-[#141110]/10 flex items-center justify-center transition-all print:hidden"
         >
           <span className="material-symbols-outlined text-lg">close</span>
@@ -85,23 +88,22 @@ function CertificateModal({
 
         <div className="text-center mb-8">
           <span className="material-symbols-outlined text-3xl text-[#b85d38]">verified_user</span>
-          <h3 className="font-serif text-2xl mt-2 mb-1 tracking-wide">Certificate of Authenticity</h3>
-          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#665e57]">NU-ART Collective</p>
+          <h3 className="font-serif text-2xl mt-2 mb-1 tracking-wide">{t("Certificate of Authenticity")}</h3>
+          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#665e57]">NUA-ARTE Collective</p>
         </div>
 
         <div className="border-t border-b border-[#38302c]/30 py-6 space-y-4 text-sm">
-          <Row label="Title" value={artworkTitle} emphasis />
-          {artistName && <Row label="Artist" value={artistName} />}
-          {medium && <Row label="Medium" value={medium} />}
-          {year && <Row label="Year" value={year} />}
-          <Row label="Edition" value="Unique piece (1 of 1)" />
-          <Row label="Certificate No." value={number} />
-          <Row label="Issued" value={issued} />
+          <Row label={t("Title", "Titre")} value={artworkTitle} emphasis />
+          {artistName && <Row label={t("Artist")} value={artistName} />}
+          {medium && <Row label={t("Medium")} value={medium} />}
+          {year && <Row label={t("Year")} value={year} />}
+          <Row label={t("Edition")} value={t("Unique piece (1 of 1)")} />
+          <Row label={t("Certificate No.")} value={number} />
+          <Row label={t("Issued", "Émis le")} value={issued} />
         </div>
 
         <p className="text-xs text-[#665e57] leading-relaxed mt-6 text-center">
-          This certifies that the above work has been authenticated by NU-ART&rsquo;s curatorial team and is sold
-          with full provenance documentation.
+          {t("This certifies that the above work has been authenticated by NUA-ARTE's curatorial team and is sold with full provenance documentation.")}
         </p>
 
         <button
@@ -109,7 +111,7 @@ function CertificateModal({
           className="w-full mt-8 bg-[#141110] text-[#f4efe6] font-mono text-xs uppercase tracking-widest py-3.5 px-6 font-semibold hover:bg-[#2a2421] transition-colors flex items-center justify-center gap-2 print:hidden"
         >
           <span className="material-symbols-outlined text-sm">print</span>
-          Print / Save as PDF
+          {t("Print / Save as PDF")}
         </button>
       </div>
     </div>

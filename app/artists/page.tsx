@@ -6,7 +6,7 @@ import { getArtists } from "@/lib/sanity/queries";
 import { getRealArtists } from "@/lib/data/supabase-artists-cached";
 
 export const metadata: Metadata = {
-  title: "Artists | NU-ART",
+  title: "Artists | NUA-ARTE",
   description: `${ARTIST_COUNT} contemporary African artists across ${COUNTRY_COUNT} nations.`,
 };
 

@@ -7,6 +7,7 @@ import type { Artwork } from "@/components/three/VirtualMuseum";
 import { useTheme } from "@/lib/theme";
 import { getPublishedArtworks } from "@/lib/data/supabase-artists";
 import { layoutArtworks } from "@/lib/data/museum-layout";
+import { useLanguage } from "@/lib/i18n";
 
 const VirtualMuseum = lazy(() => import("@/components/three/VirtualMuseum"));
 
@@ -74,6 +75,7 @@ const FALLBACK_ARTWORKS: Artwork[] = [
 ];
 
 function VirtualGalleryContent() {
+  const { t } = useLanguage();
   const searchParams = useSearchParams();
   const country = searchParams.get("country") ?? undefined;
   // TODO(backend): when a `country` search param is present, fetch the
@@ -146,16 +148,16 @@ function VirtualGalleryContent() {
         </div>
         <div className="relative z-10 text-center px-gutter-page max-w-4xl">
           <h2 className="font-label-caps text-label-caps text-background/80 mb-4 tracking-[0.3em]">
-            {countryLabel ? `VIRTUAL EXHIBITION — ${countryLabel.toUpperCase()}` : "VIRTUAL EXHIBITION"}
+            {countryLabel ? `${t("VIRTUAL EXHIBITION")} — ${countryLabel.toUpperCase()}` : t("VIRTUAL EXHIBITION")}
           </h2>
           <h1 className="font-display-lg text-display-lg-mobile md:text-display-lg text-beige mb-6 uppercase tracking-tighter">
-            THE VIRTUAL <br />
-            MUSEUM
+            {t("THE VIRTUAL")} <br />
+            {t("MUSEUM")}
           </h1>
           <p className="font-body-lg text-body-lg text-background/90 mb-10 max-w-2xl mx-auto leading-relaxed">
             {countryLabel
-              ? `A curated walk through contemporary works from ${countryLabel} — a country-specific selection served by the NU-ART archive.`
-              : "A living archive of contemporary African creativity. Move through four thematic halls — from ancestral roots to digital futures — and experience the breadth of the continent's visual imagination."}
+              ? `A curated walk through contemporary works from ${countryLabel} — a country-specific selection served by the NUA-ARTE archive.`
+              : t("A living archive of contemporary African creativity. Move through four thematic halls — from ancestral roots to digital futures — and experience the breadth of the continent's visual imagination.")}
           </p>
 
           <div className="flex flex-wrap justify-center items-center gap-6">
@@ -163,7 +165,7 @@ function VirtualGalleryContent() {
               href="#explorer-root"
               className="bg-beige text-primary px-10 py-4 font-navigation text-navigation uppercase tracking-[0.1em] hover:bg-secondary hover:text-beige transition-all duration-300"
             >
-              Enter Virtual Museum
+              {t("Enter Virtual Museum")}
             </a>
           </div>
         </div>
@@ -174,10 +176,10 @@ function VirtualGalleryContent() {
           <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
             <div>
               <h4 className="font-label-caps text-label-caps text-secondary mb-2">
-                IMMERSIVE EXPERIENCE
+                {t("IMMERSIVE EXPERIENCE")}
               </h4>
               <h2 className="font-headline-sm text-headline-sm uppercase tracking-tight">
-                Virtual Museum Explorer
+                {t("Virtual Museum Explorer")}
               </h2>
             </div>
           </div>
@@ -189,7 +191,7 @@ function VirtualGalleryContent() {
             <Suspense
               fallback={
                 <div className="absolute inset-0 flex items-center justify-center text-beige/60 font-label-caps text-[10px]">
-                  LOADING MUSEUM…
+                  {t("LOADING MUSEUM…")}
                 </div>
               }
             >
@@ -212,10 +214,10 @@ function VirtualGalleryContent() {
                   style={{ background: panelBg, border: panelBorder, borderLeft: `2px solid ${accent}`, color: textPrimary }}
                 >
                   <span className="font-label-caps text-[10px] block tracking-[0.2em]" style={{ color: textSecondary }}>
-                    CURRENT LOCATION
+                    {t("CURRENT LOCATION")}
                   </span>
                   <span className="font-headline-sm text-sm md:text-base uppercase tracking-wide">
-                    {activeZoneData.label}
+                    {t(activeZoneData.label)}
                   </span>
                 </div>
                 <div className="flex gap-2 items-stretch">
@@ -224,7 +226,7 @@ function VirtualGalleryContent() {
                     style={{ background: panelBg, border: panelBorder, borderLeft: `2px solid ${accent}`, color: textPrimary }}
                   >
                     <span className="font-label-caps text-[9px] block tracking-[0.2em]" style={{ color: textSecondary }}>
-                      ARTWORKS LOADED
+                      {t("ARTWORKS LOADED")}
                     </span>
                     <span className="font-label-caps text-[11px]">
                       {progress.loaded} / {progress.total}
@@ -235,7 +237,7 @@ function VirtualGalleryContent() {
                   </div>
                   <button
                     onClick={handleFullscreen}
-                    aria-label="Toggle fullscreen"
+                    aria-label={t("Toggle fullscreen")}
                     className="w-10 h-10 backdrop-blur-md flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2"
                     style={{ background: panelBg, border: panelBorder, color: textPrimary }}
                   >
@@ -251,7 +253,7 @@ function VirtualGalleryContent() {
                   style={{ background: panelBgSoft, border: panelBorder, color: textSecondary, borderLeft: `2px solid ${accent}` }}
                   aria-expanded={!zonesCollapsed}
                 >
-                  <span>ZONES</span>
+                  <span>{t("ZONES")}</span>
                   <span className="material-symbols-outlined text-[14px]">
                     {zonesCollapsed ? "expand_more" : "expand_less"}
                   </span>
@@ -270,7 +272,7 @@ function VirtualGalleryContent() {
                         borderLeft: `2px solid ${active ? "#F5F2EE" : "rgba(159,13,18,0.6)"}`,
                       }}
                     >
-                      <span>{z.label}</span>
+                      <span>{t(z.label)}</span>
                       {active && <span className="material-symbols-outlined text-xs">east</span>}
                     </button>
                   );
@@ -316,7 +318,7 @@ function VirtualGalleryContent() {
                       className="absolute top-1.5 left-1.5 font-label-caps text-[8px] tracking-[0.2em]"
                       style={{ color: textSecondary }}
                     >
-                      MAP · VIEW
+                      {t("MAP · VIEW")}
                     </div>
                     {ZONES.map((z) => {
                       const active = z.id === activeZone;
@@ -413,11 +415,10 @@ function VirtualGalleryContent() {
       <section className="py-section-gap px-gutter-page bg-background text-center">
         <div className="max-w-2xl mx-auto">
           <h2 className="font-headline-sm text-headline-sm mb-6 uppercase tracking-widest">
-            Connect with the Curators
+            {t("Connect with the Curators")}
           </h2>
           <p className="font-body-md text-on-surface-variant mb-12">
-            Our curators are available for virtual consultations regarding any of the featured
-            works in the Virtual Museum collection.
+            {t("Our curators are available for virtual consultations regarding any of the featured works in the Virtual Museum collection.")}
           </p>
         </div>
       </section>

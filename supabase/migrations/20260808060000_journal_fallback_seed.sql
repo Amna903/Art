@@ -29,7 +29,7 @@ VALUES
   ),
   (
     'inside-the-studio-24-hours',
-    'Inside the Studio: 24 Hours with the NU-ART Collective',
+    'Inside the Studio: 24 Hours with the NUA-ARTE Collective',
     'Exhibitions',
     'A photographic essay documenting the creative chaos and quiet moments of art creation.',
     'A photographic essay documenting the creative chaos and quiet moments of art creation.',

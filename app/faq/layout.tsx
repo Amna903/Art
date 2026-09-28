@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "FAQ | NU-ART",
-  description: "Frequently asked questions about NU-ART Collective.",
+  title: "FAQ | NUA-ARTE",
+  description: "Frequently asked questions about NUA-ARTE Collective.",
 };
 
 export default function FaqLayout({ children }: { children: React.ReactNode }) {

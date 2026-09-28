@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useLanguage } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
 import { isArtworkSaved, saveArtwork, unsaveArtwork } from "@/lib/data/saved";
 
@@ -16,6 +17,7 @@ type Props = {
 
 export function SaveButton({ artworkSlug, artworkTitle, artistName, artworkImage, className }: Props) {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
   const [fetchedSaved, setFetchedSaved] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -43,7 +45,7 @@ export function SaveButton({ artworkSlug, artworkTitle, artistName, artworkImage
       : unsaveArtwork(user?.id, artworkSlug));
 
     setBusy(false);
-    toast(next ? "Saved to your collection" : "Removed from your collection");
+    toast(next ? t("Saved to your collection") : t("Removed from your collection"));
   };
 
   return (
@@ -52,7 +54,7 @@ export function SaveButton({ artworkSlug, artworkTitle, artistName, artworkImage
       onClick={toggle}
       disabled={busy}
       aria-pressed={saved}
-      aria-label={saved ? "Remove from saved works" : "Save this artwork"}
+      aria-label={saved ? t("Remove from saved works") : t("Save this artwork")}
       className={
         className ??
         "absolute top-6 right-6 z-[1] p-3 bg-beige/90 backdrop-blur rounded-full hover:bg-secondary group/heart transition-colors disabled:opacity-60"

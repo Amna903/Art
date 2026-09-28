@@ -138,8 +138,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const resolved = await resolveArtwork(slug);
   return {
-    title: `${resolved.title} | NU-ART`,
-    description: "NU-ART — contemporary African art movement.",
+    title: `${resolved.title} | NUA-ARTE`,
+    description: "NUA-ARTE — contemporary African art movement.",
   };
 }
 

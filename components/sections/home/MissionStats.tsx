@@ -1,3 +1,7 @@
+"use client";
+
+import { useLanguage } from "@/lib/i18n";
+
 const STATS = [
   { value: "480+", label: "Artists Discovered" },
   { value: "1.2M", label: "Artist Revenue (USD)" },
@@ -6,12 +10,14 @@ const STATS = [
 ];
 
 export function MissionStats() {
+  const { t } = useLanguage();
+
   return (
     <section className="py-section-gap px-gutter-page">
       <div className="max-w-container-max mx-auto grid grid-cols-1 md:grid-cols-3 gap-24 items-center">
         <div className="col-span-1">
-          <span className="font-label-caps text-secondary block mb-4">— OUR MISSION IN DATA</span>
-          <h2 className="font-headline-md text-headline-md leading-tight">Quantifying Global Visibility</h2>
+          <span className="font-label-caps text-secondary block mb-4">— {t("OUR MISSION IN DATA", "NOTRE MISSION EN CHIFFRES")}</span>
+          <h2 className="font-headline-md text-headline-md leading-tight">{t("Quantifying Global Visibility", "Mesurer la Visibilité Mondiale")}</h2>
         </div>
         <div className="col-span-2 grid grid-cols-2 gap-8 md:gap-12">
           {STATS.map((stat) => (
@@ -22,7 +28,7 @@ export function MissionStats() {
               >
                 {stat.value}
               </span>
-              <p className="font-navigation text-navigation uppercase text-on-surface-variant">{stat.label}</p>
+              <p className="font-navigation text-navigation uppercase text-on-surface-variant">{t(stat.label)}</p>
             </div>
           ))}
         </div>

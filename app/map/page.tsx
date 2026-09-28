@@ -4,7 +4,7 @@ import { ClayAtlasMap } from "@/components/map/ClayAtlasMap";
 import { COUNTRY_COUNT } from "@/lib/data/artists";
 
 export const metadata: Metadata = {
-  title: "Interactive Map | NU-ART",
+  title: "Interactive Map | NUA-ARTE",
   description: "Explore contemporary African art country by country on an interactive map of the continent.",
 };
 

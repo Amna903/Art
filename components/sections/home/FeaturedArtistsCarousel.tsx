@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { useLanguage } from "@/lib/i18n";
 
 export type FeaturedCard = {
   slug: string;
@@ -19,6 +20,7 @@ export type FeaturedCard = {
  * browser's own momentum scrolling handles them).
  */
 export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
+  const { t } = useLanguage();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{ startX: number; startScrollLeft: number } | null>(null);
   const [atStart, setAtStart] = useState(true);
@@ -73,15 +75,15 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
     <>
       <div className="flex justify-between items-end mb-16">
         <div>
-          <span className="font-label-caps text-label-caps text-secondary block mb-2">AFRICAN ARTISTS</span>
-          <h2 className="font-headline-md text-headline-md">African Arts</h2>
+          <span className="font-label-caps text-label-caps text-secondary block mb-2">{t("AFRICAN ARTISTS", "ARTISTES AFRICAINS")}</span>
+          <h2 className="font-headline-md text-headline-md">{t("African Arts", "Arts Africains")}</h2>
         </div>
         <div className="flex space-x-4">
           <button
             type="button"
             onClick={() => scrollByCard(-1)}
             disabled={atStart}
-            aria-label="Scroll left"
+            aria-label={t("Scroll left", "Faire défiler à gauche")}
             className="w-12 h-12 border border-primary/20 flex items-center justify-center hover:bg-primary hover:text-on-primary transition-all disabled:opacity-30 disabled:pointer-events-none"
           >
             <span className="material-symbols-outlined">west</span>
@@ -90,7 +92,7 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
             type="button"
             onClick={() => scrollByCard(1)}
             disabled={atEnd}
-            aria-label="Scroll right"
+            aria-label={t("Scroll right", "Faire défiler à droite")}
             className="w-12 h-12 border border-primary/20 flex items-center justify-center hover:bg-primary hover:text-on-primary transition-all disabled:opacity-30 disabled:pointer-events-none"
           >
             <span className="material-symbols-outlined">east</span>
@@ -119,13 +121,13 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
               />
               {artist.badge && (
                 <div className="absolute bottom-4 left-4 bg-primary text-on-primary px-3 py-1 font-label-caps text-[10px]">
-                  {artist.badge}
+                  {t(artist.badge)}
                 </div>
               )}
             </div>
             <h3 className="font-headline-sm text-headline-sm mb-1">{artist.name}</h3>
             <p className="font-body-md text-on-surface-variant uppercase tracking-widest text-xs">
-              {artist.country} • African {artist.discipline}
+              {t(artist.country)} • {t(artist.discipline)}
             </p>
           </div>
         ))}

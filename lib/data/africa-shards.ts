@@ -1,4 +1,4 @@
-// 3D Sculptural Clay/Wood Atlas geometry & palette system for NU-ART.
+// 3D Sculptural Clay/Wood Atlas geometry & palette system for NUA-ARTE.
 // Direct pixel-accurate color sampling from the reference image:
 // Soft dusty terracotta, honey sand tan, golden ochre, muted sage olive,
 // dusty cocoa mauve, caramel butterscotch, and warm taupe stone.

@@ -7,6 +7,7 @@ import { PriceUponRequest } from "@/components/enquiry/PriceUponRequest";
 import { COLLECTIONS, type Collection } from "@/lib/data/collections";
 import type { SupabaseCollection } from "@/lib/data/supabase-collections";
 import { mergeSlots } from "@/lib/utils/mergeSlots";
+import { useLanguage } from "@/lib/i18n";
 
 type ViewMode = "grid" | "list";
 type MenuKey = "country" | "medium" | null;
@@ -25,6 +26,7 @@ function fromSupabase(c: SupabaseCollection): Collection {
 }
 
 export function CollectionsView({ initialItems = [] }: { initialItems?: SupabaseCollection[] }) {
+  const { t } = useLanguage();
   // Oldest real collection takes slot 0, so a slot never jumps once filled —
   // the rest stay static until replaced by admin-created collections.
   const allItems = useMemo(
@@ -77,7 +79,7 @@ export function CollectionsView({ initialItems = [] }: { initialItems?: Supabase
         <div className="flex flex-wrap items-center justify-between gap-6">
           <div ref={filterRef} className="flex items-center gap-12">
             <FilterButton
-              label="Country"
+              label={t("Country")}
               value={country}
               open={openMenu === "country"}
               onToggle={() => setOpenMenu(openMenu === "country" ? null : "country")}
@@ -88,7 +90,7 @@ export function CollectionsView({ initialItems = [] }: { initialItems?: Supabase
               }}
             />
             <FilterButton
-              label="Medium"
+              label={t("Medium")}
               value={medium}
               open={openMenu === "medium"}
               onToggle={() => setOpenMenu(openMenu === "medium" ? null : "medium")}
@@ -103,21 +105,21 @@ export function CollectionsView({ initialItems = [] }: { initialItems?: Supabase
                 onClick={resetAll}
                 className="font-label-caps text-label-caps uppercase tracking-widest text-secondary hover:opacity-70 transition-opacity"
               >
-                Reset
+                {t("Reset")}
               </button>
             )}
           </div>
           <div className="flex items-center gap-4">
-            <span className="font-label-caps text-label-caps uppercase opacity-40">View As:</span>
+            <span className="font-label-caps text-label-caps uppercase opacity-40">{t("View As:")}</span>
             <button
-              aria-label="Grid view"
+              aria-label={t("Grid view")}
               onClick={() => setView("grid")}
               className={`material-symbols-outlined w-11 h-11 flex items-center justify-center transition-opacity ${view === "grid" ? "text-primary opacity-100" : "text-on-surface-variant opacity-40 hover:opacity-100"}`}
             >
               grid_view
             </button>
             <button
-              aria-label="List view"
+              aria-label={t("List view")}
               onClick={() => setView("list")}
               className={`material-symbols-outlined w-11 h-11 flex items-center justify-center transition-opacity ${view === "list" ? "text-primary opacity-100" : "text-on-surface-variant opacity-40 hover:opacity-100"}`}
             >
@@ -130,13 +132,13 @@ export function CollectionsView({ initialItems = [] }: { initialItems?: Supabase
       {filtered.length === 0 ? (
         <section className="py-24 text-center">
           <p className="font-body-lg text-on-surface-variant mb-6">
-            No collections match these filters.
+            {t("No collections match your filters.")}
           </p>
           <button
             onClick={resetAll}
             className="font-label-caps text-label-caps uppercase tracking-widest text-secondary hover:opacity-70"
           >
-            Reset filters
+            {t("Reset filters")}
           </button>
         </section>
       ) : view === "list" ? (
@@ -167,11 +169,11 @@ export function CollectionsView({ initialItems = [] }: { initialItems?: Supabase
                   {c.description}
                 </p>
                 <div className="flex flex-wrap gap-8 pt-4 border-t border-primary/10 mt-2">
-                  {c.country && <Meta label="Country" value={c.country} />}
-                  {c.medium && <Meta label="Medium" value={c.medium} />}
-                  <Meta label="Artists" value={c.artists} />
+                  {c.country && <Meta label={t("Country")} value={c.country} />}
+                  {c.medium && <Meta label={t("Medium")} value={c.medium} />}
+                  <Meta label={t("Artists")} value={c.artists} />
                   <div>
-                    <p className="font-label-caps text-[10px] uppercase text-on-surface-variant/60 mb-1">Pricing</p>
+                    <p className="font-label-caps text-[10px] uppercase text-on-surface-variant/60 mb-1">{t("Price")}</p>
                     <PriceUponRequest className="text-sm" />
                   </div>
                 </div>
@@ -236,23 +238,22 @@ export function CollectionsView({ initialItems = [] }: { initialItems?: Supabase
         <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div>
             <h2 className="font-headline-md text-headline-md mb-6">
-              Never Miss a <br />
-              New Collection
+              {t("Never Miss a New Collection")}
             </h2>
             <p className="font-body-lg text-on-surface-variant mb-8 max-w-sm">
-              Be the first to receive our curated catalogues and invitations to private artist viewings.
+              {t("Be the first to receive our curated catalogues and invitations to private artist viewings.")}
             </p>
             <form className="flex flex-col gap-6 max-w-md" onSubmit={(e) => e.preventDefault()}>
               <div className="border-b border-primary py-2 relative group">
                 <input
                   className="bg-transparent border-none w-full focus:ring-0 font-label-caps placeholder:text-primary/30 text-primary"
-                  placeholder="YOUR EMAIL ADDRESS"
+                  placeholder={t("EMAIL ADDRESS")}
                   type="email"
                 />
                 <div className="absolute bottom-0 left-0 h-[2px] bg-secondary w-0 group-focus-within:w-full transition-all duration-500"></div>
               </div>
               <button className="text-left font-label-caps text-label-caps uppercase tracking-widest flex items-center gap-4 group">
-                Subscribe{" "}
+                {t("Subscribe")}{" "}
                 <span className="w-12 h-[1px] bg-secondary group-hover:w-24 transition-all duration-300"></span>
               </button>
             </form>
@@ -262,7 +263,7 @@ export function CollectionsView({ initialItems = [] }: { initialItems?: Supabase
               fill
               sizes="50vw"
               className="object-cover opacity-80"
-              alt="Contemporary African ceramic vessel curated for NU-ART."
+              alt="Contemporary African ceramic vessel curated for NUA-ARTE."
               src="https://nu-artcollective.lovable.app/__l5e/assets-v1/8fb36909-f581-4701-9e44-3a179fcb76d5/afr-ceramic.jpg"
             />
           </div>

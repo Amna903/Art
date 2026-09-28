@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Country Spotlight | NU-ART",
-  description: "NU-ART — contemporary African art movement.",
+  title: "Country Spotlight | NUA-ARTE",
+  description: "NUA-ARTE — contemporary African art movement.",
 };
 
 type Props = { params: Promise<{ country: string }> };
@@ -263,7 +263,7 @@ export default async function Page({ params }: Props) {
       <div className="max-w-2xl mx-auto">
       <span className="material-symbols-outlined text-secondary text-5xl mb-8" data-icon="auto_awesome">auto_awesome</span>
       <h2 className="font-headline-md text-headline-md mb-6">Never miss a masterpiece from the continent.</h2>
-      <p className="font-body-lg text-body-lg text-on-surface-variant mb-12">Join the NU-ART Circle to receive exclusive first-looks at new Nigerian drops and invitations to private artist talks.</p>
+      <p className="font-body-lg text-body-lg text-on-surface-variant mb-12">Join the NUA-ARTE Circle to receive exclusive first-looks at new Nigerian drops and invitations to private artist talks.</p>
       <div className="flex flex-col md:flex-row gap-4 justify-center items-stretch max-w-lg mx-auto">
       <input className="flex-grow border-b border-primary py-4 px-2 font-body-md focus:outline-none focus:border-secondary bg-transparent" placeholder="Your Email Address" type="email" />
       <button className="bg-primary text-on-primary px-8 py-4 font-navigation text-navigation uppercase tracking-widest hover:bg-secondary transition-all">Join The Circle</button>

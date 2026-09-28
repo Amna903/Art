@@ -20,6 +20,8 @@ type Enquiry = {
   id: string;
   artwork_title: string;
   status: string;
+  quote_token: string | null;
+  quoted_price: number | null;
   created_at: string;
 };
 
@@ -41,7 +43,7 @@ export function ClientDashboard({ userId }: { userId: string }) {
         .order("created_at", { ascending: false }),
       supabase
         .from("enquiries")
-        .select("id, artwork_title, status, created_at")
+        .select("id, artwork_title, status, quote_token, quoted_price, created_at")
         .eq("user_id", userId)
         .order("created_at", { ascending: false }),
     ]);
@@ -267,7 +269,11 @@ export function ClientDashboard({ userId }: { userId: string }) {
                     <td className="py-3 text-primary">{enquiry.artwork_title}</td>
                     <td className="py-3">{new Date(enquiry.created_at).toLocaleDateString()}</td>
                     <td className="py-3 text-right uppercase tracking-widest text-xs text-secondary">
-                      {enquiry.status}
+                      {enquiry.status === "quoted" && enquiry.quote_token ? (
+                        <Link href={`/quote/${enquiry.quote_token}`} className="underline underline-offset-4">
+                          View quote · ${Number(enquiry.quoted_price).toLocaleString()}
+                        </Link>
+                      ) : enquiry.status}
                     </td>
                   </tr>
                 ))}

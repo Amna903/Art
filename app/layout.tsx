@@ -6,9 +6,9 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { themeInitScript } from "@/lib/theme";
 
 export const metadata: Metadata = {
-  title: "NU-ART | Contemporary African Art Movement",
+  title: "NUA-ARTE | Contemporary African Art Movement",
   description:
-    "NU-ART — a curated platform dedicated to contemporary African artists. Each country, each culture, each story — collected with intent.",
+    "NUA-ARTE — a curated platform dedicated to contemporary African artists. Each country, each culture, each story — collected with intent.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

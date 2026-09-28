@@ -7,8 +7,8 @@ import { EditableImage } from "@/components/editing/EditableImage";
 import { ExhibitionsGrid } from "@/components/editing/ExhibitionsGrid";
 
 export const metadata: Metadata = {
-  title: "Virtual & Global Exhibitions | NU-ART",
-  description: "NU-ART — contemporary African art movement.",
+  title: "Virtual & Global Exhibitions | NUA-ARTE",
+  description: "NUA-ARTE — contemporary African art movement.",
 };
 
 // Matches the 60s window the underlying Supabase/Sanity reads are cached at.

@@ -609,7 +609,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "artist" | "client"
-      artwork_status: "draft" | "published" | "sold" | "archived"
+      artwork_status: "draft" | "pending_review" | "published" | "sold" | "archived"
       enquiry_status: "new" | "contacted" | "quoted" | "closed"
       exhibition_status: "upcoming" | "current" | "past"
       order_status: "pending" | "paid" | "shipped" | "completed" | "cancelled"
@@ -741,7 +741,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "artist", "client"],
-      artwork_status: ["draft", "published", "sold", "archived"],
+      artwork_status: ["draft", "pending_review", "published", "sold", "archived"],
       enquiry_status: ["new", "contacted", "quoted", "closed"],
       order_status: ["pending", "paid", "shipped", "completed", "cancelled"],
     },

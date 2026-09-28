@@ -9,8 +9,8 @@ import { ShareLinks } from "@/components/journal/ShareLinks";
 import { JournalArticle } from "@/components/journal/JournalArticle";
 
 export const metadata: Metadata = {
-  title: "Journal | NU-ART",
-  description: "NU-ART — contemporary African art movement.",
+  title: "Journal | NUA-ARTE",
+  description: "NUA-ARTE — contemporary African art movement.",
 };
 
 // Matches the 60s window the underlying Supabase/Sanity reads are cached at.
@@ -71,7 +71,7 @@ export default async function JournalPage() {
             </div>
             <div>
               <h4 className="font-label-caps text-label-caps uppercase text-secondary mb-4">Share</h4>
-              <ShareLinks title="NU-ART Journal" />
+              <ShareLinks title="NUA-ARTE Journal" />
             </div>
           </div>
         </aside>

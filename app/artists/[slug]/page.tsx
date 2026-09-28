@@ -102,7 +102,7 @@ async function resolveArtist(slug: string): Promise<ResolvedArtist | null> {
         countryCode: staticArtist.countryCode,
         city: staticArtist.city,
         technique: staticArtist.technique,
-        bio: `${staticArtist.name} is part of the NU-ART fixture directory.`,
+        bio: `${staticArtist.name} is part of the NUA-ARTE fixture directory.`,
         featuredWork: staticArtist.featuredWork,
         imageUrl: staticArtist.image,
         imageAlt: `Portrait of ${staticArtist.name}`,
@@ -121,9 +121,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const resolved = await resolveArtist(slug);
   return {
-    title: `Artist Profile — ${resolved?.artist.name ?? slug} | NU-ART`,
+    title: `Artist Profile — ${resolved?.artist.name ?? slug} | NUA-ARTE`,
     description:
-      "NU-ART — contemporary African art movement. Featured artist profile from the continent's new wave.",
+      "NUA-ARTE — contemporary African art movement. Featured artist profile from the continent's new wave.",
   };
 }
 
@@ -179,7 +179,7 @@ export default async function ArtistProfilePage({ params }: Props) {
                 <div className="bg-tertiary text-on-tertiary text-xs p-3 rounded-lg shadow-2xl w-48">
                   <p className="font-semibold mb-1">Discovered June 2026</p>
                   <p className="opacity-80">
-                    This artist has recently entered the NU-ART curated network after a rigorous review in Dakar.
+                    This artist has recently entered the NUA-ARTE curated network after a rigorous review in Dakar.
                   </p>
                   <div className="absolute top-full left-6 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-tertiary" />
                 </div>

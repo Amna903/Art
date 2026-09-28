@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
+import { QuoteCheckoutButton } from "@/components/enquiry/QuoteCheckoutButton";
 
 export const metadata: Metadata = {
-  title: "Your Quote | NU-ART",
-  description: "NU-ART — contemporary African art movement.",
+  title: "Your Quote | NUA-ARTE",
+  description: "NUA-ARTE — contemporary African art movement.",
 };
 
 type Props = { params: Promise<{ token: string }> };
@@ -75,9 +76,10 @@ export default async function QuotePage({ params }: Props) {
           </div>
 
           <p className="text-on-surface-variant leading-relaxed mb-2">
-            Hi {quote.name}, one of our curators has prepared this quote for {quote.artwork_title}. Reply to the
-            email this link came from, or contact our curator office, to arrange payment and shipping.
+            Hi {quote.name}, one of our curators has prepared this quote for {quote.artwork_title}. Sign in to the
+            account used for this request to complete your secure purchase.
           </p>
+          <QuoteCheckoutButton quoteToken={token} />
         </div>
       </div>
     </main>

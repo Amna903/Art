@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
+import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: Request) {
   try {
@@ -16,9 +17,11 @@ export async function POST(req: Request) {
     // 1. Save to Supabase DB if configured
     let dbError = null;
     if (isSupabaseConfigured()) {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const token = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+      const client = token
+        ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, { global: { headers: { Authorization: `Bearer ${token}` } } })
+        : supabase;
+      const { data: { user } } = token ? await client.auth.getUser(token) : { data: { user: null } };
 
       const combinedMessage = [
         phone ? `Phone: ${phone}` : null,
@@ -27,7 +30,7 @@ export async function POST(req: Request) {
         .filter(Boolean)
         .join("\n\n") || null;
 
-      const { error } = await supabase.from("enquiries").insert({
+      const { error } = await client.from("enquiries").insert({
         artwork_slug: artworkSlug,
         artwork_title: artworkTitle,
         artist_name: artistName ?? null,
@@ -59,14 +62,14 @@ export async function POST(req: Request) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: "NU-ART Concierge <onboarding@resend.dev>",
+            from: "NUA-ARTE Concierge <onboarding@resend.dev>",
             to: [adminEmail],
             reply_to: email,
             subject: `🎨 Price Inquiry: "${artworkTitle}" — ${name}`,
             html: `
               <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e5e5; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
                 <div style="background-color: #1a1615; color: #f4efe6; padding: 24px 32px; text-align: center;">
-                  <h1 style="margin: 0; font-size: 20px; font-weight: 300; letter-spacing: 2px; text-transform: uppercase;">NU-ART COLLECTIVE</h1>
+                  <h1 style="margin: 0; font-size: 20px; font-weight: 300; letter-spacing: 2px; text-transform: uppercase;">NUA-ARTE COLLECTIVE</h1>
                   <p style="margin: 4px 0 0; font-size: 11px; opacity: 0.7; letter-spacing: 1.5px; text-transform: uppercase;">Private Curatorial Inquiry</p>
                 </div>
 
@@ -111,7 +114,7 @@ export async function POST(req: Request) {
                 </div>
 
                 <div style="background-color: #fafafa; border-top: 1px solid #eee; padding: 16px 32px; text-align: center; font-size: 11px; color: #999;">
-                  Sent from NU-ART Concierge • Target Email: <strong>${adminEmail}</strong>
+                  Sent from NUA-ARTE Concierge • Target Email: <strong>${adminEmail}</strong>
                 </div>
               </div>
             `,

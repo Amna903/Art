@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { COUNTRY_COUNT, TECHNIQUES, type Artist, type Technique } from "@/lib/data/artists";
-import { AFRICAN_COUNTRIES } from "@/lib/data/africa";
+import { AFRICAN_COUNTRIES, getCountryDisplayName } from "@/lib/data/africa";
+import { useLanguage } from "@/lib/i18n";
 import { ArtistCard } from "./ArtistCard";
 
 const FILTERS = ["All", "New Discoveries", ...TECHNIQUES] as const;
@@ -11,6 +12,7 @@ type Filter = (typeof FILTERS)[number];
 
 export function ArtistDirectory({ artists }: { artists: Artist[] }) {
   const searchParams = useSearchParams();
+  const { t, language } = useLanguage();
 
   const sourceArtists = artists;
   const totalCount = artists.length;
@@ -93,11 +95,19 @@ export function ArtistDirectory({ artists }: { artists: Artist[] }) {
   return (
     <main className="px-gutter-page py-16 md:py-24 max-w-[1320px] mx-auto">
       <header className="mb-12 md:mb-16">
-        <span className="font-label-caps text-secondary tracking-widest">The Movement</span>
-        <h1 className="font-display text-primary text-5xl md:text-7xl mt-3 mb-4">Artists</h1>
+        <span className="font-label-caps text-secondary tracking-widest">{t("The Movement")}</span>
+        <h1 className="font-display text-primary text-5xl md:text-7xl mt-3 mb-4">{t("Artists")}</h1>
         <p className="font-body-lg text-on-surface-variant max-w-2xl">
-          {totalCount} artists across {COUNTRY_COUNT} nations — painters, sculptors, photographers, weavers, and
-          digital pioneers shaping the contemporary African canon.
+          {totalCount}{" "}
+          {t(
+            "artists across",
+            "artistes à travers"
+          )}{" "}
+          {COUNTRY_COUNT}{" "}
+          {t(
+            "nations — painters, sculptors, photographers, weavers, and digital pioneers shaping the contemporary African canon.",
+            "nations — peintres, sculpteurs, photographes, tisserands et pionniers numériques façonnant le canon contemporain africain."
+          )}
         </p>
         <div className="red-thread mt-8" />
       </header>
@@ -117,7 +127,7 @@ export function ArtistDirectory({ artists }: { artists: Artist[] }) {
                     : "border-outline text-on-surface-variant hover:border-primary hover:text-primary",
                 ].join(" ")}
               >
-                {label}
+                {t(label)}
               </button>
             );
           })}
@@ -130,35 +140,35 @@ export function ArtistDirectory({ artists }: { artists: Artist[] }) {
               onChange={(e) => updateParams({ country: e.target.value })}
               className="bg-transparent border border-outline text-primary font-label-caps uppercase text-xs px-3 py-2 rounded-full min-w-[200px]"
             >
-              <option value="">All countries (54)</option>
+              <option value="">{t("All countries (54)")}</option>
               {AFRICAN_COUNTRIES.map((c) => (
                 <option key={c.slug} value={c.slug}>
-                  {c.flag} {c.name}
+                  {c.flag} {getCountryDisplayName(c, language)}
                 </option>
               ))}
             </select>
             <input
               type="search"
-              placeholder="Search name, city, technique…"
+              placeholder={t("Search name, city, technique…")}
               value={q}
               onChange={(e) => updateParams({ q: e.target.value })}
               className="bg-transparent border border-outline text-primary placeholder:text-on-surface-variant/60 text-sm px-4 py-2 rounded-full min-w-[240px]"
             />
           </div>
           <p className="font-label-caps text-on-surface-variant text-xs tracking-widest">
-            Showing {filtered.length} of {totalCount}
+            {t("Showing")} {filtered.length} {t("of")} {totalCount}
           </p>
         </div>
       </div>
 
       {filtered.length === 0 ? (
         <div className="py-24 text-center">
-          <p className="font-headline-sm text-primary mb-2">No artists match your filters.</p>
+          <p className="font-headline-sm text-primary mb-2">{t("No artists match your filters.")}</p>
           <button
             onClick={resetFilters}
             className="font-label-caps uppercase tracking-widest border-b border-primary text-primary"
           >
-            Reset filters
+            {t("Reset filters")}
           </button>
         </div>
       ) : (

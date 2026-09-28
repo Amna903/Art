@@ -5,7 +5,9 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { useLanguage } from "@/lib/i18n";
 import { ThemeToggle } from "./ThemeToggle";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 const NAV = [
   { href: "/artists", label: "Artists" },
@@ -29,6 +31,7 @@ function useScrolled(threshold = 24) {
 export function SiteHeader() {
   const pathname = usePathname();
   const { user, role, signOut } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
   const scrolled = useScrolled();
   const isHome = pathname === "/";
@@ -64,16 +67,16 @@ export function SiteHeader() {
       >
         <Link href="/" className="flex items-center shrink-0 justify-self-start">
           <Image
-            src="/images/artlogo.png"
-            alt="NU-ARTE"
-            width={160}
-            height={40}
+            src="/images/ChatGPT%20Image%20Sep%2028,%202026,%2010_18_38%20PM.png"
+            alt="NUA-ARTE"
+            width={1103}
+            height={1426}
             priority
             className={`w-auto object-contain transition-all duration-300 ${scrolled ? "h-8" : "h-10"}`}
           />
         </Link>
 
-        <div className="hidden lg:flex lg:absolute lg:left-1/2 lg:-translate-x-1/2 items-center justify-center gap-7 lg:gap-9">
+        <div className="hidden lg:flex items-center justify-center whitespace-nowrap gap-4 xl:gap-6 2xl:gap-9">
           {NAV.map((item) => {
             const active = pathname === item.href;
             return (
@@ -85,7 +88,7 @@ export function SiteHeader() {
                   (active ? "text-secondary" : "text-on-surface hover:text-secondary")
                 }
               >
-                {item.label}
+                {t(item.label)}
                 {active && (
                   <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 h-px w-4 bg-secondary" />
                 )}
@@ -101,7 +104,7 @@ export function SiteHeader() {
               setMobileOpen(false);
               setSearchOpen((v) => !v);
             }}
-            aria-label={searchOpen ? "Close search" : "Search"}
+            aria-label={searchOpen ? t("Close search") : t("Search")}
             aria-expanded={searchOpen}
             className="material-symbols-outlined w-11 h-11 flex items-center justify-center text-on-surface hover:text-secondary transition-colors"
           >
@@ -111,6 +114,7 @@ export function SiteHeader() {
           <div className="hidden lg:block">
             <ThemeToggle />
           </div>
+          <div className="hidden lg:block"><LanguageSwitcher /></div>
 
           <div className="hidden lg:flex items-center gap-3 md:gap-4">
             {user ? (
@@ -120,14 +124,14 @@ export function SiteHeader() {
                     href="/dashboard"
                     className="font-navigation text-navigation uppercase text-on-surface hover:text-secondary"
                   >
-                    Dashboard
+                    {t("Dashboard")}
                   </Link>
                   {role === "admin" ? (
                     <Link
                       href="/admin"
                       className="font-label-caps text-[9px] uppercase tracking-widest text-secondary hover:text-primary"
                     >
-                      Admin
+                      {t("Admin")}
                     </Link>
                   ) : role ? (
                     <span className="font-label-caps text-[9px] uppercase tracking-widest text-on-surface-variant">
@@ -139,7 +143,7 @@ export function SiteHeader() {
                   onClick={() => signOut().then(() => router.push("/"))}
                   className="bg-primary text-on-primary px-4 py-2 font-navigation text-navigation uppercase"
                 >
-                  Sign out
+                  {t("Sign out")}
                 </button>
               </>
             ) : (
@@ -147,7 +151,7 @@ export function SiteHeader() {
                 href="/auth"
                 className="bg-primary text-on-primary px-5 py-2 font-navigation text-navigation uppercase hover:scale-[0.97] duration-200 transition-transform"
               >
-                Join the Circle
+                {t("Join the Circle")}
               </Link>
             )}
           </div>
@@ -181,14 +185,14 @@ export function SiteHeader() {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search artists, countries, artworks…"
+              placeholder={t("Search artists, countries, artworks…")}
               className="flex-1 bg-transparent border-b border-primary/30 focus:border-secondary outline-none py-2 font-body-md text-lg text-primary placeholder:text-on-surface-variant/40 transition-colors"
             />
             <button
               type="submit"
               className="font-navigation text-navigation uppercase tracking-widest text-secondary hover:text-primary shrink-0"
             >
-              Search
+              {t("Search")}
             </button>
           </form>
         </div>
@@ -209,7 +213,7 @@ export function SiteHeader() {
                     (active ? "text-secondary" : "text-on-surface hover:text-secondary")
                   }
                 >
-                  {item.label}
+                  {t(item.label)}
                 </Link>
               );
             })}
@@ -218,7 +222,14 @@ export function SiteHeader() {
 
             <div className="flex items-center justify-between min-h-[44px]">
               <span className="font-navigation text-navigation uppercase tracking-widest text-on-surface-variant">
-                Theme
+                {t("Language")}
+              </span>
+              <LanguageSwitcher />
+            </div>
+
+            <div className="flex items-center justify-between min-h-[44px]">
+              <span className="font-navigation text-navigation uppercase tracking-widest text-on-surface-variant">
+                {t("Theme")}
               </span>
               <ThemeToggle />
             </div>
@@ -232,7 +243,7 @@ export function SiteHeader() {
                       onClick={() => setMobileOpen(false)}
                       className="min-h-[44px] flex items-center font-navigation text-navigation uppercase tracking-widest text-on-surface hover:text-secondary"
                     >
-                      Dashboard
+                      {t("Dashboard")}
                     </Link>
                     {role === "admin" ? (
                       <Link
@@ -240,7 +251,7 @@ export function SiteHeader() {
                         onClick={() => setMobileOpen(false)}
                         className="min-h-[36px] flex items-center pl-4 font-label-caps text-[10px] uppercase tracking-widest text-secondary hover:text-primary"
                       >
-                        Admin
+                        {t("Admin")}
                       </Link>
                     ) : role ? (
                       <span className="min-h-[36px] flex items-center pl-4 font-label-caps text-[10px] uppercase tracking-widest text-on-surface-variant">
@@ -255,7 +266,7 @@ export function SiteHeader() {
                     }}
                     className="min-h-[44px] bg-primary text-on-primary px-4 font-navigation text-navigation uppercase tracking-widest"
                   >
-                    Sign out
+                    {t("Sign out")}
                   </button>
                 </>
               ) : (
@@ -264,7 +275,7 @@ export function SiteHeader() {
                   onClick={() => setMobileOpen(false)}
                   className="min-h-[44px] flex items-center justify-center bg-primary text-on-primary px-5 font-navigation text-navigation uppercase tracking-widest"
                 >
-                  Join the Circle
+                  {t("Join the Circle")}
                 </Link>
               )}
             </div>

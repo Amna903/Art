@@ -48,13 +48,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { country: countrySlug } = await params;
   const c = getCountryBySlug(countrySlug);
   const name = c?.name ?? countrySlug;
-  const desc = c?.blurb ?? "A country spotlight from the NU-ART atlas.";
+  const desc = c?.blurb ?? "A country spotlight from the NUA-ARTE atlas.";
   const hero = pickImage(`hero-${countrySlug}`, "hero");
   return {
-    title: `${name} — Country Experience | NU-ART`,
+    title: `${name} — Country Experience | NUA-ARTE`,
     description: desc,
     openGraph: {
-      title: `${name} — NU-ART Country Experience`,
+      title: `${name} — NUA-ARTE Country Experience`,
       description: desc,
       images: [hero],
     },
@@ -189,14 +189,14 @@ export default async function CountryExperience({ params }: Props) {
     .filter((e) => (e.country || "").toLowerCase() === countryNameLower)
     .map((e) => ({
       title: e.title,
-      venue: e.location || `NU-ART Pavilion · ${country.capital}`,
+      venue: e.location || `NUA-ARTE Pavilion · ${country.capital}`,
       dates: e.date_label || (e.status === "current" ? "Ongoing" : e.status === "upcoming" ? "Upcoming" : "Past"),
       img: e.cover_image_url || pickImage(`exh-${e.slug}`, "gallery"),
     }));
   const mockExhibitions = [
     {
       title: `Threads of ${country.name}`,
-      venue: `NU-ART Pavilion · ${country.capital}`,
+      venue: `NUA-ARTE Pavilion · ${country.capital}`,
       dates: "Ongoing — March 2027",
       img: pickImage(`exh1-${country.slug}`, "gallery"),
     },
@@ -252,7 +252,7 @@ export default async function CountryExperience({ params }: Props) {
             <p className="mt-4 text-[#F5F2EE]/70 font-body-md">
               An editorial gateway into the artists, works, and stories that
               define {country.name}&apos;s contribution to the contemporary African
-              movement — assembled with curatorial care by NU-ART.
+              movement — assembled with curatorial care by NUA-ARTE.
             </p>
           </div>
 
@@ -313,7 +313,7 @@ export default async function CountryExperience({ params }: Props) {
               <p className="font-body-lg text-lg text-on-surface-variant leading-relaxed max-w-xl">
                 {featuredArtist.bio} Working across painting, sculpture and
                 mixed media, {featuredArtist.name.split(" ")[0]}&apos;s practice is a
-                cornerstone of NU-ART&apos;s programme for {country.name}.
+                cornerstone of NUA-ARTE&apos;s programme for {country.name}.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">

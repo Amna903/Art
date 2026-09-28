@@ -15,7 +15,7 @@ type AuthCtx = {
   signInWithGoogle: (role?: AppRole) => Promise<{ error?: string }>;
   resetPassword: (email: string) => Promise<{ error?: string }>;
   updatePassword: (password: string) => Promise<{ error?: string }>;
-  signUp: (email: string, password: string, role: AppRole, displayName: string) => Promise<{ error?: string }>;
+  signUp: (email: string, password: string, role: AppRole, displayName: string, country?: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   refreshRole: () => Promise<void>;
 };
@@ -106,14 +106,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { error } = await supabase.auth.updateUser({ password });
         return { error: error?.message };
       },
-      signUp: async (email, password, role, displayName) => {
+      signUp: async (email, password, role, displayName, country) => {
         const redirect = `${window.location.origin}/dashboard`;
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: redirect,
-            data: { role, display_name: displayName },
+            data: { role, display_name: displayName, country },
           },
         });
         return { error: error?.message };

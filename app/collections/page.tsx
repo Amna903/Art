@@ -3,8 +3,8 @@ import { CollectionsView } from "@/components/sections/collections/CollectionsVi
 import { getPublishedCollections } from "@/lib/data/supabase-collections";
 
 export const metadata: Metadata = {
-  title: "Curated Collections | NU-ART",
-  description: "NU-ART — contemporary African art movement.",
+  title: "Curated Collections | NUA-ARTE",
+  description: "NUA-ARTE — contemporary African art movement.",
 };
 
 // Match discover/journal — without this, cover image updates can stick until redeploy.

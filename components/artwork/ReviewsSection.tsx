@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
+import { useLanguage } from "@/lib/i18n";
 import { fetchReviews, submitReview, type Review } from "@/lib/data/reviews";
 
 type Props = { artworkSlug: string };
@@ -26,6 +27,7 @@ function Stars({ value, size = "text-sm" }: { value: number; size?: string }) {
 
 export function ReviewsSection({ artworkSlug }: Props) {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
 
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -67,13 +69,13 @@ export function ReviewsSection({ artworkSlug }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      toast("Sign in to leave a review", {
+      toast(t("Sign in to leave a review"), {
         action: { label: "Sign in", onClick: () => router.push("/auth") },
       });
       return;
     }
     if (rating === 0) {
-      toast("Pick a star rating first");
+      toast(t("Pick a star rating first"));
       return;
     }
 
@@ -85,7 +87,7 @@ export function ReviewsSection({ artworkSlug }: Props) {
     setSubmitting(false);
 
     if (res.error || !res.review) {
-      toast(res.error || "Couldn't submit your review. Please try again.");
+      toast(res.error || t("Couldn't submit your review. Please try again."));
       return;
     }
 
@@ -93,13 +95,13 @@ export function ReviewsSection({ artworkSlug }: Props) {
     setTotal((t) => t + 1);
     setRating(0);
     setComment("");
-    toast("Review posted — thank you");
+    toast(t("Review posted — thank you"));
   };
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h3 className="font-label-caps text-label-caps uppercase text-primary">Collector Reviews</h3>
+        <h3 className="font-label-caps text-label-caps uppercase text-primary">{t("Collector Reviews")}</h3>
         {reviews.length > 0 && (
           <div className="flex items-center gap-2">
             <Stars value={Math.round(avgRating)} />
@@ -110,9 +112,9 @@ export function ReviewsSection({ artworkSlug }: Props) {
 
       <div className="flex flex-col gap-6">
         {loading ? (
-          <p className="text-sm text-on-surface-variant">Loading reviews…</p>
+          <p className="text-sm text-on-surface-variant">{t("Loading…", "Chargement…")}</p>
         ) : reviews.length === 0 ? (
-          <p className="text-sm text-on-surface-variant">No reviews yet — be the first to review this piece.</p>
+          <p className="text-sm text-on-surface-variant">{t("No reviews yet — be the first to review this piece.")}</p>
         ) : (
           reviews.map((r) => (
             <div key={r.id} className="border-b border-outline/10 pb-4">
@@ -134,13 +136,13 @@ export function ReviewsSection({ artworkSlug }: Props) {
             disabled={loadingMore}
             className="self-start text-xs uppercase tracking-widest text-secondary underline decoration-secondary/30 underline-offset-4 disabled:opacity-50"
           >
-            {loadingMore ? "Loading…" : `Load more (${total - reviews.length} remaining)`}
+            {loadingMore ? t("Loading…", "Chargement…") : `${t("Load more", "Charger plus")} (${total - reviews.length})`}
           </button>
         )}
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3 pt-4 border-t border-outline/10">
-        <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">Leave a review</span>
+        <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">{t("Leave a review")}</span>
         <div className="flex gap-1" onMouseLeave={() => setHoverRating(0)}>
           {Array.from({ length: 5 }).map((_, i) => (
             <button
@@ -164,7 +166,7 @@ export function ReviewsSection({ artworkSlug }: Props) {
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           rows={3}
-          placeholder="Share your experience with this piece…"
+          placeholder={t("Share your experience with this piece…")}
           className="w-full bg-surface-container-low border border-outline/20 px-3 py-2 text-sm focus:outline-none focus:border-secondary transition-colors resize-none"
         />
         <button
@@ -172,7 +174,7 @@ export function ReviewsSection({ artworkSlug }: Props) {
           disabled={submitting}
           className="self-start bg-primary text-on-primary font-navigation text-navigation uppercase tracking-widest py-2.5 px-6 hover:bg-secondary transition-colors disabled:opacity-50"
         >
-          {submitting ? "Posting…" : "Post Review"}
+          {submitting ? t("Posting…") : t("Post Review")}
         </button>
       </form>
     </div>
