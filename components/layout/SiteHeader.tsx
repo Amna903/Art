@@ -61,7 +61,7 @@ export function SiteHeader() {
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${shellClass}`}>
       <nav
-        className={`relative flex items-center justify-between w-full px-gutter-page max-w-container-max mx-auto transition-all duration-300 lg:grid lg:grid-cols-[1fr_auto_1fr] ${
+        className={`relative flex items-center justify-between w-full px-gutter-page max-w-container-max mx-auto transition-all duration-300 lg:grid lg:grid-cols-[auto_minmax(0,1fr)_auto] ${
           scrolled ? "py-2" : "py-3"
         }`}
       >
