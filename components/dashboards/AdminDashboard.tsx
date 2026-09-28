@@ -8,8 +8,9 @@ import { pingRevalidate } from "@/lib/utils/revalidate";
 import { EnquiriesAdmin } from "./EnquiriesAdmin";
 import { CollectionsAdmin } from "./CollectionsAdmin";
 import { CountrySoundsAdmin } from "./CountrySoundsAdmin";
+import { ManagedArtistsAdmin } from "./ManagedArtistsAdmin";
 import { ListRowSkeleton } from "@/components/ui/Skeleton";
-import { AFRICAN_COUNTRIES } from "@/lib/data/africa";
+import { useAuth } from "@/lib/auth";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -25,14 +26,12 @@ type Artwork = Database["public"]["Tables"]["artworks"]["Row"];
 
 export function AdminDashboard() {
   const router = useRouter();
+  const { user } = useAuth();
   const [profiles, setProfiles] = useState<ProfileRow[]>([]);
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [enquiryCount, setEnquiryCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [managedName, setManagedName] = useState("");
-  const [managedCountry, setManagedCountry] = useState("");
-  const [managedFeedback, setManagedFeedback] = useState("");
-  const [tab, setTab] = useState<"users" | "artworks" | "collections" | "enquiries" | "country sounds">("users");
+  const [tab, setTab] = useState<"users" | "artworks" | "collections" | "enquiries" | "country sounds" | "represented artists">("represented artists");
 
   const load = async () => {
     setLoading(true);
@@ -107,16 +106,6 @@ export function AdminDashboard() {
     router.refresh();
   };
 
-  const createManagedArtist = async () => {
-    if (!managedName.trim() || !managedCountry) return;
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const { error } = await supabase.from("managed_artists" as never).insert({
-      display_name: managedName.trim(), country: managedCountry, managed_by: user.id,
-    } as never);
-    setManagedFeedback(error ? error.message : "Artist profile created. You can now manage it from the represented artists record.");
-    if (!error) { setManagedName(""); setManagedCountry(""); }
-  };
 
   return (
     <div className="space-y-12">
@@ -127,7 +116,7 @@ export function AdminDashboard() {
       </section>
 
       <nav className="flex gap-8 border-b border-primary/10 overflow-x-auto">
-        {(["users", "artworks", "collections", "enquiries", "country sounds"] as const).map((t) => (
+        {(["represented artists", "users", "artworks", "collections", "enquiries", "country sounds"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -141,22 +130,12 @@ export function AdminDashboard() {
         ))}
       </nav>
 
-      {loading ? (
+      {tab === "represented artists" ? (
+        user ? <ManagedArtistsAdmin adminId={user.id} /> : null
+      ) : loading ? (
         <ListRowSkeleton count={4} />
       ) : tab === "users" ? (
         <section>
-          <div className="mb-8 border border-primary/10 bg-surface-container-low p-5 max-w-2xl">
-            <p className="text-xs uppercase tracking-widest text-secondary mb-3">Represented artist — no account required</p>
-            <div className="grid sm:grid-cols-[1fr_1fr_auto] gap-3">
-              <input value={managedName} onChange={(e) => setManagedName(e.target.value)} placeholder="Artist name" className="bg-transparent border border-primary/20 px-3 py-2 text-sm" />
-              <select value={managedCountry} onChange={(e) => setManagedCountry(e.target.value)} className="bg-transparent border border-primary/20 px-3 py-2 text-sm">
-                <option value="">Country</option>
-                {AFRICAN_COUNTRIES.map((country) => <option key={country.slug} value={country.name}>{country.name}</option>)}
-              </select>
-              <button onClick={createManagedArtist} className="bg-primary text-on-primary px-4 py-2 text-xs uppercase tracking-widest">Create profile</button>
-            </div>
-            {managedFeedback && <p className="mt-3 text-xs text-on-surface-variant">{managedFeedback}</p>}
-          </div>
           <table className="w-full text-sm">
             <thead className="text-xs uppercase tracking-widest text-on-surface-variant">
               <tr className="border-b border-primary/10">

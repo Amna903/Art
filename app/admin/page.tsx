@@ -33,7 +33,7 @@ export default function AdminPage() {
           </span>
           <h1 className="font-display-lg text-display-lg text-primary">Operations</h1>
           <p className="text-on-surface-variant mt-2 max-w-xl">
-            Manage members, artworks and the sonic identity of each African nation.
+            Manage represented artists (no login required), members, artworks, and the sonic identity of each African nation.
           </p>
         </div>
         <Link

@@ -87,7 +87,7 @@ async function resolveArtwork(slug: string): Promise<ResolvedWork> {
     return {
       title: real.title,
       artist: real.artistName,
-      artistSlug: real.artistId || getArtistSlugByName(real.artistName),
+      artistSlug: real.artistSlug || getArtistSlugByName(real.artistName),
       medium: real.medium ?? FALLBACK.medium,
       year: real.year ? String(real.year) : FALLBACK.year,
       image: real.imageUrl,

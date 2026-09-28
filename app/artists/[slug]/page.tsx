@@ -62,7 +62,7 @@ async function resolveArtist(slug: string): Promise<ResolvedArtist | null> {
   const realArtist = (await getRealArtists()).find((artist) => artist.slug === slug);
   if (realArtist) {
     const works = (await getPublishedArtworks())
-      .filter((work) => work.artistId === slug)
+      .filter((work) => work.artistSlug === slug)
       .map((work) => ({
         slug: work.slug,
         title: work.title,
