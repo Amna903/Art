@@ -74,6 +74,31 @@ const FALLBACK_ARTWORKS: Artwork[] = [
   },
 ];
 
+function MobileMuseumPreview({ artworks }: { artworks: Artwork[] }) {
+  return (
+    <div className="md:hidden border border-primary/10 bg-primary p-4">
+      <p className="font-label-caps text-[10px] tracking-[0.22em] text-secondary mb-2">MOBILE MUSEUM</p>
+      <p className="text-sm text-beige/80 mb-4">Browse the current exhibition. The immersive walk-through is available on larger screens.</p>
+      <div className="grid grid-cols-2 gap-3">
+        {artworks.slice(0, 4).map((artwork) => (
+          <article
+            key={artwork.id}
+            className="group overflow-hidden border border-beige/20 bg-primary"
+          >
+            <div className="relative aspect-[4/5] bg-surface-container">
+              <Image src={artwork.image} alt={artwork.title} fill sizes="50vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+            </div>
+            <div className="p-3">
+              <p className="font-label-caps text-[9px] tracking-[0.12em] text-secondary truncate">{artwork.artist}</p>
+              <p className="mt-1 text-sm font-semibold text-beige line-clamp-2">{artwork.title}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function VirtualGalleryContent() {
   const { t } = useLanguage();
   const searchParams = useSearchParams();
@@ -117,7 +142,7 @@ function VirtualGalleryContent() {
   };
 
   const handleFullscreen = () => {
-    const el = document.getElementById("explorer-root");
+    const el = document.getElementById("explorer-3d-root");
     if (!document.fullscreenElement) el?.requestFullscreen?.();
     else document.exitFullscreen?.();
   };
@@ -184,9 +209,10 @@ function VirtualGalleryContent() {
             </div>
           </div>
 
+          <div id="explorer-root">
           <div
-            className="relative aspect-video w-full bg-black group overflow-hidden border border-primary/10 shadow-2xl"
-            id="explorer-root"
+            className="relative hidden md:block aspect-video w-full bg-black group overflow-hidden border border-primary/10 shadow-2xl"
+            id="explorer-3d-root"
           >
             <Suspense
               fallback={
@@ -408,6 +434,8 @@ function VirtualGalleryContent() {
               </div>
             )}
 
+          </div>
+          <MobileMuseumPreview artworks={artworks} />
           </div>
         </div>
       </section>

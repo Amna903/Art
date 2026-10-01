@@ -4,7 +4,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Fonts — NU-ART Collective brand identity */
+  /* Fonts — NUA-ARTE Collective brand identity */
   --font-display: "Cormorant Garamond", "Trajan Pro", serif;
   --font-body: "Montserrat", sans-serif;
   --font-script: "Allura", "Great Vibes", cursive;
@@ -131,7 +131,7 @@
 }
 
 :root {
-  /* NU-ART Collective — brand palette (locked) */
+  /* NUA-ARTE Collective — brand palette (locked) */
   --brand-marfim: #F5F2EE;
   --brand-preto: #111111;
   --brand-vermelho: #9F0D12;
@@ -395,7 +395,7 @@
 }
 
 /* =====================================================================
-   NU-ART ORGANIC RED THREAD SYSTEM
+   NUA-ARTE ORGANIC RED THREAD SYSTEM
    Hand-drawn curved wave/loop accents — signature brand gesture used
    across hero, section transitions, cards, and CTAs.
    ===================================================================== */

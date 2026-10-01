@@ -4,11 +4,12 @@ import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { geoConicEqualArea, geoPath } from "d3-geo";
 import africaGeo from "@/lib/data/africa-geo.json";
-import { ISLAND_PINS, getCountryByGeoName, getCountryBySlug } from "@/lib/data/africa";
+import { ISLAND_PINS, getCountryByGeoName, getCountryBySlug, getCountryDisplayName } from "@/lib/data/africa";
 import { getStats } from "@/lib/data/africa-map";
 import { buildCountryShards, type CountryInput, type Shard } from "@/lib/data/africa-shards";
 import { useCountrySoundUrls } from "@/lib/data/country-sounds";
 import { ARTISTS, TECHNIQUES, type Technique } from "@/lib/data/artists";
+import { useLanguage } from "@/lib/i18n";
 import "@/components/map/clay-atlas.css";
 
 const W = 1000;
@@ -231,6 +232,8 @@ export function ClayAtlasMap() {
     });
   };
 
+  const { t, language } = useLanguage();
+
   return (
     <div
       className="nu-atlas space-y-6"
@@ -253,7 +256,7 @@ export function ClayAtlasMap() {
           </span>
           <input
             type="text"
-            placeholder="Search 54 African countries…"
+            placeholder={t("Search 54 African countries…", "Rechercher parmi 54 pays africains…")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="bg-transparent font-mono text-xs uppercase tracking-widest focus:outline-none w-full"
@@ -274,7 +277,7 @@ export function ClayAtlasMap() {
           <button
             type="button"
             onClick={toggleSound}
-            aria-label={soundOn ? "Mute sound" : "Unmute sound"}
+            aria-label={soundOn ? t("Mute sound", "Couper le son") : t("Unmute sound", "Activer le son")}
             className="inline-flex items-center gap-2 px-3.5 py-1.5 border rounded text-[10px] font-mono tracking-[0.2em] uppercase transition-all shadow-2xs"
             style={{
               borderColor: "var(--atlas-border)",
@@ -285,7 +288,7 @@ export function ClayAtlasMap() {
             <span className="material-symbols-outlined text-[16px]">
               {soundOn ? "volume_up" : "volume_off"}
             </span>
-            <span className="font-semibold">{soundOn ? "Sound On" : "Muted"}</span>
+            <span className="font-semibold">{soundOn ? t("Sound On", "Son Activé") : t("Muted", "Muet")}</span>
           </button>
 
           <div className="flex items-center border rounded overflow-hidden shadow-2xs" style={{ borderColor: "var(--atlas-border)", backgroundColor: "var(--atlas-card-bg)" }}>
@@ -293,7 +296,7 @@ export function ClayAtlasMap() {
               onClick={() => setZoom((z) => Math.min(2.2, z + 0.25))}
               className="px-3 py-1 text-xs border-r font-bold hover:opacity-75"
               style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-fg)" }}
-              title="Zoom In"
+              title={t("Zoom In", "Zoom avant")}
             >
               +
             </button>
@@ -301,7 +304,7 @@ export function ClayAtlasMap() {
               onClick={() => setZoom((z) => Math.max(1, z - 0.25))}
               className="px-3 py-1 text-xs border-r font-bold hover:opacity-75"
               style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-fg)" }}
-              title="Zoom Out"
+              title={t("Zoom Out", "Zoom arrière")}
             >
               −
             </button>
@@ -309,9 +312,9 @@ export function ClayAtlasMap() {
               onClick={() => setZoom(1)}
               className="px-3 py-1 text-xs font-mono tracking-wider hover:opacity-75"
               style={{ color: "var(--atlas-fg)" }}
-              title="Reset Zoom"
+              title={t("Reset Zoom", "Réinitialiser le zoom")}
             >
-              RESET
+              {t("RESET", "RÉINIT")}
             </button>
           </div>
         </div>
@@ -549,19 +552,19 @@ export function ClayAtlasMap() {
               <div className="flex items-center gap-2">
                 <span className="text-2xl">{hoveredCountry.flag}</span>
                 <h3 className="font-serif text-xl font-bold" style={{ color: "var(--atlas-fg)" }}>
-                  {hoveredCountry.name}
+                  {getCountryDisplayName(hoveredCountry, language)}
                 </h3>
               </div>
               <span className="text-[10px] font-mono tracking-widest uppercase font-semibold text-[color:var(--atlas-accent)]">
-                {hoveredCountry.region}
+                {t(hoveredCountry.region)}
               </span>
             </div>
             <p className="text-xs italic leading-relaxed mb-3" style={{ color: "var(--atlas-fg-muted)" }}>
               &ldquo;{hoveredCountry.blurb}&rdquo;
             </p>
             <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest pt-2.5 border-t" style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-accent)" }}>
-              <span className="font-semibold">{hoveredStats?.artistsCount} Artists</span>
-              <span className="font-semibold">{hoveredStats?.worksCount} Works</span>
+              <span className="font-semibold">{hoveredStats?.artistsCount} {t("Artists", "Artistes")}</span>
+              <span className="font-semibold">{hoveredStats?.worksCount} {t("Works", "Œuvres")}</span>
             </div>
           </div>
         )}
@@ -570,7 +573,7 @@ export function ClayAtlasMap() {
       {/* Medium Quick Filters Bar */}
       <div className="flex flex-wrap items-center gap-2 pt-2">
         <span className="font-mono text-[10px] tracking-widest uppercase mr-2" style={{ color: "var(--atlas-fg-muted)" }}>
-          Filter by Medium:
+          {t("Filter by Medium:", "Filtrer par technique :")}
         </span>
         <button
           onClick={() => setActiveFilter(null)}
@@ -581,20 +584,20 @@ export function ClayAtlasMap() {
           }`}
           style={activeFilter ? { backgroundColor: "var(--atlas-card-bg)", color: "var(--atlas-fg)" } : {}}
         >
-          All Mediums
+          {t("All Mediums", "Toutes les techniques")}
         </button>
-        {TECHNIQUES.map((t) => (
+        {TECHNIQUES.map((tech) => (
           <button
-            key={t}
-            onClick={() => setActiveFilter(activeFilter === t ? null : t)}
+            key={tech}
+            onClick={() => setActiveFilter(activeFilter === tech ? null : tech)}
             className={`px-3.5 py-2 text-[10px] font-mono uppercase tracking-widest border rounded transition-all cursor-pointer ${
-              activeFilter === t
+              activeFilter === tech
                 ? "bg-[#9F0D12] text-[#F5F2EE] border-[#9F0D12] shadow-xs font-semibold"
                 : "border-[color:var(--atlas-border)] hover:border-[color:var(--atlas-accent)] hover:opacity-80"
             }`}
-            style={activeFilter !== t ? { backgroundColor: "var(--atlas-card-bg)", color: "var(--atlas-fg)" } : {}}
+            style={activeFilter !== tech ? { backgroundColor: "var(--atlas-card-bg)", color: "var(--atlas-fg)" } : {}}
           >
-            {t}
+            {t(tech)}
           </button>
         ))}
       </div>

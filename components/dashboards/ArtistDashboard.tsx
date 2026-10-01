@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/client";
 import { AFRICAN_COUNTRIES } from "@/lib/data/africa";
 import type { Database } from "@/lib/supabase/types";
@@ -113,12 +114,18 @@ export function ArtistDashboard({ userId }: { userId: string }) {
       country: profileDraft.country ?? null,
       avatar_url: profileDraft.avatar_url ?? null,
     };
-    await supabase.from("profiles").upsert(payload, { onConflict: "id" });
+    const { error } = await supabase.from("profiles").upsert(payload, { onConflict: "id" });
+    if (error) {
+      toast.error(`Could not save your profile: ${error.message}`);
+      setProfileSaving(false);
+      return;
+    }
     await load();
     await pingRevalidate("artworks");
     router.refresh();
     setProfileSaving(false);
     closeProfileEditor();
+    toast.success("Profile saved.");
   };
 
   const uploadProfileAvatar = async (file: File) => {
@@ -130,10 +137,17 @@ export function ArtistDashboard({ userId }: { userId: string }) {
       setProfileUploading(false);
       return;
     }
-    const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+    const { data: signed, error: signedUrlError } = await supabase.storage
+      .from("avatars")
+      .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+    if (signedUrlError || !signed?.signedUrl) {
+      toast.error(`Photo uploaded, but its URL could not be created: ${signedUrlError?.message ?? "Unknown error"}`);
+      setProfileUploading(false);
+      return;
+    }
     setProfileDraft((prev) => ({
       ...(prev ?? { id: userId, display_name: "", bio: null, country: null, avatar_url: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }),
-      avatar_url: signed?.signedUrl ?? "",
+      avatar_url: signed.signedUrl,
     }));
     setProfileUploading(false);
   };
@@ -155,20 +169,27 @@ export function ArtistDashboard({ userId }: { userId: string }) {
       image_url: editing.image_url ?? "",
       status: (editing.status as Artwork["status"]) ?? "draft",
     };
-    if (editing.id) {
-      await supabase.from("artworks").update(payload).eq("id", editing.id);
-    } else {
-      await supabase.from("artworks").insert(payload);
+    const { error } = editing.id
+      ? await supabase.from("artworks").update(payload).eq("id", editing.id)
+      : await supabase.from("artworks").insert(payload);
+    if (error) {
+      toast.error(`Could not save this artwork: ${error.message}`);
+      return;
     }
     setEditing(null);
     await load();
     await pingRevalidate("artworks");
     router.refresh();
+    toast.success(editing.id ? "Artwork updated." : "Artwork saved.");
   };
 
   const remove = async (id: string) => {
     if (!confirm("Delete this artwork?")) return;
-    await supabase.from("artworks").delete().eq("id", id);
+    const { error } = await supabase.from("artworks").delete().eq("id", id);
+    if (error) {
+      toast.error(`Could not delete this artwork: ${error.message}`);
+      return;
+    }
     await load();
     await pingRevalidate("artworks");
     router.refresh();
@@ -184,10 +205,15 @@ export function ArtistDashboard({ userId }: { userId: string }) {
       setUploading(false);
       return;
     }
-    const { data: signed } = await supabase.storage
+    const { data: signed, error: signedUrlError } = await supabase.storage
       .from("artworks")
       .createSignedUrl(path, 60 * 60 * 24 * 365 * 10); // 10y
-    setEditing((e) => ({ ...e!, image_url: signed?.signedUrl ?? "" }));
+    if (signedUrlError || !signed?.signedUrl) {
+      toast.error(`Image uploaded, but its URL could not be created: ${signedUrlError?.message ?? "Unknown error"}`);
+      setUploading(false);
+      return;
+    }
+    setEditing((e) => ({ ...e!, image_url: signed.signedUrl }));
     setUploading(false);
   };
 

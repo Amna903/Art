@@ -273,8 +273,12 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
         <div className="flex flex-col justify-between h-full space-y-8 z-10 self-stretch py-2">
           {/* Logo Branding */}
           <div>
-            <h2 className="font-serif text-2xl md:text-3xl tracking-[0.25em] font-light uppercase" style={{ color: "var(--atlas-fg)" }}>
-              NU <span className="inline-block mx-1 text-xs opacity-40 font-sans">—</span> ARTE
+            <h2
+              className="font-serif text-2xl md:text-3xl tracking-[0.25em] font-light uppercase"
+              style={{ color: "var(--atlas-fg)" }}
+              aria-label="NUA-ARTE"
+            >
+              NUA <span className="inline-block mx-1 text-xs opacity-40 font-sans">—</span> ARTE
             </h2>
             <span
               className="block font-mono text-[9px] tracking-[0.45em] uppercase mt-1 font-semibold"
@@ -347,6 +351,13 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
             >
               {t("Explore Artists & Works →", "Explorer Artistes & Œuvres →")}
             </button>
+            <Link
+              href={`/virtual-gallery?country=${activeCountry.slug}`}
+              className="mt-2 block text-[10px] font-mono tracking-[0.2em] uppercase font-semibold transition-colors hover:underline"
+              style={{ color: "var(--atlas-fg-muted)" }}
+            >
+              {t("Visit Virtual Museum")}
+            </Link>
           </div>
         </div>
 
@@ -589,8 +600,8 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
 
             {/* Title */}
             <h1 className="font-serif text-3xl lg:text-4xl leading-[1.15] font-light mt-3" style={{ color: "var(--atlas-fg)" }}>
-              {t("Explore Africa.")} <br />
-              <span className="italic font-normal">{t("Discover Art.")}</span>
+              {t("Explore Africa.", "Explorez l'Afrique.")} <br />
+              <span className="italic font-normal">{t("Discover Art.", "Découvrez l'Art.")}</span>
             </h1>
 
             {/* Paragraph */}

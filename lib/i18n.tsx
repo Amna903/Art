@@ -67,6 +67,43 @@ const DICTIONARY: Record<string, string> = {
   "54 Nations. One Continent.": "54 Nations. Un Continent.",
   "Explore the contemporary creative landscape across every African border. Tap any nation to discover artists, sounds, and active exhibitions.":
     "Explorez le paysage créatif contemporain à travers chaque frontière africaine. Touchez une nation pour découvrir artistes, sons et expositions en cours.",
+  "EXPLORE AFRICA": "EXPLORER L'AFRIQUE",
+  "Explore Africa": "Explorer l'Afrique",
+  "DISCOVER ART": "DÉCOUVRIR L'ART",
+  "Discover Art": "Découvrir l'Art",
+  "ARTISTS": "ARTISTES",
+  "ARTWORKS": "ŒUVRES",
+  "STORIES": "RÉCITS",
+  "EXHIBITIONS": "EXPOSITIONS",
+  "COLLECTORS": "COLLECTIONNEURS",
+  "ABOUT US": "À PROPOS",
+  "ONE CONTINENT.": "UN CONTINENT.",
+  "INFINITE VOICES.": "DES VOIX INFINIES.",
+  "ARTISTS REPRESENTED": "ARTISTES REPRÉSENTÉS",
+  "ARTWORKS AVAILABLE": "ŒUVRES DISPONIBLES",
+  "COUNTRIES": "PAYS",
+  "COLLECTORS WORLDWIDE": "COLLECTIONNEURS DANS LE MONDE",
+  "SCROLL TO EXPLORE": "DÉFILEZ POUR EXPLORER",
+  "VIEW ALL COUNTRIES": "VOIR TOUS LES PAYS",
+  "Explore Artists & Works →": "Explorer Artistes & Œuvres →",
+  "Search 54 African countries…": "Rechercher parmi 54 pays africains…",
+  "The Discovery Map": "La Carte Découverte",
+  "The Atlas, in Full.": "L'Atlas au Complet.",
+  "← Back to Home": "← Retour à l'Accueil",
+  "Hover a country to see its name, click to open its full spotlight page. 54 nations, filterable by medium.":
+    "Survolez un pays pour voir son nom, cliquez pour ouvrir sa page dédiée. 54 nations, filtrables par technique.",
+  "Filter by Medium:": "Filtrer par technique :",
+  "All Mediums": "Toutes les techniques",
+  "Mixed Media": "Techniques Mixtes",
+  "Other": "Autre",
+  "Sound On": "Son Activé",
+  "Muted": "Muet",
+  "Mute sound": "Couper le son",
+  "Unmute sound": "Activer le son",
+  "Zoom In": "Zoom avant",
+  "Zoom Out": "Zoom arrière",
+  "Reset Zoom": "Réinitialiser le zoom",
+  "RESET": "RÉINIT",
   "Territories": "Territoires",
   "Artworks": "Œuvres",
   "Active Works": "Œuvres actives",
@@ -87,6 +124,11 @@ const DICTIONARY: Record<string, string> = {
   // Homepage Sections
   "Curatorial Focus": "Regard Curatorial",
   "Featured Artists": "Artistes en Vedette",
+  "AFRICAN ARTISTS": "ARTISTES AFRICAINS",
+  "African Arts": "Arts Africains",
+  "Featured work:": "Œuvre en vedette :",
+  "Medium:": "Technique :",
+  "Visit Virtual Museum": "Visiter le Musée Virtuel",
   "Pioneers and emerging voices defining contemporary practice across the continent.":
     "Pionniers et voix émergentes façonnant la création contemporaine à travers le continent.",
   "View Profile": "Voir le profil",
@@ -215,6 +257,11 @@ const DICTIONARY: Record<string, string> = {
   "Enter Virtual Museum": "Entrer dans le Musée Virtuel",
   "IMMERSIVE EXPERIENCE": "EXPÉRIENCE IMMERSIVE",
   "Virtual Museum Explorer": "Explorateur du Musée Virtuel",
+  "IMMERSIVE MODE": "MODE IMMERSIF",
+  "Click to enter the museum": "Cliquez pour entrer dans le musée",
+  "WASD · MOVE": "WASD · DÉPLACER",
+  "MOUSE · LOOK": "SOURIS · REGARDER",
+  "ESC · EXIT": "ÉCHAP · QUITTER",
   "CURRENT LOCATION": "EMPLACEMENT ACTUEL",
   "ARTWORKS LOADED": "ŒUVRES CHARGÉES",
   "ZONES": "ZONES",
@@ -496,15 +543,10 @@ const DICTIONARY: Record<string, string> = {
   "Load more": "Charger plus",
   "Print / Save as PDF": "Imprimer / Enregistrer en PDF",
   "This certifies that the above work has been authenticated by NUA-ARTE's curatorial team and is sold with full provenance documentation.": "Ce document certifie que l'œuvre ci-dessus a été authentifiée par l'équipe curatoriale de NUA-ARTE et est vendue avec une documentation de provenance complète.",
-  "FEATURED WORK": "ŒUVRE EN VEDETTE",
   "View Bio": "Voir la Bio",
   "NEW DISCOVERY": "NOUVELLE DÉCOUVERTE",
   "WORKS": "ŒUVRES",
   "CURATED AFRICAN ART": "ART AFRICAIN SÉLECTIONNÉ",
-  "Explore Artists & Works →": "Explorer Artistes & Œuvres →",
-  "ONE CONTINENT.": "UN CONTINENT.",
-  "INFINITE VOICES.": "DES VOIX INFINIES.",
-  "VIEW ALL COUNTRIES": "VOIR TOUS LES PAYS",
   "Follow": "Suivre",
   "Unfollow": "Ne plus suivre",
 };
@@ -539,7 +581,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const t = useCallback(
     (keyOrText: string, fallback?: string): string => {
-      if (language === "en") return fallback ?? keyOrText;
+      if (language === "en") return keyOrText;
       const trimmed = keyOrText.trim();
       if (DICTIONARY[trimmed]) {
         // Preserve any leading/trailing spaces
@@ -630,7 +672,7 @@ export function useLanguage(): LanguageContextType {
     return {
       language: "en",
       setLanguage: () => {},
-      t: (keyOrText: string, fallback?: string) => fallback ?? keyOrText,
+      t: (keyOrText: string, fallback?: string) => keyOrText,
       isFrench: false,
     };
   }

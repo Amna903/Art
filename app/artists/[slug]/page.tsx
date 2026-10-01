@@ -134,11 +134,11 @@ export default async function ArtistProfilePage({ params }: Props) {
     return <main className="max-w-container-max mx-auto px-gutter-page py-24">Artist not found.</main>;
   }
 
-  const { artist, works, source } = resolved;
+  const { artist, works } = resolved;
   const directoryArtists = await getDirectoryArtists();
   const country = artist.countrySlug ? getCountryBySlug(artist.countrySlug) : null;
   const heroImage =
-    artist.imageUrl ??
+    artist.imageUrl?.trim() ||
     "https://nu-artcollective.lovable.app/__l5e/assets-v1/dc981581-67cc-4c92-881e-bbb825d6b9c6/afr-street-lagos.jpg";
   const featuredWork = artist.featuredWork || works[0]?.title || "Featured Work";
   const nameParts = artist.name.trim().split(/\s+/).filter(Boolean);
@@ -207,9 +207,6 @@ export default async function ArtistProfilePage({ params }: Props) {
             </p>
             <p className="text-body-md font-semibold text-tertiary uppercase tracking-widest">
               Featured work: {featuredWork}
-            </p>
-            <p className="text-xs uppercase tracking-widest text-on-surface-variant mt-2">
-              Source: {source}
             </p>
           </div>
           <div className="flex flex-col gap-4">
@@ -361,7 +358,7 @@ export default async function ArtistProfilePage({ params }: Props) {
                     sizes="(max-width: 768px) 50vw, 25vw"
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                     alt={`Portrait of ${a.name}`}
-                    src={a.image}
+                    src={a.image?.trim() || heroImage}
                   />
                 </div>
                 <h3 className="text-body-lg font-bold group-hover:text-secondary transition-colors">{a.name}</h3>

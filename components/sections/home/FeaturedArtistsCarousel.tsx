@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useLanguage } from "@/lib/i18n";
 
 export type FeaturedCard = {
@@ -109,9 +110,14 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
         className="flex gap-12 overflow-x-auto no-scrollbar snap-x-mandatory pb-8 cursor-grab active:cursor-grabbing"
       >
         {cards.map((artist) => (
-          <div key={artist.slug} className="min-w-[400px] snap-center group cursor-pointer">
+          <Link
+            key={artist.slug}
+            href={`/artists/${artist.slug}`}
+            className="min-w-[400px] snap-center group cursor-pointer"
+            aria-label={t(`View ${artist.name}'s profile`, `Voir le profil de ${artist.name}`)}
+          >
             <div className="aspect-[4/5] overflow-hidden mb-6 relative bg-surface-container">
-              {artist.image ? (
+              {artist.image?.trim() ? (
                 <Image
                   fill
                   sizes="400px"
@@ -131,7 +137,7 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
             <p className="font-body-md text-on-surface-variant uppercase tracking-widest text-xs">
               {t(artist.country)} • {t(artist.discipline)}
             </p>
-          </div>
+          </Link>
         ))}
       </div>
     </>

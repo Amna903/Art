@@ -61,12 +61,12 @@ export function SiteHeader() {
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${shellClass}`}>
       <nav
-        className={`flex items-center gap-6 w-full px-gutter-page max-w-container-max mx-auto transition-all duration-300 ${
+        className={`w-full px-4 sm:px-6 lg:px-8 max-w-container-max mx-auto transition-all duration-300 ${
           scrolled ? "py-2" : "py-3"
-        }`}
+        } flex items-center justify-between gap-4 lg:gap-8`}
       >
         {/* Left — logo */}
-        <div className="flex-1 flex items-center justify-start min-w-0">
+        <div className="flex items-center justify-start shrink-0">
           <Link href="/" className="flex items-center shrink-0">
             <Image
               src="/images/ChatGPT%20Image%20Sep%2028,%202026,%2010_18_38%20PM.png"
@@ -80,7 +80,7 @@ export function SiteHeader() {
         </div>
 
         {/* Center — primary nav */}
-        <div className="hidden lg:flex items-center justify-center shrink-0 gap-5 xl:gap-8">
+        <div className="hidden lg:flex items-center justify-center shrink-0 gap-3 xl:gap-6 2xl:gap-8">
           {NAV.map((item) => {
             const active = pathname === item.href;
             return (
@@ -102,7 +102,7 @@ export function SiteHeader() {
         </div>
 
         {/* Right — search / lang / auth */}
-        <div className="flex-1 flex items-center justify-end gap-2 md:gap-3 min-w-0">
+        <div className="flex items-center justify-end gap-1.5 sm:gap-2 xl:gap-3 shrink-0">
           <button
             type="button"
             onClick={() => {
@@ -116,12 +116,12 @@ export function SiteHeader() {
             {searchOpen ? "close" : "search"}
           </button>
 
-          <div className="hidden lg:flex items-center gap-3 shrink-0">
+          <div className="hidden lg:flex items-center gap-2 xl:gap-3 shrink-0">
             <ThemeToggle />
             <LanguageSwitcher />
           </div>
 
-          <div className="hidden lg:flex items-center gap-3 shrink-0">
+          <div className="hidden lg:flex items-center gap-2 xl:gap-3 shrink-0">
             {user ? (
               <>
                 <div className="flex flex-col items-end leading-tight">
@@ -146,7 +146,7 @@ export function SiteHeader() {
                 </div>
                 <button
                   onClick={() => signOut().then(() => router.push("/"))}
-                  className="bg-primary text-on-primary px-4 py-2 font-navigation text-navigation uppercase whitespace-nowrap"
+                  className="bg-primary text-on-primary px-3.5 xl:px-4 py-2 font-navigation text-navigation uppercase whitespace-nowrap"
                 >
                   {t("Sign out")}
                 </button>
@@ -154,7 +154,7 @@ export function SiteHeader() {
             ) : (
               <Link
                 href="/auth"
-                className="bg-primary text-on-primary px-5 py-2 font-navigation text-navigation uppercase hover:scale-[0.97] duration-200 transition-transform whitespace-nowrap"
+                className="bg-primary text-on-primary px-3.5 xl:px-5 py-2 font-navigation text-navigation uppercase hover:scale-[0.97] duration-200 transition-transform whitespace-nowrap"
               >
                 {t("Join the Circle")}
               </Link>

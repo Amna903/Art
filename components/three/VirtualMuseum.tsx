@@ -1,10 +1,11 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { PointerLockControls, Text } from "@react-three/drei";
+import { Html, MeshReflectorMaterial, PointerLockControls } from "@react-three/drei";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { useTheme } from "@/lib/theme";
+import { useLanguage } from "@/lib/i18n";
 
 export type Artwork = {
   id: string;
@@ -21,117 +22,123 @@ export type Artwork = {
   medium?: string;
 };
 
-export const ZONE_POSITIONS: Record<number, [number, number, number]> = {
-  1: [0, 1.65, 8],
-  2: [-6, 1.65, 0],
-  3: [6, 1.65, 0],
-  4: [0, 1.65, -8],
+// Room physical dimensions (in meters)
+const ROOM = { w: 20, h: 5.6, d: 24 };
+
+// Viewpoint positions and target focus points for each zone so the camera directly faces that zone's artworks
+export const ZONE_VIEWPOINTS: Record<
+  number,
+  { pos: [number, number, number]; lookAt: [number, number, number] }
+> = {
+  1: { pos: [0, 1.65, 8.2], lookAt: [0, 1.65, 12] },       // Zone 01: South Wall (Ancestral Roots)
+  2: { pos: [-6.2, 1.65, 0], lookAt: [-10, 1.65, 0] },     // Zone 02: West Wall (Urban Rhythm)
+  3: { pos: [6.2, 1.65, 0], lookAt: [10, 1.65, 0] },       // Zone 03: East Wall (Woven Threads)
+  4: { pos: [0, 1.65, -8.2], lookAt: [0, 1.65, -12] },     // Zone 04: North Wall (Digital Horizons)
 };
 
-const ROOM = { w: 20, h: 6, d: 24 };
+// Exported for backwards compatibility
+export const ZONE_POSITIONS: Record<number, [number, number, number]> = {
+  1: ZONE_VIEWPOINTS[1].pos,
+  2: ZONE_VIEWPOINTS[2].pos,
+  3: ZONE_VIEWPOINTS[3].pos,
+  4: ZONE_VIEWPOINTS[4].pos,
+};
 
 type TexStatus = "loading" | "ready" | "error";
 type TexEntry = { status: TexStatus; texture?: THREE.Texture };
 
 type Palette = {
   wall: string;
-  wallAccent: string;
-  wallShadow: string;
+  wallPlaster: string;
   floor: string;
   ceiling: string;
+  skylightEmissive: string;
   bg: string;
-  fogNear: number;
-  fogFar: number;
-  ambient: number;
-  hemi: number;
+  ambientIntensity: number;
   hemiSky: string;
   hemiGround: string;
-  directional: number;
+  hemiIntensity: number;
   directionalColor: string;
-  spot: number;
-  wallWash: number;
-  exposure: number;
-  frame: string;
-  matte: string;
-  plaque: string;
-  plaqueOpacity: number;
+  directionalIntensity: number;
+  spotColor: string;
+  spotIntensity: number;
+  frameColor: string;
+  matteColor: string;
+  plaqueBg: string;
   labelPrimary: string;
   labelSecondary: string;
   accent: string;
-  titleColor: string;
-  skylight: string;
   baseboard: string;
-  trim: string;
+  trackColor: string;
 };
 
-const LIGHT_PALETTE: Palette = {
-  wall: "#EDE7DD",
-  wallAccent: "#E2D9CB",
-  wallShadow: "#8A7E6E",
-  floor: "#3B322A",
-  ceiling: "#1E1A16",
-  bg: "#1A1613",
-  fogNear: 18,
-  fogFar: 55,
-  ambient: 0.28,
-  hemi: 0.35,
-  hemiSky: "#FFF3DD",
-  hemiGround: "#2A231C",
-  directional: 0.35,
-  directionalColor: "#FFE9C4",
-  spot: 3.4,
-  wallWash: 0.6,
-  exposure: 1.05,
-  frame: "#0A0806",
-  matte: "#F5F0E6",
-  plaque: "#0F0C09",
-  plaqueOpacity: 0.85,
-  labelPrimary: "#F5F0E6",
-  labelSecondary: "#B8AC98",
+const MUSEUM_PALETTE: Palette = {
+  wall: "#F4F3F0",
+  wallPlaster: "#E9E8E4",
+  floor: "#171819",
+  ceiling: "#090A0B",
+  skylightEmissive: "#FFFDF9",
+  bg: "#161514",
+  ambientIntensity: 0.65,
+  hemiSky: "#FFFDF8",
+  hemiGround: "#5C564E",
+  hemiIntensity: 0.75,
+  directionalColor: "#FFF8ED",
+  directionalIntensity: 0.65,
+  spotColor: "#FFF6E8",
+  spotIntensity: 2.6,
+  frameColor: "#181615",
+  matteColor: "#FAF8F5",
+  plaqueBg: "#171514",
+  labelPrimary: "#F5F3EF",
+  labelSecondary: "#B8B5AF",
   accent: "#9F0D12",
-  titleColor: "#E6D2B5",
-  skylight: "#FFEAC2",
-  baseboard: "#0F0C09",
-  trim: "#1A1613",
+  baseboard: "#242220",
+  trackColor: "#1C1A18",
 };
-
 
 // Module-level cached placeholder textures (NUA-ARTE red brush motif on ivory)
 let _phLoading: THREE.CanvasTexture | null = null;
 let _phError: THREE.CanvasTexture | null = null;
 let _plasterTex: THREE.CanvasTexture | null = null;
+let _floorTex: THREE.CanvasTexture | null = null;
 
 function makePlaceholder(kind: "loading" | "error"): THREE.CanvasTexture {
   const c = document.createElement("canvas");
   c.width = 512;
   c.height = 512;
   const ctx = c.getContext("2d")!;
-  ctx.fillStyle = "#ede5db";
+  ctx.fillStyle = "#F5F2ED";
   ctx.fillRect(0, 0, 512, 512);
+
   const g = ctx.createLinearGradient(0, 0, 512, 512);
-  g.addColorStop(0, "rgba(155,140,120,0.10)");
-  g.addColorStop(1, "rgba(200,190,175,0.05)");
+  g.addColorStop(0, "rgba(212, 175, 120, 0.15)");
+  g.addColorStop(1, "rgba(159, 13, 18, 0.08)");
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, 512, 512);
+
   ctx.strokeStyle = "#9F0D12";
   ctx.lineCap = "round";
   ctx.globalAlpha = 0.85;
-  ctx.lineWidth = 34;
+  ctx.lineWidth = 32;
   ctx.beginPath();
   ctx.moveTo(96, 180);
   ctx.bezierCurveTo(200, 120, 320, 260, 420, 200);
   ctx.stroke();
+
   ctx.globalAlpha = 0.55;
-  ctx.lineWidth = 22;
+  ctx.lineWidth = 20;
   ctx.beginPath();
   ctx.moveTo(110, 320);
   ctx.bezierCurveTo(220, 380, 340, 260, 410, 340);
   ctx.stroke();
+
   ctx.globalAlpha = 1;
-  ctx.fillStyle = "#1a1613";
-  ctx.font = "600 22px 'Hanken Grotesk', system-ui, sans-serif";
+  ctx.fillStyle = "#1A1715";
+  ctx.font = "600 20px system-ui, sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText(kind === "error" ? "IMAGE UNAVAILABLE" : "LOADING…", 256, 476);
+  ctx.fillText(kind === "error" ? "IMAGE UNAVAILABLE" : "LOADING ARTWORK…", 256, 460);
+
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 8;
@@ -144,10 +151,10 @@ function getPlaceholder(kind: "loading" | "error"): THREE.CanvasTexture {
   return (_phError ??= makePlaceholder("error"));
 }
 
-// Subtle plaster noise texture (grayscale, tiles)
+// Subtle natural plaster grain for museum walls
 function getPlasterTexture(): THREE.CanvasTexture {
   if (_plasterTex) return _plasterTex;
-  const size = 256;
+  const size = 512;
   const c = document.createElement("canvas");
   c.width = size;
   c.height = size;
@@ -156,7 +163,7 @@ function getPlasterTexture(): THREE.CanvasTexture {
   ctx.fillRect(0, 0, size, size);
   const img = ctx.getImageData(0, 0, size, size);
   for (let i = 0; i < img.data.length; i += 4) {
-    const n = 128 + (Math.random() - 0.5) * 24;
+    const n = 128 + (Math.random() - 0.5) * 16;
     img.data[i] = n;
     img.data[i + 1] = n;
     img.data[i + 2] = n;
@@ -164,171 +171,245 @@ function getPlasterTexture(): THREE.CanvasTexture {
   ctx.putImageData(img, 0, 0);
   const tex = new THREE.CanvasTexture(c);
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(6, 3);
+  tex.repeat.set(8, 4);
   tex.anisotropy = 4;
   _plasterTex = tex;
   return tex;
 }
 
-function Walls({ p }: { p: Palette }) {
-  const plaster = useMemo(() => getPlasterTexture(), []);
+// Low-sheen charcoal concrete — the polished dark floor from the reference gallery.
+function getFloorTexture(): THREE.CanvasTexture {
+  if (_floorTex) return _floorTex;
+  const size = 512;
+  const c = document.createElement("canvas");
+  c.width = size;
+  c.height = size;
+  const ctx = c.getContext("2d")!;
+  ctx.fillStyle = "#1A1B1C";
+  ctx.fillRect(0, 0, size, size);
+
+  // Fine concrete variation, kept intentionally subtle so it reflects the artwork light.
+  for (let i = 0; i < 6000; i++) {
+    const x = Math.random() * size;
+    const y = Math.random() * size;
+    const r = Math.random() * 1.2 + 0.3;
+    const tone = Math.random() > 0.5 ? 28 : 38;
+    ctx.fillStyle = `rgb(${tone}, ${tone}, ${tone + 1})`;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(10, 12);
+  tex.anisotropy = 8;
+  _floorTex = tex;
+  return tex;
+}
+
+// Architectural museum gallery pavilion
+function GalleryArchitecture({ p }: { p: Palette }) {
   const wallMat = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
         color: p.wall,
-        roughness: 0.96,
+        roughness: 0.8,
         metalness: 0,
-        roughnessMap: plaster,
       }),
-    [p.wall, plaster],
+    [p.wall],
   );
-  const wallAccentMat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: p.wallAccent, roughness: 0.95 }),
-    [p.wallAccent],
-  );
-  const floorMat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: p.floor, roughness: 0.82, metalness: 0.08 }),
-    [p.floor],
-  );
+
   const ceilMat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: p.ceiling, roughness: 1 }),
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: p.ceiling,
+        roughness: 0.95,
+      }),
     [p.ceiling],
   );
+
   const baseboardMat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: p.baseboard, roughness: 0.7 }),
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: p.baseboard,
+        roughness: 0.55,
+        metalness: 0.25,
+      }),
     [p.baseboard],
   );
-  const trimMat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: p.trim, roughness: 0.7 }),
-    [p.trim],
-  );
-  const seamMat = useMemo(
-    () => new THREE.MeshBasicMaterial({ color: p.wallShadow, toneMapped: false, transparent: true, opacity: 0.55 }),
-    [p.wallShadow],
+
+  const trackMat = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: p.trackColor,
+        roughness: 0.45,
+        metalness: 0.6,
+      }),
+    [p.trackColor],
   );
 
   const W = ROOM.w;
   const H = ROOM.h;
   const D = ROOM.d;
-
-  // Wall factory with panels + baseboard + top trim
-  const Wall = ({
-    position,
-    rotation,
-    length,
-    accent = false,
-  }: {
-    position: [number, number, number];
-    rotation: [number, number, number];
-    length: number;
-    accent?: boolean;
-  }) => {
-    const mat = accent ? wallAccentMat : wallMat;
-    // seam positions (every ~length/3)
-    const seams = [-length / 6, length / 6];
-    return (
-      <group position={position} rotation={rotation}>
-        <mesh material={mat} receiveShadow>
-          <planeGeometry args={[length, H]} />
-        </mesh>
-        {/* baseboard */}
-        <mesh position={[0, -H / 2 + 0.09, 0.02]} material={baseboardMat}>
-          <boxGeometry args={[length, 0.18, 0.04]} />
-        </mesh>
-        {/* top trim */}
-        <mesh position={[0, H / 2 - 0.06, 0.015]} material={trimMat}>
-          <boxGeometry args={[length, 0.06, 0.03]} />
-        </mesh>
-        {/* vertical seams */}
-        {seams.map((x, i) => (
-          <mesh key={i} position={[x, 0, 0.011]} material={seamMat}>
-            <planeGeometry args={[0.012, H - 0.3]} />
-          </mesh>
-        ))}
-      </group>
-    );
-  };
+  const wallThick = 0.4;
 
   return (
     <group>
-      {/* Polished floor */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow material={floorMat}>
+      {/* Blurred mirror-polished gallery floor — reflects lights and art without becoming a sharp mirror. */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
         <planeGeometry args={[W, D]} />
+        <MeshReflectorMaterial
+          color={p.floor}
+          resolution={512}
+          blur={[350, 110]}
+          mixBlur={1}
+          mixStrength={1.45}
+          mirror={0.48}
+          roughness={0.28}
+          metalness={0.7}
+          depthScale={0.35}
+          minDepthThreshold={0.2}
+          maxDepthThreshold={1.4}
+        />
       </mesh>
-      {/* Soft reflective sheen strip down the center of the floor */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.002, 0]}>
-        <planeGeometry args={[W * 0.55, D]} />
-        <meshBasicMaterial color={p.skylight} transparent opacity={0.045} toneMapped={false} />
-      </mesh>
+
       {/* Ceiling */}
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, H, 0]} material={ceilMat}>
         <planeGeometry args={[W, D]} />
       </mesh>
 
-      {/* Ceiling track rails (two long rails along the room) */}
-      {[-W / 2 + 3.5, W / 2 - 3.5].map((x) => (
-        <mesh key={`rail-${x}`} position={[x, H - 0.08, 0]}>
-          <boxGeometry args={[0.06, 0.06, D - 1]} />
-          <meshStandardMaterial color="#0A0806" roughness={0.4} metalness={0.6} />
+      {/* Exposed black ceiling grid, matching a working contemporary gallery. */}
+      <group position={[0, H - 0.05, 0]}>
+        {Array.from({ length: 21 }, (_, i) => (
+          <mesh key={`ceiling-x-${i}`} position={[-W / 2 + i, 0, 0]} material={trackMat}>
+            <boxGeometry args={[0.035, 0.07, D]} />
+          </mesh>
+        ))}
+        {Array.from({ length: 25 }, (_, i) => (
+          <mesh key={`ceiling-z-${i}`} position={[0, 0, -D / 2 + i]} material={trackMat}>
+            <boxGeometry args={[W, 0.07, 0.035]} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* Minimalist suspended black lighting tracks parallel to all 4 walls (2.2m from wall) */}
+      <group position={[0, H - 0.12, 0]}>
+        {/* North track */}
+        <mesh position={[0, 0, -D / 2 + 2.2]}>
+          <boxGeometry args={[W - 4.4, 0.05, 0.05]} />
+          <primitive object={trackMat} attach="material" />
         </mesh>
-      ))}
-      {/* Center ceiling beam */}
-      <mesh position={[0, H - 0.06, 0]}>
-        <boxGeometry args={[0.12, 0.12, D - 1]} />
-        <meshStandardMaterial color="#0A0806" roughness={0.5} metalness={0.5} />
+        {/* South track */}
+        <mesh position={[0, 0, D / 2 - 2.2]}>
+          <boxGeometry args={[W - 4.4, 0.05, 0.05]} />
+          <primitive object={trackMat} attach="material" />
+        </mesh>
+        {/* West track */}
+        <mesh position={[-W / 2 + 2.2, 0, 0]}>
+          <boxGeometry args={[0.05, 0.05, D - 4.4]} />
+          <primitive object={trackMat} attach="material" />
+        </mesh>
+        {/* East track */}
+        <mesh position={[W / 2 - 2.2, 0, 0]}>
+          <boxGeometry args={[0.05, 0.05, D - 4.4]} />
+          <primitive object={trackMat} attach="material" />
+        </mesh>
+      </group>
+
+      {/* SOLID ARCHITECTURAL WALLS */}
+      {/* North Feature Wall (Back, z = -12) */}
+      <mesh position={[0, H / 2, -D / 2 - wallThick / 2]} receiveShadow material={wallMat}>
+        <boxGeometry args={[W, H, wallThick]} />
+      </mesh>
+      {/* Entrance wall: split into two wings so visitors visibly enter the gallery. */}
+      <mesh position={[-6.6, H / 2, D / 2 + wallThick / 2]} receiveShadow material={wallMat}>
+        <boxGeometry args={[6.8, H, wallThick]} />
+      </mesh>
+      <mesh position={[6.6, H / 2, D / 2 + wallThick / 2]} receiveShadow material={wallMat}>
+        <boxGeometry args={[6.8, H, wallThick]} />
+      </mesh>
+      {/* West Wall (Left, x = -10) */}
+      <mesh position={[-W / 2 - wallThick / 2, H / 2, 0]} receiveShadow material={wallMat}>
+        <boxGeometry args={[wallThick, H, D]} />
+      </mesh>
+      {/* East Wall (Right, x = 10) */}
+      <mesh position={[W / 2 + wallThick / 2, H / 2, 0]} receiveShadow material={wallMat}>
+        <boxGeometry args={[wallThick, H, D]} />
       </mesh>
 
-      {/* Back wall — hero feature wall */}
-      <Wall position={[0, H / 2, -D / 2]} rotation={[0, 0, 0]} length={W} />
-      {/* Front wall */}
-      <Wall position={[0, H / 2, D / 2]} rotation={[0, Math.PI, 0]} length={W} />
-      {/* Left wall (accent) */}
-      <Wall position={[-W / 2, H / 2, 0]} rotation={[0, Math.PI / 2, 0]} length={D} accent />
-      {/* Right wall (accent) */}
-      <Wall position={[W / 2, H / 2, 0]} rotation={[0, -Math.PI / 2, 0]} length={D} accent />
-
-      {/* Central bench (museum viewing bench, not a plinth) */}
-      <mesh position={[0, 0.22, 0]} castShadow receiveShadow>
-        <boxGeometry args={[2.6, 0.08, 0.55]} />
-        <meshStandardMaterial color="#1A1613" roughness={0.4} metalness={0.15} />
+      {/* Freestanding return wall creates the second room beyond the entrance. */}
+      <mesh position={[-3.7, H / 2, 3.4]} receiveShadow material={wallMat}>
+        <boxGeometry args={[wallThick, H, 9.2]} />
       </mesh>
-      {[-1.15, 1.15].map((x) => (
-        <mesh key={`leg-${x}`} position={[x, 0.09, 0]} castShadow>
-          <boxGeometry args={[0.06, 0.18, 0.5]} />
-          <meshStandardMaterial color="#0A0806" roughness={0.5} metalness={0.4} />
-        </mesh>
-      ))}
+
+      {/* Deep indigo drapery marks the passage into the next gallery wing. */}
+      <group position={[-2.7, H / 2, -D / 2 + 0.03]}>
+        {Array.from({ length: 12 }, (_, i) => (
+          <mesh key={`curtain-fold-${i}`} position={[-0.72 + i * 0.13, 0, 0.012]}>
+            <boxGeometry args={[0.1, H - 1.0, 0.06]} />
+            <meshStandardMaterial color={i % 2 ? "#10264D" : "#071A3B"} roughness={0.82} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* Continuous Architectural Baseboards */}
+      {/* North baseboard */}
+      <mesh position={[0, 0.06, -D / 2 + 0.02]} material={baseboardMat}>
+        <boxGeometry args={[W, 0.12, 0.04]} />
+      </mesh>
+      {/* South baseboard */}
+      <mesh position={[0, 0.06, D / 2 - 0.02]} material={baseboardMat}>
+        <boxGeometry args={[W, 0.12, 0.04]} />
+      </mesh>
+      {/* West baseboard */}
+      <mesh position={[-W / 2 + 0.02, 0.06, 0]} material={baseboardMat}>
+        <boxGeometry args={[0.04, 0.12, D]} />
+      </mesh>
+      {/* East baseboard */}
+      <mesh position={[W / 2 - 0.02, 0.06, 0]} material={baseboardMat}>
+        <boxGeometry args={[0.04, 0.12, D]} />
+      </mesh>
+
+
     </group>
   );
 }
 
-// Visible ceiling-mounted spot can (visual prop only; light is emitted by ArtworkFrame's spotLight)
-function CeilingCan({
-  position,
-  aim,
+// Ceiling Track Spotlight Can Fixture
+function TrackLightFixture({
+  trackPos,
+  targetPos,
   color,
 }: {
-  position: [number, number, number];
-  aim: [number, number, number];
+  trackPos: [number, number, number];
+  targetPos: [number, number, number];
   color: string;
 }) {
-  const canRef = useRef<THREE.Group>(null);
+  const headRef = useRef<THREE.Group>(null);
   useEffect(() => {
-    if (canRef.current) canRef.current.lookAt(new THREE.Vector3(...aim));
-  }, [aim]);
+    if (headRef.current) {
+      headRef.current.lookAt(new THREE.Vector3(...targetPos));
+    }
+  }, [targetPos]);
+
   return (
-    <group position={position}>
-      <mesh position={[0, 0.09, 0]}>
-        <cylinderGeometry args={[0.018, 0.018, 0.18, 8]} />
-        <meshStandardMaterial color="#0A0806" roughness={0.5} metalness={0.6} />
+    <group position={trackPos}>
+      {/* Track mounting clip */}
+      <mesh position={[0, 0.05, 0]}>
+        <boxGeometry args={[0.06, 0.06, 0.06]} />
+        <meshStandardMaterial color="#111111" roughness={0.4} metalness={0.7} />
       </mesh>
-      <group ref={canRef} position={[0, 0, 0]}>
+      {/* Swivel head */}
+      <group ref={headRef} position={[0, 0, 0]}>
         <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.065, 0.085, 0.2, 16]} />
-          <meshStandardMaterial color="#050608" roughness={0.45} metalness={0.55} />
+          <cylinderGeometry args={[0.045, 0.06, 0.16, 16]} />
+          <meshStandardMaterial color="#181818" roughness={0.35} metalness={0.65} />
         </mesh>
-        <mesh position={[0, 0, 0.1]}>
-          <circleGeometry args={[0.05, 20]} />
+        {/* Warm LED lens glow */}
+        <mesh position={[0, 0, 0.082]}>
+          <circleGeometry args={[0.038, 16]} />
           <meshBasicMaterial color={color} toneMapped={false} />
         </mesh>
       </group>
@@ -336,9 +417,7 @@ function CeilingCan({
   );
 }
 
-
-
-
+// Artwork Frame with Museum Plaque and Dedicated Spotlight
 function ArtworkFrame({
   art,
   entry,
@@ -354,21 +433,19 @@ function ArtworkFrame({
   const targetRef = useRef<THREE.Object3D>(null);
   const spotRef = useRef<THREE.SpotLight>(null);
 
-  // Artwork image material: lighting-independent, stable, no shadow interaction,
-  // polygonOffset pulls it toward camera to eliminate z-fighting with backing plane.
+  // Artwork canvas material: lighting-independent, high-res SRGB, no z-fighting
   const mat = useMemo(() => {
     const m = new THREE.MeshBasicMaterial({
       color: 0xffffff,
       toneMapped: false,
       transparent: false,
-      opacity: 1,
       side: THREE.FrontSide,
       depthTest: true,
       depthWrite: true,
     });
     m.polygonOffset = true;
-    m.polygonOffsetFactor = -2;
-    m.polygonOffsetUnits = -2;
+    m.polygonOffsetFactor = -1;
+    m.polygonOffsetUnits = -1;
     return m;
   }, []);
 
@@ -398,46 +475,64 @@ function ArtworkFrame({
     }
   }, []);
 
-  const label = `${art.artist}${art.year ? ` · ${art.year}` : ""}${art.medium ? ` · ${art.medium}` : ""}`;
-  const plaqueW = Math.max(1.6, art.width * 0.9);
+  const label = [art.artist, art.year, art.medium].filter(Boolean).join(" · ");
+  const plaqueW = Math.max(1.4, Math.min(art.width * 0.85, 2.0));
 
-  // Depth layering (local +Z = into the room, away from the wall):
-  //   wall surface        : z = 0
-  //   outer frame box     : z ∈ [0.00, 0.05]  (depth 0.05, centered at 0.025)
-  //   inner matte plane   : z = 0.055
-  //   artwork image plane : z = 0.085  (+ polygonOffset)
-  //   plaque group        : z = 0.06
-  const ceilingLocalY = ROOM.h - 0.2 - art.position[1];
+  // Ceiling track position relative to this artwork
+  const ceilingY = ROOM.h - 0.15 - art.position[1];
+
   return (
     <group position={art.position} rotation={[0, art.rotationY, 0]}>
-      {/* Ceiling-mounted spot fixture (visual) above the artwork */}
-      <CeilingCan
-        position={[0, ceilingLocalY, 1.4]}
-        aim={[0, 0, 0.1]}
-        color={palette.skylight}
+      {/* Ceiling Track Spotlight Can */}
+      <TrackLightFixture
+        trackPos={[0, ceilingY, 2.2]}
+        targetPos={[0, 0, 0]}
+        color={palette.spotColor}
       />
 
-      {/* Outer frame */}
-      <mesh position={[0, 0, 0.025]} castShadow receiveShadow>
-        <boxGeometry args={[art.width + 0.22, art.height + 0.22, 0.05]} />
-        <meshStandardMaterial color={palette.frame} roughness={0.55} metalness={0.1} />
-      </mesh>
-      {/* Inner matte (backing) — sits clearly in front of the frame face */}
-      <mesh position={[0, 0, 0.055]} receiveShadow>
-        <planeGeometry args={[art.width + 0.06, art.height + 0.06]} />
+      {/* Target object for the spotlight */}
+      <object3D ref={targetRef} position={[0, 0, 0.04]} />
+
+      {/* Dedicated spotlight from the ceiling track */}
+      <spotLight
+        ref={spotRef}
+        position={[0, ceilingY, 2.2]}
+        angle={0.38}
+        penumbra={0.7}
+        intensity={hovered ? palette.spotIntensity * 1.3 : palette.spotIntensity}
+        distance={9.5}
+        decay={1.3}
+        color={palette.spotColor}
+        castShadow
+        shadow-mapSize-width={512}
+        shadow-mapSize-height={512}
+        shadow-bias={-0.0004}
+      />
+
+      {/* Outer Museum Frame Box */}
+      <mesh position={[0, 0, 0.02]} castShadow receiveShadow>
+        <boxGeometry args={[art.width + 0.16, art.height + 0.16, 0.04]} />
         <meshStandardMaterial
-          color={hovered ? "#C96D6D" : palette.matte}
-          roughness={0.65}
-          emissive={hovered ? "#9F0D12" : "#000000"}
-          emissiveIntensity={hovered ? 0.2 : 0}
-          polygonOffset
-          polygonOffsetFactor={1}
-          polygonOffsetUnits={1}
+          color={palette.frameColor}
+          roughness={0.45}
+          metalness={0.12}
         />
       </mesh>
-      {/* Artwork image plane — clearly in front, no shadows, no lighting dependence */}
+
+      {/* Archival Matte Board */}
+      <mesh position={[0, 0, 0.041]} receiveShadow>
+        <planeGeometry args={[art.width + 0.04, art.height + 0.04]} />
+        <meshStandardMaterial
+          color={hovered ? "#C96D6D" : palette.matteColor}
+          roughness={0.75}
+          emissive={hovered ? "#9F0D12" : "#000000"}
+          emissiveIntensity={hovered ? 0.25 : 0}
+        />
+      </mesh>
+
+      {/* Artwork Canvas Plane */}
       <mesh
-        position={[0, 0, 0.085]}
+        position={[0, 0, 0.043]}
         material={mat}
         castShadow={false}
         receiveShadow={false}
@@ -454,103 +549,58 @@ function ArtworkFrame({
         <planeGeometry args={[art.width, art.height]} />
       </mesh>
 
-      {/* Label plaque — separated below the frame, forward of the wall */}
-      <group position={[0, -art.height / 2 - 0.36, 0.06]}>
-        <mesh>
-          <planeGeometry args={[plaqueW, 0.38]} />
-          <meshBasicMaterial color={palette.plaque} transparent opacity={palette.plaqueOpacity} toneMapped={false} />
+      {/* Refined Museum Label Plaque Beneath Frame */}
+      <group position={[0, -art.height / 2 - 0.21, 0.018]}>
+        {/* Plaque backplate */}
+        <mesh castShadow receiveShadow>
+          <boxGeometry args={[plaqueW, 0.24, 0.035]} />
+          <meshStandardMaterial
+            color={palette.plaqueBg}
+            roughness={0.5}
+            metalness={0.2}
+          />
         </mesh>
-        <mesh position={[-plaqueW / 2 + 0.02, 0, 0.005]}>
-          <planeGeometry args={[0.03, 0.38]} />
+        {/* Brand accent red bar */}
+        <mesh position={[-plaqueW / 2 + 0.015, 0, 0.019]}>
+          <boxGeometry args={[0.025, 0.24, 0.004]} />
           <meshBasicMaterial color={palette.accent} toneMapped={false} />
         </mesh>
-        <Text
-          position={[-plaqueW / 2 + 0.1, 0.08, 0.008]}
-          fontSize={0.1}
-          color={palette.labelPrimary}
-          anchorX="left"
-          anchorY="middle"
-          maxWidth={plaqueW - 0.15}
-        >
-          {art.title.toUpperCase()}
-        </Text>
-        <Text
-          position={[-plaqueW / 2 + 0.1, -0.08, 0.008]}
-          fontSize={0.058}
-          color={palette.labelSecondary}
-          anchorX="left"
-          anchorY="middle"
-          maxWidth={plaqueW - 0.15}
-        >
-          {label}
-        </Text>
+        {/* DOM labels avoid a remote font fetch that could suspend the WebGL scene. */}
+        <Html position={[0, 0, 0.022]} transform distanceFactor={7} style={{ pointerEvents: "none" }}>
+          <div
+            style={{ width: `${Math.max(112, plaqueW * 118)}px`, transform: "translate(-50%, -50%)", fontFamily: "system-ui, sans-serif" }}
+          >
+            <p style={{ color: palette.labelPrimary, fontSize: "9px", fontWeight: 700, letterSpacing: "0.08em", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {art.title.toUpperCase()}
+            </p>
+            <p style={{ color: palette.labelSecondary, fontSize: "7px", letterSpacing: "0.04em", margin: "3px 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {label}
+            </p>
+          </div>
+        </Html>
       </group>
-
-      <object3D ref={targetRef} position={[0, 0, 0.085]} />
-      {/* Focused warm LED spot from the ceiling track toward the artwork */}
-      <spotLight
-        ref={spotRef}
-        position={[0, ROOM.h - 0.2 - art.position[1], 1.4]}
-        angle={0.32}
-        penumbra={0.9}
-        intensity={hovered ? palette.spot * 1.35 : palette.spot}
-        distance={9}
-        decay={1.25}
-        color={palette.skylight}
-        castShadow
-        shadow-mapSize-width={512}
-        shadow-mapSize-height={512}
-        shadow-bias={-0.0005}
-      />
-      {/* Subtle volumetric-feel light cone */}
-      <mesh
-        position={[0, (ROOM.h - 0.2 - art.position[1]) / 2, 0.8]}
-        rotation={[0, 0, 0]}
-      >
-        <coneGeometry args={[0.9, ROOM.h - 0.2 - art.position[1], 24, 1, true]} />
-        <meshBasicMaterial
-          color={palette.skylight}
-          transparent
-          opacity={hovered ? 0.08 : 0.045}
-          side={THREE.DoubleSide}
-          depthWrite={false}
-          toneMapped={false}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
-      {/* Warm wall-glow halo behind the frame */}
-      <mesh position={[0, 0, -0.01]}>
-        <planeGeometry args={[art.width * 2.4, art.height * 2.2]} />
-        <meshBasicMaterial
-          color={palette.skylight}
-          transparent
-          opacity={hovered ? 0.13 : 0.08}
-          depthWrite={false}
-          toneMapped={false}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
-
     </group>
   );
 }
 
-function WallWash({ palette }: { palette: Palette }) {
-  // Soft wall washes on the two long side walls to sculpt depth
+// Ambient Perimeter Wall Washes
+function PerimeterWallWash({ palette }: { palette: Palette }) {
   const c = palette.hemiSky;
-  const i = palette.wallWash;
+  const intensity = 0.45;
+  const y = ROOM.h - 0.6;
   return (
     <>
-      <pointLight position={[-ROOM.w / 2 + 1, ROOM.h - 0.6, -6]} intensity={i} distance={12} color={c} decay={2} />
-      <pointLight position={[-ROOM.w / 2 + 1, ROOM.h - 0.6, 6]} intensity={i} distance={12} color={c} decay={2} />
-      <pointLight position={[ROOM.w / 2 - 1, ROOM.h - 0.6, -6]} intensity={i} distance={12} color={c} decay={2} />
-      <pointLight position={[ROOM.w / 2 - 1, ROOM.h - 0.6, 6]} intensity={i} distance={12} color={c} decay={2} />
-      <pointLight position={[0, ROOM.h - 0.6, -ROOM.d / 2 + 1]} intensity={i * 0.9} distance={12} color={c} decay={2} />
-      <pointLight position={[0, ROOM.h - 0.6, ROOM.d / 2 - 1]} intensity={i * 0.9} distance={12} color={c} decay={2} />
+      <pointLight position={[-ROOM.w / 2 + 2, y, -6]} intensity={intensity} distance={14} color={c} decay={2} />
+      <pointLight position={[-ROOM.w / 2 + 2, y, 6]} intensity={intensity} distance={14} color={c} decay={2} />
+      <pointLight position={[ROOM.w / 2 - 2, y, -6]} intensity={intensity} distance={14} color={c} decay={2} />
+      <pointLight position={[ROOM.w / 2 - 2, y, 6]} intensity={intensity} distance={14} color={c} decay={2} />
+      <pointLight position={[0, y, -ROOM.d / 2 + 2]} intensity={intensity * 0.9} distance={14} color={c} decay={2} />
+      <pointLight position={[0, y, ROOM.d / 2 - 2]} intensity={intensity * 0.9} distance={14} color={c} decay={2} />
     </>
   );
 }
 
+// First-Person Player Controller
 function Player({
   zoneTarget,
   onZoneReached,
@@ -564,9 +614,11 @@ function Player({
   const keys = useRef<Record<string, boolean>>({});
   const velocity = useRef(new THREE.Vector3());
 
+  // Initial view mirrors the reference: a diagonal sightline across the near wall,
+  // long white side wall, dark floor, and curtain beyond.
   useEffect(() => {
-    camera.position.set(0, 1.65, 10);
-    camera.lookAt(0, 1.65, 0);
+    camera.position.set(-5.8, 1.65, 7.5);
+    camera.lookAt(3.2, 1.7, -3.8);
   }, [camera]);
 
   useEffect(() => {
@@ -586,16 +638,19 @@ function Player({
     };
   }, [setKeysActive]);
 
+  // When a zone is chosen, smoothly place the camera directly facing that zone's artworks
   useEffect(() => {
     if (zoneTarget == null) return;
-    const [x, y, z] = ZONE_POSITIONS[zoneTarget];
-    camera.position.set(x, y, z);
-    camera.lookAt(0, 1.65, 0);
+    const vp = ZONE_VIEWPOINTS[zoneTarget];
+    if (vp) {
+      camera.position.set(...vp.pos);
+      camera.lookAt(...vp.lookAt);
+    }
     onZoneReached();
   }, [zoneTarget, camera, onZoneReached]);
 
   useFrame((_, delta) => {
-    const speed = 4;
+    const speed = 4.2;
     const dir = new THREE.Vector3();
     const fwd = new THREE.Vector3();
     camera.getWorldDirection(fwd);
@@ -612,25 +667,28 @@ function Player({
       dir.normalize().multiplyScalar(speed * delta);
       velocity.current.copy(dir);
     } else {
-      velocity.current.multiplyScalar(0.8);
+      velocity.current.multiplyScalar(0.82);
     }
     camera.position.add(velocity.current);
-    const m = 0.6;
-    camera.position.x = THREE.MathUtils.clamp(camera.position.x, -ROOM.w / 2 + m, ROOM.w / 2 - m);
-    camera.position.z = THREE.MathUtils.clamp(camera.position.z, -ROOM.d / 2 + m, ROOM.d / 2 - m);
+
+    // Keep camera safely inside gallery walls
+    const mx = 1.2;
+    const mz = 1.4;
+    camera.position.x = THREE.MathUtils.clamp(camera.position.x, -ROOM.w / 2 + mx, ROOM.w / 2 - mx);
+    camera.position.z = THREE.MathUtils.clamp(camera.position.z, -ROOM.d / 2 + mz, ROOM.d / 2 - mz);
     camera.position.y = 1.65;
   });
 
   return null;
 }
 
-function SceneRig({ exposure }: { exposure: number }) {
+function SceneRig() {
   const { gl } = useThree();
   useEffect(() => {
     gl.toneMapping = THREE.ACESFilmicToneMapping;
-    gl.toneMappingExposure = exposure;
+    gl.toneMappingExposure = 1.05;
     gl.outputColorSpace = THREE.SRGBColorSpace;
-  }, [gl, exposure]);
+  }, [gl]);
   return null;
 }
 
@@ -650,10 +708,8 @@ export default function VirtualMuseum({
   onLoadProgress?: (loaded: number, total: number, errors: number) => void;
 }) {
   const { theme } = useTheme();
-  // The 3D gallery keeps a single, always-well-lit look regardless of the
-  // site's light/dark toggle — switching the site to dark mode shouldn't
-  // plunge the museum interior into near-black walls/lighting.
-  const palette = LIGHT_PALETTE;
+  const { t } = useLanguage();
+  const palette = MUSEUM_PALETTE;
   const isDark = theme === "dark";
   const [locked, setLocked] = useState(false);
   const [entries, setEntries] = useState<Record<string, TexEntry>>(() =>
@@ -710,27 +766,29 @@ export default function VirtualMuseum({
     <div id="virtual-museum-viewport" className="absolute inset-0 h-full w-full">
       <Canvas
         shadows
-        camera={{ fov: 70, near: 0.1, far: 100, position: [0, 1.65, 10] }}
+        camera={{ fov: 58, near: 0.1, far: 100, position: [-5.8, 1.65, 7.5] }}
         gl={{ antialias: true, powerPreference: "high-performance" }}
         dpr={[1, 2]}
       >
-
-        <SceneRig exposure={palette.exposure} />
+        <SceneRig />
         <color attach="background" args={[palette.bg]} />
-        <fog attach="fog" args={[palette.bg, palette.fogNear, palette.fogFar]} />
-        <ambientLight intensity={palette.ambient} />
-        <hemisphereLight args={[palette.hemiSky, palette.hemiGround, palette.hemi]} />
+        <ambientLight intensity={palette.ambientIntensity} />
+        <hemisphereLight args={[palette.hemiSky, palette.hemiGround, palette.hemiIntensity]} />
+
+        {/* Diffuse Natural Skylight */}
         <directionalLight
-          position={[4, 12, 6]}
-          intensity={palette.directional}
+          position={[0, 10, 0]}
+          intensity={palette.directionalIntensity}
           color={palette.directionalColor}
           castShadow
           shadow-mapSize-width={1024}
           shadow-mapSize-height={1024}
           shadow-bias={-0.0005}
         />
-        <WallWash palette={palette} />
-        <Walls p={palette} />
+
+        <PerimeterWallWash palette={palette} />
+        <GalleryArchitecture p={palette} />
+
         {artworks.map((a) => (
           <ArtworkFrame
             key={a.id}
@@ -740,41 +798,43 @@ export default function VirtualMuseum({
             onSelect={onSelectArtwork}
           />
         ))}
-        <Text
-          position={[0, 3.2, -ROOM.d / 2 + 0.05]}
-          fontSize={0.3}
-          color={palette.titleColor}
-          anchorX="center"
-          letterSpacing={0.1}
-        >
-          THE VIRTUAL MUSEUM
-        </Text>
+
+        <Html position={[0, 4.2, -ROOM.d / 2 + 0.04]} transform sprite distanceFactor={10} style={{ pointerEvents: "none" }}>
+          <p
+            style={{ color: "#3A3632", fontFamily: "system-ui, sans-serif", fontSize: "12px", fontWeight: 700, letterSpacing: "0.16em", margin: 0, transform: "translate(-50%, -50%)", whiteSpace: "nowrap" }}
+          >
+            NUA-ARTE VIRTUAL MUSEUM
+          </p>
+        </Html>
+
         <Player
           zoneTarget={zoneTarget}
           onZoneReached={onZoneReached}
           setKeysActive={(k) => onKeysChange?.(k)}
         />
+
         <PointerLockControls
           selector="#virtual-museum-viewport"
           onLock={() => setLocked(true)}
           onUnlock={() => setLocked(false)}
         />
       </Canvas>
+
       {!locked && (
         <div
           className="absolute inset-0 flex items-center justify-center pointer-events-none"
           style={{
             background: isDark
-              ? "radial-gradient(circle at center, rgba(7,10,13,0.25), rgba(7,10,13,0.6))"
-              : "radial-gradient(circle at center, rgba(245,242,238,0.15), rgba(245,242,238,0.45))",
+              ? "radial-gradient(circle at center, rgba(7,10,13,0.3), rgba(7,10,13,0.65))"
+              : "radial-gradient(circle at center, rgba(245,242,238,0.2), rgba(245,242,238,0.5))",
           }}
         >
           <div
             className="px-6 py-5 text-center w-[min(360px,88%)] backdrop-blur-md shadow-2xl"
             style={{
-              background: isDark ? "rgba(7,10,13,0.76)" : "rgba(245,242,238,0.86)",
+              background: isDark ? "rgba(7,10,13,0.8)" : "rgba(245,242,238,0.88)",
               border: isDark
-                ? "1px solid rgba(245,242,238,0.12)"
+                ? "1px solid rgba(245,242,238,0.14)"
                 : "1px solid rgba(17,17,17,0.12)",
               borderLeft: "2px solid #9F0D12",
             }}
@@ -783,18 +843,18 @@ export default function VirtualMuseum({
               className="font-label-caps text-[10px] tracking-[0.35em] mb-2"
               style={{ color: "#9F0D12" }}
             >
-              IMMERSIVE MODE
+              {t("IMMERSIVE MODE")}
             </p>
             <p
               className="font-headline-sm text-base md:text-lg uppercase tracking-wider mb-3"
               style={{ color: isDark ? "#F5F2EE" : "#111111" }}
             >
-              Click to enter the museum
+              {t("Click to enter the museum")}
             </p>
             <div className="flex flex-wrap justify-center gap-1.5 text-[9px] font-label-caps tracking-wider">
-              {["WASD · MOVE", "MOUSE · LOOK", "ESC · EXIT"].map((t) => (
+              {["WASD · MOVE", "MOUSE · LOOK", "ESC · EXIT"].map((ctrl) => (
                 <span
-                  key={t}
+                  key={ctrl}
                   className="px-2 py-1 border"
                   style={{
                     color: isDark ? "#D9D2CC" : "#4B5560",
@@ -802,7 +862,7 @@ export default function VirtualMuseum({
                     background: isDark ? "rgba(245,242,238,0.04)" : "rgba(17,17,17,0.03)",
                   }}
                 >
-                  {t}
+                  {t(ctrl)}
                 </span>
               ))}
             </div>

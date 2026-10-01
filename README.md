@@ -1,6 +1,6 @@
-# NU-ART Collective — Next.js + Tailwind
+# NUA-ARTE Collective — Next.js + Tailwind
 
-Full port of the NU-ART Collective site from TanStack Start to Next.js (App
+Full port of the NUA-ARTE Collective site from TanStack Start to Next.js (App
 Router), styled entirely with Tailwind CSS v4 — no separate/external CSS
 files. Every design token, keyframe, and one-off utility class lives in the
 single Tailwind entry point: `app/globals.css`.
