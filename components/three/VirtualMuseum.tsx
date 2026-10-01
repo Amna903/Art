@@ -73,7 +73,9 @@ type Palette = {
 };
 
 const MUSEUM_PALETTE: Palette = {
-  wall: "#F4F3F0",
+  // Smooth, pale mineral paint — closer to a finished contemporary gallery
+  // wall than raw grey plaster.
+  wall: "#F0F0EE",
   wallPlaster: "#E9E8E4",
   floor: "#171819",
   ceiling: "#090A0B",
@@ -196,7 +198,8 @@ function getPlasterTexture(): THREE.CanvasTexture {
   return tex;
 }
 
-// Low-sheen charcoal concrete — the polished dark floor from the reference gallery.
+// Polished charcoal concrete with extremely fine aggregate. Large-format joints
+// are modelled separately below, so they remain crisp beneath reflections.
 function getFloorTexture(): THREE.CanvasTexture {
   if (_floorTex) return _floorTex;
   const size = 512;
@@ -231,15 +234,17 @@ function getFloorTexture(): THREE.CanvasTexture {
 // Architectural museum gallery pavilion
 function GalleryArchitecture({ p }: { p: Palette }) {
   const plasterTexture = useMemo(() => getPlasterTexture(), []);
+  const floorTexture = useMemo(() => getFloorTexture(), []);
   const wallMat = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
         color: p.wall,
-        roughness: 0.9,
-        metalness: 0,
+        // Museum paint has a soft satin sheen; use only a tiny bump so the
+        // wall reads as professionally finished, not rough plaster.
+        roughness: 0.48,
+        metalness: 0.03,
         bumpMap: plasterTexture,
-        bumpScale: 0.045,
-        roughnessMap: plasterTexture,
+        bumpScale: 0.012,
       }),
     [p.wall, plasterTexture],
   );
@@ -285,18 +290,36 @@ function GalleryArchitecture({ p }: { p: Palette }) {
         <planeGeometry args={[W, D]} />
         <MeshReflectorMaterial
           color={p.floor}
+          map={floorTexture}
           resolution={512}
-          blur={[350, 110]}
-          mixBlur={1}
-          mixStrength={1.45}
-          mirror={0.48}
-          roughness={0.28}
-          metalness={0.7}
+          blur={[280, 85]}
+          mixBlur={0.86}
+          mixStrength={1.15}
+          mirror={0.55}
+          roughness={0.2}
+          metalness={0.46}
           depthScale={0.35}
           minDepthThreshold={0.2}
           maxDepthThreshold={1.4}
         />
       </mesh>
+
+      {/* Fine expansion joints: a gallery-grade polished concrete floor reads
+          in large slabs, not as one endless featureless dark plane. */}
+      <group position={[0, 0.006, 0]}>
+        {[-7.5, -5, -2.5, 0, 2.5, 5, 7.5].map((x) => (
+          <mesh key={`floor-joint-x-${x}`} position={[x, 0, 0]}>
+            <boxGeometry args={[0.018, 0.006, D]} />
+            <meshStandardMaterial color="#090A0A" roughness={0.32} metalness={0.15} />
+          </mesh>
+        ))}
+        {[-9, -6, -3, 0, 3, 6, 9].map((z) => (
+          <mesh key={`floor-joint-z-${z}`} position={[0, 0, z]}>
+            <boxGeometry args={[W, 0.006, 0.018]} />
+            <meshStandardMaterial color="#090A0A" roughness={0.32} metalness={0.15} />
+          </mesh>
+        ))}
+      </group>
 
       {/* Ceiling */}
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, H, 0]} material={ceilMat}>
@@ -633,7 +656,7 @@ function ArtworkFrame({
           <meshBasicMaterial color={palette.accent} toneMapped={false} />
         </mesh>
         {/* DOM labels avoid a remote font fetch that could suspend the WebGL scene. */}
-        <Html position={[0, 0, 0.022]} transform distanceFactor={7} style={{ pointerEvents: "none" }}>
+        <Html position={[0, 0, 0.022]} transform occlude distanceFactor={7} style={{ pointerEvents: "none" }}>
           <div
             style={{ width: `${Math.max(112, plaqueW * 118)}px`, transform: "translate(-50%, -50%)", fontFamily: "system-ui, sans-serif" }}
           >
@@ -736,6 +759,7 @@ function Player({
     } else {
       velocity.current.multiplyScalar(0.82);
     }
+    const previousPosition = camera.position.clone();
     camera.position.add(velocity.current);
 
     // Keep camera safely inside gallery walls
@@ -743,6 +767,32 @@ function Player({
     const mz = 1.4;
     camera.position.x = THREE.MathUtils.clamp(camera.position.x, -ROOM.w / 2 + mx, ROOM.w / 2 - mx);
     camera.position.z = THREE.MathUtils.clamp(camera.position.z, -ROOM.d / 2 + mz, ROOM.d / 2 - mz);
+
+    // The freestanding return wall is a real barrier, not only decoration.
+    // Keep a small visitor radius so the camera cannot clip through it or see
+    // DOM plaque labels on its far side while walking.
+    const visitorRadius = 0.45;
+    const returnWall = {
+      minX: -3.7 - 0.2 - visitorRadius,
+      maxX: -3.7 + 0.2 + visitorRadius,
+      minZ: 3.4 - 9.2 / 2 - visitorRadius,
+      maxZ: 3.4 + 9.2 / 2 + visitorRadius,
+    };
+    const insideReturnWall =
+      camera.position.x >= returnWall.minX &&
+      camera.position.x <= returnWall.maxX &&
+      camera.position.z >= returnWall.minZ &&
+      camera.position.z <= returnWall.maxZ;
+
+    if (insideReturnWall) {
+      // Resolve against the face that the visitor approached, allowing them
+      // to walk around either end but never pass through the wall itself.
+      if (previousPosition.x >= returnWall.maxX) camera.position.x = returnWall.maxX;
+      else if (previousPosition.x <= returnWall.minX) camera.position.x = returnWall.minX;
+      else if (previousPosition.z <= returnWall.minZ) camera.position.z = returnWall.minZ;
+      else camera.position.z = returnWall.maxZ;
+      velocity.current.set(0, 0, 0);
+    }
     camera.position.y = 1.65;
   });
 
@@ -866,7 +916,9 @@ export default function VirtualMuseum({
           />
         ))}
 
-        <Html position={[0, 4.2, -ROOM.d / 2 + 0.04]} transform sprite distanceFactor={10} style={{ pointerEvents: "none" }}>
+        {/* This is a wall-mounted sign: no billboard/sprite behavior, so it
+            stays flush to the north feature wall as the visitor walks. */}
+        <Html position={[0, 4.2, -ROOM.d / 2 + 0.025]} transform occlude distanceFactor={10} style={{ pointerEvents: "none" }}>
           <p
             style={{ color: "#3A3632", fontFamily: "system-ui, sans-serif", fontSize: "12px", fontWeight: 700, letterSpacing: "0.16em", margin: 0, transform: "translate(-50%, -50%)", whiteSpace: "nowrap" }}
           >
