@@ -30,6 +30,11 @@ export default async function HomePage() {
   const atlasStats = {
     artists: new Set(publishedArtworks.map((artwork) => artwork.artistId)).size,
     artworks: publishedArtworks.length,
+    countries: new Set(
+      publishedArtworks
+        .map((artwork) => artwork.artistCountry?.trim().toLowerCase())
+        .filter((country): country is string => Boolean(country)),
+    ).size,
   };
 
   // The code decides Collector Picks: artworks ranked by "Request Price"

@@ -99,6 +99,7 @@ function playCountryCue(slug: string, ctx: AudioContext, master: GainNode) {
 type AtlasStats = {
   artists: number;
   artworks: number;
+  countries: number;
 };
 
 export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
@@ -754,7 +755,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
               {t("COUNTRIES", "PAYS")}
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
-              54
+              {stats.countries.toLocaleString()}
             </div>
           </div>
         </div>

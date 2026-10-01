@@ -228,8 +228,20 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
   };
 
   const saveArtwork = async () => {
-    if (!artworkDraft?.title?.trim() || !artworkDraft.image_url?.trim() || !selected) {
-      setFeedback("Artwork title and image are required.");
+    if (!artworkDraft || !selected) {
+      setFeedback("Select an artist before saving artwork.");
+      return;
+    }
+    if (!artworkDraft.title?.trim()) {
+      setFeedback("Artwork title is required.");
+      return;
+    }
+    if (!artworkDraft.image_url?.trim()) {
+      setFeedback("Upload an artwork image before saving.");
+      return;
+    }
+    if (uploadingArtwork) {
+      setFeedback("Wait for the image upload to finish.");
       return;
     }
     setSavingArtwork(true);
@@ -284,18 +296,24 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
   const uploadArtworkImage = async (file: File) => {
     if (!selected) return;
     setUploadingArtwork(true);
-    const path = `managed/${selected.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
-    const { error } = await supabase.storage.from("artworks").upload(path, file);
-    if (error) {
-      setFeedback(error.message);
+    setFeedback("");
+    try {
+      const path = `managed/${selected.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
+      const { error } = await supabase.storage.from("artworks").upload(path, file);
+      if (error) throw new Error(error.message);
+
+      const { data: signed, error: signedUrlError } = await supabase.storage
+        .from("artworks")
+        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (signedUrlError || !signed?.signedUrl) {
+        throw new Error(signedUrlError?.message ?? "Could not create an image URL.");
+      }
+      setArtworkDraft((d) => (d ? { ...d, image_url: signed.signedUrl } : d));
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "Artwork image upload failed.");
+    } finally {
       setUploadingArtwork(false);
-      return;
     }
-    const { data: signed } = await supabase.storage
-      .from("artworks")
-      .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
-    setArtworkDraft((d) => (d ? { ...d, image_url: signed?.signedUrl ?? "" } : d));
-    setUploadingArtwork(false);
   };
 
   if (loading) return <ListRowSkeleton count={4} />;
@@ -575,31 +593,40 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                     onChange={(v) => setArtworkDraft({ ...artworkDraft, description: v })}
                     textarea
                   />
-                  <div className="flex flex-wrap items-center gap-4">
+                  <div className="flex flex-wrap items-center gap-4 border-2 border-dashed border-secondary/40 bg-surface p-4">
                     {artworkDraft.image_url ? (
-                      <div className="relative w-24 h-24 bg-surface-container overflow-hidden">
-                        <Image src={artworkDraft.image_url} alt="" fill sizes="96px" className="object-cover" />
+                      <div className="relative w-24 h-24 shrink-0 bg-surface-container overflow-hidden">
+                        <Image src={artworkDraft.image_url} alt="Artwork preview" fill sizes="96px" className="object-cover" />
                       </div>
-                    ) : null}
-                    <label className="text-xs uppercase tracking-widest text-secondary cursor-pointer">
-                      {uploadingArtwork ? "Uploading…" : "Upload image"}
+                    ) : (
+                      <p className="text-sm text-on-surface-variant">Artwork image required</p>
+                    )}
+                    <label
+                      className={
+                        "inline-flex min-h-11 items-center justify-center bg-primary px-5 py-3 text-xs font-semibold uppercase tracking-widest text-on-primary cursor-pointer transition-colors hover:bg-secondary " +
+                        (uploadingArtwork ? "pointer-events-none opacity-60" : "")
+                      }
+                    >
+                      {uploadingArtwork ? "Uploading image…" : artworkDraft.image_url ? "Replace artwork image" : "Choose artwork image"}
                       <input
                         type="file"
                         accept="image/*"
-                        className="hidden"
+                        className="sr-only"
                         disabled={uploadingArtwork}
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) uploadArtworkImage(file);
+                          e.currentTarget.value = "";
                         }}
                       />
                     </label>
+                    <span className="text-xs text-on-surface-variant">JPEG, PNG, or WebP</span>
                   </div>
                   <div className="flex gap-3">
                     <button
                       type="button"
                       onClick={saveArtwork}
-                      disabled={savingArtwork}
+                      disabled={savingArtwork || uploadingArtwork}
                       className="bg-primary text-on-primary px-4 py-2 text-xs uppercase tracking-widest disabled:opacity-50"
                     >
                       {savingArtwork ? "Saving…" : "Save artwork"}
