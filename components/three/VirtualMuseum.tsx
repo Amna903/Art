@@ -151,7 +151,9 @@ function getPlaceholder(kind: "loading" | "error"): THREE.CanvasTexture {
   return (_phError ??= makePlaceholder("error"));
 }
 
-// Subtle natural plaster grain for museum walls
+// Subtle natural plaster grain for museum walls. This is used as a bump and
+// roughness map, keeping the gallery wall matte while giving grazing light
+// something real to catch instead of reading as a perfectly flat white plane.
 function getPlasterTexture(): THREE.CanvasTexture {
   if (_plasterTex) return _plasterTex;
   const size = 512;
@@ -163,12 +165,29 @@ function getPlasterTexture(): THREE.CanvasTexture {
   ctx.fillRect(0, 0, size, size);
   const img = ctx.getImageData(0, 0, size, size);
   for (let i = 0; i < img.data.length; i += 4) {
-    const n = 128 + (Math.random() - 0.5) * 16;
+    const n = 128 + (Math.random() - 0.5) * 20;
     img.data[i] = n;
     img.data[i + 1] = n;
     img.data[i + 2] = n;
   }
   ctx.putImageData(img, 0, 0);
+
+  // Large, very low-contrast trowel passes avoid a tiled digital-noise look.
+  for (let i = 0; i < 90; i++) {
+    const tone = Math.random() > 0.5 ? 145 : 108;
+    ctx.fillStyle = `rgba(${tone}, ${tone}, ${tone}, 0.035)`;
+    ctx.beginPath();
+    ctx.ellipse(
+      Math.random() * size,
+      Math.random() * size,
+      18 + Math.random() * 75,
+      3 + Math.random() * 14,
+      Math.random() * Math.PI,
+      0,
+      Math.PI * 2,
+    );
+    ctx.fill();
+  }
   const tex = new THREE.CanvasTexture(c);
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
   tex.repeat.set(8, 4);
@@ -211,14 +230,18 @@ function getFloorTexture(): THREE.CanvasTexture {
 
 // Architectural museum gallery pavilion
 function GalleryArchitecture({ p }: { p: Palette }) {
+  const plasterTexture = useMemo(() => getPlasterTexture(), []);
   const wallMat = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
         color: p.wall,
-        roughness: 0.8,
+        roughness: 0.9,
         metalness: 0,
+        bumpMap: plasterTexture,
+        bumpScale: 0.045,
+        roughnessMap: plasterTexture,
       }),
-    [p.wall],
+    [p.wall, plasterTexture],
   );
 
   const ceilMat = useMemo(
@@ -279,6 +302,30 @@ function GalleryArchitecture({ p }: { p: Palette }) {
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, H, 0]} material={ceilMat}>
         <planeGeometry args={[W, D]} />
       </mesh>
+
+      {/* Recessed skylight bays and coves create the soft falloff that makes a
+          physical gallery feel deep, even before the individual art spots hit. */}
+      <group position={[0, H - 0.035, 0]}>
+        {[-6, 0, 6].map((x) => (
+          <group key={`skylight-${x}`} position={[x, 0, -2]}>
+            <mesh rotation={[Math.PI / 2, 0, 0]}>
+              <planeGeometry args={[4.1, 7.2]} />
+              <meshStandardMaterial
+                color="#FFF9EF"
+                emissive={p.skylightEmissive}
+                emissiveIntensity={0.75}
+                roughness={0.5}
+              />
+            </mesh>
+            <mesh position={[0, 0.015, -3.65]} material={trackMat}>
+              <boxGeometry args={[4.25, 0.08, 0.08]} />
+            </mesh>
+            <mesh position={[0, 0.015, 3.65]} material={trackMat}>
+              <boxGeometry args={[4.25, 0.08, 0.08]} />
+            </mesh>
+          </group>
+        ))}
+      </group>
 
       {/* Exposed black ceiling grid, matching a working contemporary gallery. */}
       <group position={[0, H - 0.05, 0]}>
@@ -343,6 +390,26 @@ function GalleryArchitecture({ p }: { p: Palette }) {
       <mesh position={[-3.7, H / 2, 3.4]} receiveShadow material={wallMat}>
         <boxGeometry args={[wallThick, H, 9.2]} />
       </mesh>
+
+      {/* Hairline shadow reveals break up the large planes like real drywall
+          joints, without competing with the artwork. */}
+      <group>
+        {[-5, 5].map((x) => (
+          <mesh key={`north-reveal-${x}`} position={[x, H / 2, -D / 2 + 0.012]} material={baseboardMat}>
+            <boxGeometry args={[0.018, H - 0.24, 0.012]} />
+          </mesh>
+        ))}
+        {[-6, 0, 6].map((z) => (
+          <mesh key={`west-reveal-${z}`} position={[-W / 2 + 0.012, H / 2, z]} rotation={[0, Math.PI / 2, 0]} material={baseboardMat}>
+            <boxGeometry args={[0.018, H - 0.24, 0.012]} />
+          </mesh>
+        ))}
+        {[-6, 0, 6].map((z) => (
+          <mesh key={`east-reveal-${z}`} position={[W / 2 - 0.012, H / 2, z]} rotation={[0, Math.PI / 2, 0]} material={baseboardMat}>
+            <boxGeometry args={[0.018, H - 0.24, 0.012]} />
+          </mesh>
+        ))}
+      </group>
 
       {/* Deep indigo drapery marks the passage into the next gallery wing. */}
       <group position={[-2.7, H / 2, -D / 2 + 0.03]}>
