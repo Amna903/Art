@@ -23,8 +23,13 @@ export type Database = {
           description: string | null
           dimensions: string | null
           id: string
+          image_phash: string | null
           image_url: string
           medium: string | null
+          originality_checked_at: string | null
+          originality_report: Json | null
+          originality_score: number | null
+          originality_status: Database["public"]["Enums"]["originality_status"]
           price_usd: number
           slug: string
           status: Database["public"]["Enums"]["artwork_status"]
@@ -40,8 +45,13 @@ export type Database = {
           description?: string | null
           dimensions?: string | null
           id?: string
+          image_phash?: string | null
           image_url?: string
           medium?: string | null
+          originality_checked_at?: string | null
+          originality_report?: Json | null
+          originality_score?: number | null
+          originality_status?: Database["public"]["Enums"]["originality_status"]
           price_usd?: number
           slug: string
           status?: Database["public"]["Enums"]["artwork_status"]
@@ -57,8 +67,13 @@ export type Database = {
           description?: string | null
           dimensions?: string | null
           id?: string
+          image_phash?: string | null
           image_url?: string
           medium?: string | null
+          originality_checked_at?: string | null
+          originality_report?: Json | null
+          originality_score?: number | null
+          originality_status?: Database["public"]["Enums"]["originality_status"]
           price_usd?: number
           slug?: string
           status?: Database["public"]["Enums"]["artwork_status"]
@@ -654,7 +669,8 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "artist" | "client"
-      artwork_status: "draft" | "pending_review" | "published" | "sold" | "archived"
+      artwork_status: "draft" | "pending_review" | "blocked" | "published" | "sold" | "archived"
+      originality_status: "unchecked" | "clear" | "review" | "blocked"
       enquiry_status: "new" | "contacted" | "quoted" | "closed"
       exhibition_status: "upcoming" | "current" | "past"
       order_status: "pending" | "paid" | "shipped" | "completed" | "cancelled"
@@ -786,7 +802,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "artist", "client"],
-      artwork_status: ["draft", "pending_review", "published", "sold", "archived"],
+      artwork_status: ["draft", "pending_review", "blocked", "published", "sold", "archived"],
+      originality_status: ["unchecked", "clear", "review", "blocked"],
       enquiry_status: ["new", "contacted", "quoted", "closed"],
       order_status: ["pending", "paid", "shipped", "completed", "cancelled"],
     },

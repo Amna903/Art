@@ -9,6 +9,7 @@ import { EnquiriesAdmin } from "./EnquiriesAdmin";
 import { CollectionsAdmin } from "./CollectionsAdmin";
 import { CountrySoundsAdmin } from "./CountrySoundsAdmin";
 import { ManagedArtistsAdmin } from "./ManagedArtistsAdmin";
+import { OriginalityReviewAdmin } from "./OriginalityReviewAdmin";
 import { ListRowSkeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/lib/auth";
 
@@ -31,7 +32,15 @@ export function AdminDashboard() {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [enquiryCount, setEnquiryCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"users" | "artworks" | "collections" | "enquiries" | "country sounds" | "represented artists">("represented artists");
+  const [tab, setTab] = useState<
+    | "users"
+    | "artworks"
+    | "collections"
+    | "enquiries"
+    | "country sounds"
+    | "represented artists"
+    | "originality"
+  >("represented artists");
 
   const load = async () => {
     setLoading(true);
@@ -116,7 +125,17 @@ export function AdminDashboard() {
       </section>
 
       <nav className="flex gap-8 border-b border-primary/10 overflow-x-auto">
-        {(["represented artists", "users", "artworks", "collections", "enquiries", "country sounds"] as const).map((t) => (
+        {(
+          [
+            "represented artists",
+            "originality",
+            "users",
+            "artworks",
+            "collections",
+            "enquiries",
+            "country sounds",
+          ] as const
+        ).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -132,6 +151,8 @@ export function AdminDashboard() {
 
       {tab === "represented artists" ? (
         user ? <ManagedArtistsAdmin adminId={user.id} /> : null
+      ) : tab === "originality" ? (
+        <OriginalityReviewAdmin />
       ) : loading ? (
         <ListRowSkeleton count={4} />
       ) : tab === "users" ? (
@@ -225,6 +246,7 @@ export function AdminDashboard() {
                     >
                       <option value="draft">draft</option>
                       <option value="pending_review">pending review</option>
+                      <option value="blocked">blocked</option>
                       <option value="published">published</option>
                       <option value="sold">sold</option>
                       <option value="archived">archived</option>

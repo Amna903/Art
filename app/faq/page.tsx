@@ -14,6 +14,10 @@ const FAQS = [
     a: "Yes. Every acquisition ships with a hand-signed Certificate of Authenticity, and provenance is documented from the artist's studio through to delivery.",
   },
   {
+    q: "How do you check that an artwork hasn't appeared online before?",
+    a: "Uploads are screened with image recognition and reverse-image search against existing works on NUA-ARTE and publicly indexed websites. Clear matches are blocked automatically; uncertain matches go to an admin review queue. No system can guarantee 100% coverage — some sites and social posts are not publicly indexed — but this keeps a strong originality-control process without incorrectly rejecting legitimate artists.",
+  },
+  {
     q: "Do you ship internationally?",
     a: "Yes — insured, white-glove shipping in custom-built wooden crates is available worldwide. Shipping is quoted alongside your price after an enquiry.",
   },

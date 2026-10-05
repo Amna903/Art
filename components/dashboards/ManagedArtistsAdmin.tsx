@@ -11,6 +11,7 @@ import { slugify } from "@/lib/utils/slugify";
 import { pingRevalidate } from "@/lib/utils/revalidate";
 import { F } from "./FormField";
 import { ListRowSkeleton } from "@/components/ui/Skeleton";
+import { saveArtworkWithOriginality } from "@/lib/originality/client";
 
 type ManagedArtist = Database["public"]["Tables"]["managed_artists"]["Row"];
 type Artwork = Database["public"]["Tables"]["artworks"]["Row"];
@@ -245,6 +246,9 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
       return;
     }
     setSavingArtwork(true);
+    setFeedback("");
+
+    let originalityNote = "";
     const selectedMedium = artworkDraft.medium?.trim() ?? "";
     const mediumValue =
       selectedMedium === "Other" ? (artworkDraft.customMedium ?? "").trim() : selectedMedium;
@@ -264,18 +268,21 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
       image_url: artworkDraft.image_url,
       status: (artworkDraft.status as Artwork["status"]) ?? "published",
     };
-
-    const res = artworkDraft.id
-      ? await supabase.from("artworks").update(payload).eq("id", artworkDraft.id)
-      : await supabase.from("artworks").insert(payload);
-
-    setSavingArtwork(false);
-    if (res.error) {
-      setFeedback(res.error.message);
+    try {
+      const { originality } = await saveArtworkWithOriginality({ ...payload, id: artworkDraft.id });
+      if (originality.decision === "blocked") originalityNote = originality.note;
+      else if (originality.decision === "review") originalityNote = "Possible match found — queued for originality review instead of publishing.";
+    } catch (error) {
+      setSavingArtwork(false);
+      setFeedback(error instanceof Error ? error.message : "Could not save artwork.");
       return;
     }
+    setSavingArtwork(false);
     setArtworkDraft(null);
-    setFeedback("Artwork saved.");
+    setFeedback(
+      originalityNote ||
+        "Artwork saved.",
+    );
     await load();
     await pingRevalidate("artworks");
     router.refresh();
@@ -581,6 +588,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                       >
                         <option value="draft">draft</option>
                         <option value="pending_review">pending review</option>
+                        <option value="blocked">blocked</option>
                         <option value="published">published</option>
                         <option value="sold">sold</option>
                         <option value="archived">archived</option>

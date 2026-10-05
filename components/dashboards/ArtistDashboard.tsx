@@ -11,6 +11,7 @@ import { slugify } from "@/lib/utils/slugify";
 import { pingRevalidate } from "@/lib/utils/revalidate";
 import { F } from "./FormField";
 import { CardGridSkeleton } from "@/components/ui/Skeleton";
+import { saveArtworkWithOriginality } from "@/lib/originality/client";
 
 type Artwork = Database["public"]["Tables"]["artworks"]["Row"];
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -37,6 +38,7 @@ export function ArtistDashboard({ userId }: { userId: string }) {
   const [customMedium, setCustomMedium] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadName, setUploadName] = useState<string | null>(null);
+  const [checkingOriginality, setCheckingOriginality] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -156,6 +158,9 @@ export function ArtistDashboard({ userId }: { userId: string }) {
     if (!editing?.title || !editing.image_url?.trim() || !(Number(editing.price_usd) > 0)) return;
     const selectedMedium = editing.medium?.trim() ?? "";
     const mediumValue = selectedMedium === "Other" ? customMedium.trim() : selectedMedium;
+
+    setCheckingOriginality(true);
+    let originalityDecision: "clear" | "review" | "blocked" = "clear";
     const payload = {
       artist_id: userId,
       title: editing.title!,
@@ -169,18 +174,22 @@ export function ArtistDashboard({ userId }: { userId: string }) {
       image_url: editing.image_url ?? "",
       status: (editing.status as Artwork["status"]) ?? "draft",
     };
-    const { error } = editing.id
-      ? await supabase.from("artworks").update(payload).eq("id", editing.id)
-      : await supabase.from("artworks").insert(payload);
-    if (error) {
-      toast.error(`Could not save this artwork: ${error.message}`);
+    try {
+      const { originality } = await saveArtworkWithOriginality({ ...payload, id: editing.id });
+      originalityDecision = originality.decision;
+      if (originality.decision === "blocked") toast.error(originality.note);
+      else if (originality.decision === "review") toast.message("Possible match found — sent to admin review.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not save artwork.");
+      setCheckingOriginality(false);
       return;
     }
+    setCheckingOriginality(false);
     setEditing(null);
     await load();
     await pingRevalidate("artworks");
     router.refresh();
-    toast.success(editing.id ? "Artwork updated." : "Artwork saved.");
+    if (originalityDecision !== "blocked") toast.success(editing.id ? "Artwork updated." : "Artwork saved.");
   };
 
   const remove = async (id: string) => {
@@ -392,13 +401,18 @@ export function ArtistDashboard({ userId }: { userId: string }) {
                 <label className="block">
                   <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">Status</span>
                   <select
-                    value={editing.status ?? "draft"}
+                    value={editing.status === "blocked" ? "blocked" : editing.status ?? "draft"}
                     onChange={(e) => setEditing({ ...editing, status: e.target.value as Artwork["status"] })}
                     className="w-full bg-transparent border-b border-primary/30 py-2 text-primary"
+                    disabled={editing.status === "blocked"}
                   >
                     <option value="draft">Draft</option>
                     <option value="pending_review">Submit for admin review</option>
+                    {editing.status === "blocked" ? <option value="blocked">Blocked (originality match)</option> : null}
                   </select>
+                  <p className="mt-1 text-[11px] text-on-surface-variant">
+                    Every save runs an originality check against platform works and publicly indexed images.
+                  </p>
                 </label>
               </div>
               <div>
@@ -446,11 +460,21 @@ export function ArtistDashboard({ userId }: { userId: string }) {
                 </button>
                 <button
                   onClick={save}
-                  disabled={!editing.title?.trim() || !editing.image_url?.trim() || !(Number(editing.price_usd) > 0)}
+                  disabled={
+                    checkingOriginality ||
+                    uploading ||
+                    !editing.title?.trim() ||
+                    !editing.image_url?.trim() ||
+                    !(Number(editing.price_usd) > 0)
+                  }
                   title="Title, price, and an image are all required"
                   className="bg-primary text-on-primary px-5 py-2 text-xs uppercase tracking-[0.2em] disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {editing.status === "pending_review" ? "Submit for review" : "Save draft"}
+                  {checkingOriginality
+                    ? "Checking originality…"
+                    : editing.status === "pending_review"
+                      ? "Submit for review"
+                      : "Save draft"}
                 </button>
               </div>
             </div>
