@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import type { Artwork } from "@/components/three/VirtualMuseum";
 import { useTheme } from "@/lib/theme";
 import { getPublishedArtworks } from "@/lib/data/supabase-artists";
-import { layoutArtworks } from "@/lib/data/museum-layout";
+import { layoutArtworks, FALLBACK_ARTWORKS } from "@/lib/data/museum-layout";
 import { useLanguage } from "@/lib/i18n";
 
 const VirtualMuseum = lazy(() => import("@/components/three/VirtualMuseum"));
@@ -19,60 +19,6 @@ const ZONES = [
   { id: 3, label: "ZONE 03: WOVEN THREADS", map: { left: "80%", top: "50%" } },
   { id: 4, label: "ZONE 04: DIGITAL HORIZONS", map: { left: "50%", top: "20%" } },
 ] as const;
-
-// Fallback set, shown only while Supabase has no published artworks yet
-// (or isn't configured). Once real artworks exist, they're placed
-// automatically via `layoutArtworks` — no manual coordinates needed.
-const FALLBACK_ARTWORKS: Artwork[] = [
-  {
-    id: "a1", title: "Adire Reverie", artist: "Fatoumata Niang", year: "2024", medium: "Indigo on cotton",
-    description: "Indigo on cotton — reinterpreting ancestral resist-dye techniques.",
-    image: "https://nu-artcollective.lovable.app/__l5e/assets-v1/cd429143-8a30-4fcf-ad79-d9a3d5093892/afr-textile.jpg",
-    position: [-3, 1.9, 11.95], rotationY: Math.PI, width: 2.4, height: 1.6, zone: 1,
-  },
-  {
-    id: "a2", title: "Sahel Light", artist: "Amadou Fall", year: "2023", medium: "Earth pigment on linen",
-    description: "A study in earth pigment and Sahel light.",
-    image: "https://nu-artcollective.lovable.app/__l5e/assets-v1/a820f217-1476-433e-9017-b7e8bc4d6e4b/afr-painting-abstract.jpg",
-    position: [3, 1.9, 11.95], rotationY: Math.PI, width: 1.8, height: 2.4, zone: 1,
-  },
-  {
-    id: "a3", title: "Lagos Nocturne", artist: "Moussa Sene", year: "2024", medium: "Archival pigment print",
-    description: "Photographic study of urban rhythm after dark.",
-    image: "https://nu-artcollective.lovable.app/__l5e/assets-v1/cd429143-8a30-4fcf-ad79-d9a3d5093892/afr-textile.jpg",
-    position: [-9.95, 1.9, -4], rotationY: Math.PI / 2, width: 2.2, height: 1.8, zone: 2,
-  },
-  {
-    id: "a4", title: "City Pulse", artist: "Amina Diallo", year: "2023", medium: "Mixed media on canvas",
-    description: "Night life along a modern African corniche.",
-    image: "https://nu-artcollective.lovable.app/__l5e/assets-v1/cd429143-8a30-4fcf-ad79-d9a3d5093892/afr-textile.jpg",
-    position: [-9.95, 1.9, 4], rotationY: Math.PI / 2, width: 2.2, height: 1.8, zone: 2,
-  },
-  {
-    id: "a5", title: "Bogolan Geometry", artist: "Issa Diop", year: "2024", medium: "Algorithmic print on cotton",
-    description: "Algorithmic art inspired by Mud cloth symbolism.",
-    image: "https://nu-artcollective.lovable.app/__l5e/assets-v1/8170e7d1-3e87-4dfd-984d-5c50a5625187/afr-gallery-room.jpg",
-    position: [9.95, 1.9, -4], rotationY: -Math.PI / 2, width: 2, height: 2, zone: 3,
-  },
-  {
-    id: "a6", title: "Indigo Threads", artist: "Kadiatou Touré", year: "2023", medium: "Generative textile",
-    description: "Generative interpretation of resist-dye patterns.",
-    image: "https://nu-artcollective.lovable.app/__l5e/assets-v1/8170e7d1-3e87-4dfd-984d-5c50a5625187/afr-gallery-room.jpg",
-    position: [9.95, 1.9, 4], rotationY: -Math.PI / 2, width: 2, height: 2, zone: 3,
-  },
-  {
-    id: "a7", title: "Horizon Codex", artist: "Amadou Fall", year: "2024", medium: "Wood carving with digital scan",
-    description: "Woodcraft heritage meets minimalist modernism.",
-    image: "https://nu-artcollective.lovable.app/__l5e/assets-v1/3b671063-daed-4dec-a143-5219ad0ec512/afr-fabric-macro.jpg",
-    position: [-3, 1.9, -11.95], rotationY: 0, width: 2.2, height: 2, zone: 4,
-  },
-  {
-    id: "a8", title: "Digital Ancestry", artist: "Thandiwe Mbeki", year: "2024", medium: "Raking light photography",
-    description: "Carved memory, rendered in raking light.",
-    image: "https://nu-artcollective.lovable.app/__l5e/assets-v1/3b671063-daed-4dec-a143-5219ad0ec512/afr-fabric-macro.jpg",
-    position: [3, 1.9, -11.95], rotationY: 0, width: 2.2, height: 2, zone: 4,
-  },
-];
 
 function MobileMuseumPreview({ artworks }: { artworks: Artwork[] }) {
   return (
@@ -346,6 +292,17 @@ function VirtualGalleryContent() {
                     >
                       {t("MAP · VIEW")}
                     </div>
+                    {/* Mid partition wall indicator */}
+                    <span
+                      className="absolute pointer-events-none rounded-full"
+                      style={{
+                        left: "31.5%",
+                        top: "45%",
+                        width: "2px",
+                        height: "38%",
+                        background: isDark ? "rgba(245,242,238,0.28)" : "rgba(17,17,17,0.22)",
+                      }}
+                    />
                     {ZONES.map((z) => {
                       const active = z.id === activeZone;
                       return (
