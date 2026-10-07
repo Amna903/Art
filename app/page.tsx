@@ -6,7 +6,7 @@ import { DiscoverOrigin } from "@/components/sections/home/DiscoverOrigin";
 import { MissionStats } from "@/components/sections/home/MissionStats";
 import { ProcessSteps, Newsletter } from "@/components/sections/home/ProcessAndNewsletter";
 import { ARTWORKS } from "@/lib/data/content";
-import { getDirectoryArtists, getDirectoryArtworks } from "@/lib/data/directory";
+import { getDirectoryArtists } from "@/lib/data/directory";
 import { normalizeCountrySlug } from "@/lib/data/africa";
 import { getMostRequestedArtworks } from "@/lib/data/supabase-artists-cached";
 import { getPublishedArtworks } from "@/lib/data/supabase-artists";
@@ -24,12 +24,11 @@ function ThreadDivider() {
 }
 
 export default async function HomePage() {
-  const [mostRequested, publishedArtworks, directoryArtists, directoryArtworks, blocks] =
+  const [mostRequested, publishedArtworks, directoryArtists, blocks] =
     await Promise.all([
       getMostRequestedArtworks(6),
       getPublishedArtworks(),
       getDirectoryArtists(),
-      getDirectoryArtworks(),
       getPageBlocks("home"),
     ]);
 
@@ -48,11 +47,8 @@ export default async function HomePage() {
   ]);
 
   const atlasStats = {
-    artists: Math.max(
-      directoryArtists.length,
-      new Set(publishedArtworks.map((artwork) => artwork.artistId)).size,
-    ),
-    artworks: publishedArtworks.length > 0 ? publishedArtworks.length : directoryArtworks.length,
+    artists: new Set(publishedArtworks.map((artwork) => artwork.artistId)).size,
+    artworks: publishedArtworks.length,
     countries: uniqueCountries.size,
   };
 

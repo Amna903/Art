@@ -7,6 +7,7 @@ export async function FeaturedArtists() {
   // Real, self-service artists (published work on the platform) take over
   // the static demo slots one-for-one — same exchange as the Collections page.
   const realArtists = await getRealArtists();
+  const artistsWithWorks = realArtists.filter((artist) => artist.worksCount > 0);
   const staticCards: FeaturedCard[] = ARTISTS.slice(0, 3).map((artist) => ({
     slug: artist.slug,
     name: artist.name,
@@ -14,7 +15,7 @@ export async function FeaturedArtists() {
     discipline: artist.discipline,
     image: artist.image,
   }));
-  const realCards: FeaturedCard[] = realArtists.map((artist) => ({
+  const realCards: FeaturedCard[] = artistsWithWorks.map((artist) => ({
     slug: artist.slug,
     name: artist.name,
     country: artist.countryName || "Africa",
