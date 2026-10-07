@@ -41,7 +41,7 @@ export function Hero({ blocks }: { blocks: PageBlocks }) {
         className="hero-fade-bottom pointer-events-none absolute inset-x-0 top-20 h-[38vh] min-h-[280px] max-h-[420px] bg-gradient-to-b from-transparent via-background/15 to-background/30 lg:hidden"
       />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-container-max items-start px-4 pb-12 pt-10 -translate-x-4 sm:px-6 sm:pb-14 sm:pt-12 sm:-translate-x-6 lg:-translate-x-12 lg:min-h-[min(900px,68vw)] lg:items-center lg:py-24 lg:px-8">
+      <div className="relative z-10 mx-auto flex w-full max-w-container-max items-start px-6 pb-12 pt-10 sm:px-8 sm:pb-14 sm:pt-12 lg:-translate-x-8 lg:min-h-[min(900px,68vw)] lg:items-center lg:py-24 lg:px-8">
         <div className="w-full max-w-[760px] lg:w-[58%]">
           <div className="mb-5 flex items-center gap-3">
             <span aria-hidden="true" className="h-px w-5 bg-secondary" />
