@@ -74,7 +74,7 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
 
   return (
     <>
-      <div className="flex justify-between items-end mb-16">
+      <div className="flex justify-between items-end mb-10 sm:mb-16 gap-4">
         <div>
           <span className="font-label-caps text-label-caps text-secondary block mb-2">{t("AFRICAN ARTISTS", "ARTISTES AFRICAINS")}</span>
           <h2 className="font-headline-md text-headline-md">{t("African Arts", "Arts Africains")}</h2>
@@ -113,7 +113,7 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
           <Link
             key={artist.slug}
             href={`/artists/${artist.slug}`}
-            className="min-w-[400px] snap-center group cursor-pointer"
+            className="min-w-[min(82vw,400px)] snap-center group cursor-pointer"
             aria-label={t(`View ${artist.name}'s profile`, `Voir le profil de ${artist.name}`)}
           >
             <div className="aspect-[4/5] overflow-hidden mb-6 relative bg-surface-container">

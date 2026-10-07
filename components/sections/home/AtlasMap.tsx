@@ -268,7 +268,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
       />
 
       {/* Main Container */}
-      <div className="relative max-w-[1440px] mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-[260px_1fr_340px] gap-8 lg:gap-12 items-center min-h-[700px]">
+      <div className="relative max-w-[1440px] mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-[260px_1fr_340px] gap-8 lg:gap-12 items-center min-h-0 lg:min-h-[700px]">
         
         {/* LEFT COLUMN: Brand Identity, Vertical Timeline Navigation & Country Callout */}
         <div className="flex flex-col justify-between h-full space-y-8 z-10 self-stretch py-2">
@@ -363,7 +363,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
         </div>
 
         {/* CENTER COLUMN: 3D Sculptural Africa Relief Map */}
-        <div className="relative flex items-center justify-center w-full h-full min-h-[560px] lg:min-h-[680px]">
+        <div className="relative flex items-center justify-center w-full h-full min-h-[360px] sm:min-h-[460px] lg:min-h-[680px]">
           {/* Audio Control */}
           <button
             type="button"

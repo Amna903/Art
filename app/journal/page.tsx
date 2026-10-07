@@ -71,7 +71,7 @@ export default async function JournalPage() {
             </div>
             <div>
               <h4 className="font-label-caps text-label-caps uppercase text-secondary mb-4">Share</h4>
-              <ShareLinks title="NUA-ARTE Journal" />
+              <ShareLinks />
             </div>
           </div>
         </aside>
