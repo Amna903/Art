@@ -47,7 +47,10 @@ export default async function HomePage() {
   ]);
 
   const atlasStats = {
-    artists: new Set(publishedArtworks.map((artwork) => artwork.artistId)).size,
+    artists: Math.max(
+      directoryArtists.length,
+      new Set(publishedArtworks.map((artwork) => artwork.artistId)).size,
+    ),
     artworks: publishedArtworks.length,
     countries: uniqueCountries.size,
   };
