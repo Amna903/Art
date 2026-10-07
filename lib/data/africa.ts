@@ -87,6 +87,23 @@ export function getCountryByGeoName(name: string): Country | undefined {
   return AFRICAN_COUNTRIES.find((c) => c.name === name);
 }
 
+export function normalizeCountrySlug(str: string): string {
+  if (!str) return "";
+  const s = str.trim().toLowerCase();
+  const sNoHyphen = s.replace(/-/g, " ");
+  const match = AFRICAN_COUNTRIES.find(
+    (c) =>
+      c.slug.toLowerCase() === s ||
+      c.name.toLowerCase() === s ||
+      c.name.toLowerCase() === sNoHyphen ||
+      c.code.toLowerCase() === s ||
+      c.slug.toLowerCase().replace(/-/g, " ") === s ||
+      (c.nameFr && (c.nameFr.toLowerCase() === s || c.nameFr.toLowerCase() === sNoHyphen)) ||
+      (c.namePt && (c.namePt.toLowerCase() === s || c.namePt.toLowerCase() === sNoHyphen)),
+  );
+  return match ? match.slug : s.replace(/\s+/g, "-");
+}
+
 // ---------- Deterministic mock content per country ----------
 
 function hash(str: string): number {

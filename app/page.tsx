@@ -6,6 +6,8 @@ import { DiscoverOrigin } from "@/components/sections/home/DiscoverOrigin";
 import { MissionStats } from "@/components/sections/home/MissionStats";
 import { ProcessSteps, Newsletter } from "@/components/sections/home/ProcessAndNewsletter";
 import { ARTWORKS } from "@/lib/data/content";
+import { getDirectoryArtists, getDirectoryArtworks } from "@/lib/data/directory";
+import { normalizeCountrySlug } from "@/lib/data/africa";
 import { getMostRequestedArtworks } from "@/lib/data/supabase-artists-cached";
 import { getPublishedArtworks } from "@/lib/data/supabase-artists";
 import { getPageBlocks } from "@/lib/data/pageBlocks";
@@ -22,19 +24,36 @@ function ThreadDivider() {
 }
 
 export default async function HomePage() {
-  const [mostRequested, publishedArtworks, blocks] = await Promise.all([
-    getMostRequestedArtworks(6),
-    getPublishedArtworks(),
-    getPageBlocks("home"),
+  const [mostRequested, publishedArtworks, directoryArtists, directoryArtworks, blocks] =
+    await Promise.all([
+      getMostRequestedArtworks(6),
+      getPublishedArtworks(),
+      getDirectoryArtists(),
+      getDirectoryArtworks(),
+      getPageBlocks("home"),
+    ]);
+
+  // Countries represent the distinct nations the artists are associated with
+  const uniqueCountries = new Set([
+    ...directoryArtists
+      .map((artist) =>
+        normalizeCountrySlug(artist.countrySlug || artist.countryName || ""),
+      )
+      .filter(Boolean),
+    ...publishedArtworks
+      .map((artwork) =>
+        normalizeCountrySlug(artwork.artistCountry || artwork.country || ""),
+      )
+      .filter(Boolean),
   ]);
+
   const atlasStats = {
-    artists: new Set(publishedArtworks.map((artwork) => artwork.artistId)).size,
-    artworks: publishedArtworks.length,
-    countries: new Set(
-      publishedArtworks
-        .map((artwork) => artwork.artistCountry?.trim().toLowerCase())
-        .filter((country): country is string => Boolean(country)),
-    ).size,
+    artists: Math.max(
+      directoryArtists.length,
+      new Set(publishedArtworks.map((artwork) => artwork.artistId)).size,
+    ),
+    artworks: publishedArtworks.length > 0 ? publishedArtworks.length : directoryArtworks.length,
+    countries: uniqueCountries.size,
   };
 
   // The code decides Collector Picks: artworks ranked by "Request Price"

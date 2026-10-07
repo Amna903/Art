@@ -9,6 +9,15 @@ export const metadata: Metadata = {
   title: "NUA-ARTE | Contemporary African Art Movement",
   description:
     "NUA-ARTE — a curated platform dedicated to contemporary African artists. Each country, each culture, each story — collected with intent.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
