@@ -372,20 +372,6 @@ export default async function ArtistProfilePage({ params }: Props) {
         </section>
       )}
 
-      <section className="max-w-[1440px] mx-auto px-gutter-page mt-section-gap text-center relative py-20">
-        <h2 className="text-display-lg leading-none font-display mb-10">
-          Start your <br />
-          <span className="italic">legacy.</span>
-        </h2>
-        <div className="flex justify-center gap-6">
-          <button className="bg-tertiary text-on-tertiary px-12 py-5 rounded-xl font-bold uppercase tracking-widest hover:bg-secondary-container transition-all">
-            Inquire for Commission
-          </button>
-          <button className="border border-tertiary px-12 py-5 rounded-xl font-bold uppercase tracking-widest hover:bg-tertiary hover:text-on-tertiary transition-all">
-            Full Artist CV
-          </button>
-        </div>
-      </section>
     </main>
   );
 }

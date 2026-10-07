@@ -35,7 +35,7 @@ export function JournalArticle({ post, showBackLink = true }: { post: JournalArt
           </div>
           <div>
             <h4 className="font-label-caps text-label-caps uppercase text-secondary mb-4">Share</h4>
-            <ShareLinks title={post.title} />
+            <ShareLinks />
           </div>
         </div>
       </aside>
