@@ -6,7 +6,6 @@ import Image from "next/image";
 import { PriceUponRequest } from "@/components/enquiry/PriceUponRequest";
 import { COLLECTIONS, type Collection } from "@/lib/data/collections";
 import type { SupabaseCollection } from "@/lib/data/supabase-collections";
-import { mergeSlots } from "@/lib/utils/mergeSlots";
 import { useLanguage } from "@/lib/i18n";
 import { getCountryBySlug, getCountryDisplayName, normalizeCountrySlug } from "@/lib/data/africa";
 
@@ -35,7 +34,14 @@ export function CollectionsView({ initialItems = [] }: { initialItems?: Supabase
   // work on these display values.
   const allItems = useMemo(
     () =>
-      mergeSlots(initialItems.map(fromSupabase), COLLECTIONS).map((c) => {
+      // Real collections only (change brief §6); the sample collections are
+      // shown in local development until a real one exists.
+      (initialItems.length > 0
+        ? initialItems.map(fromSupabase)
+        : process.env.NODE_ENV === "development"
+          ? COLLECTIONS
+          : []
+      ).map((c) => {
         const artworkCount = c.artists.match(/^(\d+) artworks?$/);
         return {
           ...c,
@@ -156,7 +162,7 @@ export function CollectionsView({ initialItems = [] }: { initialItems?: Supabase
       {filtered.length === 0 ? (
         <section className="py-24 text-center">
           <p className="font-body-lg text-on-surface-variant mb-6">
-            {t("No collections match your filters.")}
+            {allItems.length === 0 ? t("The first collection is coming soon.") : t("No collections match your filters.")}
           </p>
           <button
             onClick={resetAll}

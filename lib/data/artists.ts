@@ -16,6 +16,8 @@ export type Technique = (typeof TECHNIQUES)[number];
 export type Artist = {
   slug: string;
   name: string;
+  /** Kept apart from the name (change brief §6). */
+  age?: number | null;
   countryCode: string;
   countryName: string;
   countrySlug: string;

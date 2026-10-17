@@ -1,31 +1,29 @@
 import { ARTISTS } from "@/lib/data/content";
 import { getRealArtists } from "@/lib/data/supabase-artists-cached";
-import { mergeSlots } from "@/lib/utils/mergeSlots";
+import { getCountryBySlug } from "@/lib/data/africa";
 import { FeaturedArtistsCarousel, type FeaturedCard } from "./FeaturedArtistsCarousel";
 
 export async function FeaturedArtists() {
-  // Real, self-service artists (published work on the platform) take over
-  // the static demo slots one-for-one — same exchange as the Collections page.
+  // The real NUA-ARTE artists (change brief §6). The static demo artists only
+  // appear on a build without any real artists (local development).
   const realArtists = await getRealArtists();
-  const artistsWithWorks = realArtists.filter((artist) => artist.worksCount > 0);
-  const staticCards: FeaturedCard[] = ARTISTS.slice(0, 3).map((artist) => ({
-    slug: artist.slug,
-    name: artist.name,
-    country: artist.country,
-    discipline: artist.discipline,
-    image: artist.image,
-  }));
-  const realCards: FeaturedCard[] = artistsWithWorks.map((artist) => ({
-    slug: artist.slug,
-    name: artist.name,
-    country: artist.countryName || "Africa",
-    discipline: artist.technique || "art",
-    image: artist.image,
-  }));
-  const cards: FeaturedCard[] = mergeSlots(realCards, staticCards).map((card, index) => ({
-    ...card,
-    badge: index === 0 ? "NEW ADDITION" : undefined,
-  }));
+  const withPhoto = [...realArtists].sort((a, b) => Number(!!b.image) - Number(!!a.image) || b.worksCount - a.worksCount);
+  const cards: FeaturedCard[] =
+    realArtists.length > 0
+      ? withPhoto.slice(0, 6).map((artist) => ({
+          slug: artist.slug,
+          name: artist.name,
+          country: getCountryBySlug(artist.countrySlug)?.name ?? (artist.countryName || "Africa"),
+          discipline: artist.technique || "art",
+          image: artist.image,
+        }))
+      : ARTISTS.slice(0, 3).map((artist) => ({
+          slug: artist.slug,
+          name: artist.name,
+          country: artist.country,
+          discipline: artist.discipline,
+          image: artist.image,
+        }));
 
   return (
     <section className="bg-surface-container-low py-section-gap px-gutter-page overflow-hidden">

@@ -3,7 +3,7 @@
  * immediately instead of on their next natural revalidation. Best-effort:
  * a failure here just means the change takes up to 60s to show up elsewhere. */
 export async function pingRevalidate(
-  tag: "journal-posts" | "exhibitions" | "artworks" | "collections" | "page-blocks",
+  tag: "journal-posts" | "exhibitions" | "artworks" | "collections" | "page-blocks" | "site-heroes",
   opts?: { page?: string },
 ) {
   try {

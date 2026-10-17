@@ -19,17 +19,18 @@ type FeatureLike = {
   geometry: GeoJSON.Geometry;
 };
 
-// 9 Featured countries for the right directory panel
+// 9 Featured countries for the right directory panel. Countries with
+// NUA-ARTE artists come first; Angola is the featured country.
 const FEATURED_SLUGS = [
-  "cabo-verde",
+  "angola",
+  "drc",
+  "congo",
   "senegal",
   "morocco",
   "ghana",
   "nigeria",
   "kenya",
   "south-africa",
-  "ethiopia",
-  "angola",
 ];
 
 // Left vertical navigation links
@@ -159,8 +160,8 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
     return map;
   }, [shards]);
 
-  // Active hovered/selected country slug (defaults to Cabo Verde)
-  const [activeSlug, setActiveSlug] = useState<string>("cabo-verde");
+  // Active hovered/selected country slug (defaults to Angola)
+  const [activeSlug, setActiveSlug] = useState<string>("angola");
   const { t, language, formatNumber } = useLanguage();
   const [soundOn, setSoundOn] = useState(true);
   const audioRef = useRef<{ ctx: AudioContext; master: GainNode } | null>(null);
@@ -233,7 +234,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
     router.push(`/discover/${slug}`);
   };
 
-  const activeCountry = getCountryBySlug(activeSlug) || getCountryBySlug("cabo-verde")!;
+  const activeCountry = getCountryBySlug(activeSlug) || getCountryBySlug("angola")!;
   const activeShard = shardMap.get(activeSlug);
 
   const featuredCountries = FEATURED_SLUGS.map((slug) => getCountryBySlug(slug)).filter(
@@ -699,7 +700,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
 
       {/* BOTTOM DIVIDED STATS BAR */}
       <div
-        className="mt-14 pt-8 border-t max-w-[1440px] mx-auto px-6 md:px-12 grid grid-cols-2 md:grid-cols-5 gap-6 text-center md:text-left"
+        className={`mt-14 pt-8 border-t max-w-[1440px] mx-auto px-6 md:px-12 grid grid-cols-2 ${stats.artworks > 0 ? "md:grid-cols-4" : "md:grid-cols-3"} gap-6 text-center md:text-left`}
         style={{ borderColor: "var(--atlas-border)" }}
       >
         {/* Stat 1 */}
@@ -715,12 +716,13 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
               {t("ARTISTS REPRESENTED")}
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
-              {formatNumber(stats.artists)}+
+              {formatNumber(stats.artists)}
             </div>
           </div>
         </div>
 
-        {/* Stat 2 */}
+        {/* Stat 2 (hidden until there are published works) */}
+        {stats.artworks > 0 && (
         <div className="flex flex-col md:flex-row items-center gap-3.5 md:px-4 md:border-r" style={{ borderColor: "var(--atlas-border)" }}>
           <div
             className="w-10 h-10 rounded-full border flex items-center justify-center shrink-0 shadow-xs"
@@ -733,10 +735,11 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
               {t("ARTWORKS AVAILABLE")}
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
-              {formatNumber(stats.artworks)}+
+              {formatNumber(stats.artworks)}
             </div>
           </div>
         </div>
+        )}
 
         {/* Stat 3 */}
         <div className="flex flex-col md:flex-row items-center gap-3.5 md:px-4 md:border-r" style={{ borderColor: "var(--atlas-border)" }}>
@@ -752,24 +755,6 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
               {formatNumber(stats.countries)}
-            </div>
-          </div>
-        </div>
-
-        {/* Stat 4 */}
-        <div className="flex flex-col md:flex-row items-center gap-3.5 md:px-4 md:border-r" style={{ borderColor: "var(--atlas-border)" }}>
-          <div
-            className="w-10 h-10 rounded-full border flex items-center justify-center shrink-0 shadow-xs"
-            style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-accent)", backgroundColor: "var(--atlas-card-bg)" }}
-          >
-            <span className="material-symbols-outlined text-[20px]">groups</span>
-          </div>
-          <div>
-            <div className="font-mono text-[9px] tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
-              {t("COLLECTORS WORLDWIDE")}
-            </div>
-            <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
-              1,000+
             </div>
           </div>
         </div>

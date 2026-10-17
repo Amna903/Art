@@ -1,3 +1,4 @@
+import { normalizeCountrySlug } from "@/lib/data/africa";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { TECHNIQUES, type Artist, type Technique } from "@/lib/data/artists";
 import type { Json } from "@/lib/supabase/types";
@@ -21,12 +22,14 @@ export type SupabaseArtwork = {
   year: number | null;
   country: string | null;
   description: string | null;
+  dimensions: string | null;
   imageUrl: string;
   /** Account user id, or managed_artists.id when admin-represented. */
   artistId: string;
   /** Public route key: managed slug, or account user id. */
   artistSlug: string;
   artistName: string;
+  artistAge: number | null;
   artistCountry: string | null;
   artistCity: string | null;
   artistBio: string | null;
@@ -42,6 +45,7 @@ type ArtworkRow = {
   year: number | null;
   country: string | null;
   description: string | null;
+  dimensions: string | null;
   image_url: string;
   artist_id: string;
   managed_artist_id: string | null;
@@ -67,12 +71,13 @@ type ManagedArtistRow = {
   technique: string | null;
   avatar_url: string | null;
   translations: Json;
+  created_at?: string;
 };
 
 const ARTWORK_SELECT =
-  "id, slug, title, medium, year, country, description, image_url, artist_id, managed_artist_id, translations";
+  "id, slug, title, medium, year, country, description, dimensions, image_url, artist_id, managed_artist_id, translations";
 const PROFILE_SELECT = "id, display_name, bio, country, avatar_url, translations";
-const MANAGED_SELECT = "id, slug, display_name, bio, country, city, technique, avatar_url, translations";
+const MANAGED_SELECT = "id, slug, display_name, bio, country, city, technique, avatar_url, translations, created_at";
 
 function toArtwork(
   row: ArtworkRow,
@@ -91,10 +96,12 @@ function toArtwork(
       year: row.year,
       country: row.country,
       description,
+      dimensions: row.dimensions ?? null,
       imageUrl: row.image_url,
       artistId: managed.id,
       artistSlug: managed.slug,
-      artistName: managed.display_name?.trim() || "Artist",
+      artistName: splitArtistName(managed.display_name ?? "").name || "Artist",
+      artistAge: splitArtistName(managed.display_name ?? "").age,
       artistCountry: managed.country ?? row.country ?? null,
       artistCity: managed.city ?? null,
       artistBio: localized(managed.translations, "bio", lang, managed.bio) ?? null,
@@ -111,10 +118,12 @@ function toArtwork(
     year: row.year,
     country: row.country,
     description,
+    dimensions: row.dimensions ?? null,
     imageUrl: row.image_url,
     artistId: row.artist_id,
     artistSlug: row.artist_id,
-    artistName: profile?.display_name?.trim() || "Artist",
+    artistName: splitArtistName(profile?.display_name ?? "").name || "Artist",
+    artistAge: splitArtistName(profile?.display_name ?? "").age,
     artistCountry: profile?.country ?? row.country ?? null,
     artistCity: null,
     artistBio: (profile && localized(profile.translations, "bio", lang, profile.bio)) ?? null,
@@ -276,10 +285,11 @@ function artistFromWorks(works: SupabaseArtwork[]): Artist {
   return {
     slug: first.artistSlug,
     name: first.artistName,
+    age: first.artistAge,
     countryCode: "",
     countryName: first.artistCountry ?? first.country ?? "",
-    countrySlug: (first.artistCountry ?? first.country ?? "").toLowerCase().replace(/\s+/g, "-"),
-    city: first.artistCity ?? "",
+    countrySlug: normalizeCountrySlug(first.artistCountry ?? first.country ?? ""),
+    city: cleanPlace(first.artistCity),
     technique,
     filterTechniques: filterTechniques.length
       ? filterTechniques
@@ -293,6 +303,44 @@ function artistFromWorks(works: SupabaseArtwork[]): Artist {
     image: first.artistAvatarUrl ?? first.imageUrl,
   };
 }
+
+/**
+ * Splits what was typed into the name field into separate fields (change
+ * brief §6): "PENIEL JOSHE Also known as Mukulo Onesto Age 56" →
+ * { name: "Peniel Joshe", age: 56 }. The alias is left out until its spelling
+ * is confirmed.
+ */
+export function splitArtistName(raw: string): { name: string; age: number | null } {
+  let text = raw.trim().replace(/\s+/g, " ");
+  const ageMatch = text.match(/[,\s]*\bAge\s*:?\s*(\d{1,3})\b[,\s]*$/i);
+  const age = ageMatch ? Number(ageMatch[1]) : null;
+  if (ageMatch) text = text.slice(0, ageMatch.index).trim();
+  text = text.replace(/[,\s]*\b(also known as|aka|a\.k\.a\.)\b.*$/i, "").trim();
+  return { name: displayArtistName(text), age };
+}
+
+/** One style for every name (change brief §6): title case. Names typed in
+ * capitals ("JOSÉ PROENÇA") are lowered first; otherwise only first letters
+ * are raised ("Mayonga kingila" → "Mayonga Kingila"). Particles stay lower. */
+export function displayArtistName(name: string): string {
+  const trimmed = name.trim().replace(/\s+/g, " ");
+  const base = trimmed === trimmed.toUpperCase() ? trimmed.toLowerCase() : trimmed;
+  const particles = new Set(["da", "de", "do", "das", "dos", "e"]);
+  return base
+    .split(" ")
+    .map((w, i) => (i > 0 && particles.has(w) ? w : w.replace(/(^|[-'])(\p{L})/gu, (_, sep, c) => sep + c.toUpperCase())))
+    .join(" ");
+}
+
+/** "Luanda," → "Luanda"; "kinshasa" → "Kinshasa". */
+export function cleanPlace(place: string | null | undefined): string {
+  const p = (place ?? "").trim().replace(/[\s,;]+$/, "");
+  return p ? p.charAt(0).toLocaleUpperCase() + p.slice(1) : "";
+}
+
+/** "NEW DISCOVERY" is kept for artists added in the last 30 days. */
+const NEW_DISCOVERY_MS = 30 * 24 * 60 * 60 * 1000;
+const isRecent = (createdAt?: string) => !!createdAt && Date.now() - new Date(createdAt).getTime() < NEW_DISCOVERY_MS;
 
 /**
  * Groups published artworks by artist (account or admin-managed) into the
@@ -323,17 +371,17 @@ export async function getRealArtists(lang: Language = "en"): Promise<Artist[]> {
       if (bySlug.has(m.slug)) continue;
       artists.push({
         slug: m.slug,
-        name: m.display_name,
+        ...splitArtistName(m.display_name),
         countryCode: "",
         countryName: m.country,
-        countrySlug: m.country.toLowerCase().replace(/\s+/g, "-"),
-        city: m.city ?? "",
+        countrySlug: normalizeCountrySlug(m.country),
+        city: cleanPlace(m.city),
         technique: m.technique?.trim() || "Painting",
         filterTechniques: TECHNIQUES.includes((m.technique ?? "") as Technique)
           ? [(m.technique as Technique)]
           : ["Other"],
         worksCount: 0,
-        newDiscovery: true,
+        newDiscovery: isRecent(m.created_at),
         featuredWork: "",
         bio: localized(m.translations, "bio", lang, m.bio) ?? "",
         image: m.avatar_url ?? "",

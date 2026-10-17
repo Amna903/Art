@@ -19,7 +19,7 @@ const SLOT_HALF_GAP = 3; // distance of the first pair of frames from wall cente
 const SLOT_PAIR_STEP = 6; // distance between successive pairs
 
 // 4 zones × 4 slots/wall + 4 mid wall slots = 20 artworks total.
-const MAX_ARTWORKS = 20;
+export const MAX_ARTWORKS = 20;
 
 // Mid partition wall (at x = -3.7, length 9.2 in z) slots: 2 on East face, 2 on West face
 const MID_WALL_SLOTS: Array<{
@@ -162,29 +162,39 @@ export const FALLBACK_ARTWORKS: Artwork[] = [
   },
 ];
 
+function details(a: SupabaseArtwork) {
+  return {
+    id: a.id,
+    title: a.title,
+    artist: a.artistName,
+    description: a.description ?? "",
+    image: a.imageUrl,
+    width: FRAME_WIDTH,
+    height: FRAME_HEIGHT,
+    year: a.year ? String(a.year) : undefined,
+    medium: a.medium ?? undefined,
+    dimensions: a.dimensions ?? undefined,
+    slug: a.slug,
+    artistSlug: a.artistSlug,
+  };
+}
+
+/**
+ * Places every published artwork for the gallery. The first MAX_ARTWORKS
+ * (newest first) get a wall in the 3D room; any beyond that are still part of
+ * the guided tour and the grid, just without a wall position (the camera stays
+ * put for them). Sample artworks are never mixed in with real ones.
+ */
 export function layoutArtworks(source: SupabaseArtwork[]): Artwork[] {
-  // getPublishedArtworks() orders newest-first, so the first MAX_ARTWORKS
-  // entries are the most recently published — the oldest overflow is
-  // simply left off rather than shown badly placed.
-  const visible = source.slice(0, MAX_ARTWORKS);
-  const placed = visible.map((a, index) => {
+  return source.map((a, index) => {
+    if (index >= MAX_ARTWORKS) {
+      return { ...details(a), position: [0, 1.9, 0] as [number, number, number], rotationY: 0, zone: 1 as ZoneId };
+    }
+
     // Indices 8..11 are mounted on the mid partition wall (2 on East face, 2 on West face)
     if (index >= 8 && index < 12) {
       const mid = MID_WALL_SLOTS[index - 8];
-      return {
-        id: a.id,
-        title: a.title,
-        artist: a.artistName,
-        description: a.description ?? "",
-        image: a.imageUrl,
-        position: mid.position,
-        rotationY: mid.rotationY,
-        width: FRAME_WIDTH,
-        height: FRAME_HEIGHT,
-        zone: mid.zone,
-        year: a.year ? String(a.year) : undefined,
-        medium: a.medium ?? undefined,
-      };
+      return { ...details(a), position: mid.position, rotationY: mid.rotationY, zone: mid.zone };
     }
 
     // Outer perimeter walls (indices 0..7 and 12..19)
@@ -195,28 +205,6 @@ export function layoutArtworks(source: SupabaseArtwork[]): Artwork[] {
     const position: [number, number, number] =
       wall.axis === "x" ? [offset, 1.9, wall.fixed] : [wall.fixed, 1.9, offset];
 
-    return {
-      id: a.id,
-      title: a.title,
-      artist: a.artistName,
-      description: a.description ?? "",
-      image: a.imageUrl,
-      position,
-      rotationY: wall.rotationY,
-      width: FRAME_WIDTH,
-      height: FRAME_HEIGHT,
-      zone,
-      year: a.year ? String(a.year) : undefined,
-      medium: a.medium ?? undefined,
-    };
+    return { ...details(a), position, rotationY: wall.rotationY, zone };
   });
-
-  // Guarantee that all 12 gallery slots (especially the 4 paintings on the mid wall)
-  // remain populated so artworks never appear and disappear when partial Supabase results arrive.
-  if (placed.length < FALLBACK_ARTWORKS.length) {
-    const remaining = FALLBACK_ARTWORKS.slice(placed.length);
-    return [...placed, ...remaining];
-  }
-
-  return placed;
 }

@@ -4,7 +4,6 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { MeshReflectorMaterial, PointerLockControls } from "@react-three/drei";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { useTheme } from "@/lib/theme";
 import { useLanguage } from "@/lib/i18n";
 
 export type Artwork = {
@@ -20,6 +19,11 @@ export type Artwork = {
   zone: 1 | 2 | 3 | 4;
   year?: string;
   medium?: string;
+  dimensions?: string;
+  /** Artwork slug, for enquiries. */
+  slug?: string;
+  /** Public artist route key (/artists/[slug]). */
+  artistSlug?: string;
 };
 
 // Room physical dimensions (in meters)
@@ -950,28 +954,63 @@ function PerimeterWallWash() {
   );
 }
 
-// First-Person Player Controller
+type MoveKeys = Record<string, boolean>;
+
+/** Where the camera stands to look at one artwork: in front of it, at eye
+ * height, shifted sideways by `offset` metres so the painting sits clear of
+ * the viewing panel on the right. */
+function viewpointFor(art: Artwork, offset: number) {
+  const normal = new THREE.Vector3(Math.sin(art.rotationY), 0, Math.cos(art.rotationY));
+  const right = new THREE.Vector3().crossVectors(normal.clone().negate(), new THREE.Vector3(0, 1, 0)).normalize();
+  const distance = Math.max(2.8, Math.max(art.width, art.height) * 1.55);
+  const target = new THREE.Vector3(...art.position).addScaledVector(right, offset);
+  const pos = new THREE.Vector3(...art.position).addScaledVector(normal, distance).addScaledVector(right, offset);
+  pos.y = 1.65;
+  pos.x = THREE.MathUtils.clamp(pos.x, -ROOM.w / 2 + 1.2, ROOM.w / 2 - 1.2);
+  pos.z = THREE.MathUtils.clamp(pos.z, -ROOM.d / 2 + 1.4, ROOM.d / 2 - 1.4);
+  // Camera convention (looks down -z), unlike Object3D.lookAt on a plain object.
+  const look = new THREE.Matrix4().lookAt(pos, new THREE.Vector3(target.x, art.position[1] - 0.15, target.z), new THREE.Vector3(0, 1, 0));
+  return { pos, quat: new THREE.Quaternion().setFromRotationMatrix(look) };
+}
+
+// Camera controller. "tour": glides smoothly to the focused artwork and ignores
+// the keyboard (arrow keys move between artworks instead). "free": first-person
+// walking with W/A/S/D or arrow keys, plus drag-to-look and on-screen arrows on
+// touch screens.
 function Player({
-  zoneTarget,
-  onZoneReached,
+  mode,
+  focus,
+  focusOffset,
+  touchKeys,
   setKeysActive,
 }: {
-  zoneTarget: number | null;
-  onZoneReached: () => void;
-  setKeysActive: (k: Record<string, boolean>) => void;
+  mode: "tour" | "free";
+  focus: Artwork | null;
+  focusOffset: number;
+  touchKeys: React.MutableRefObject<MoveKeys>;
+  setKeysActive: (k: MoveKeys) => void;
 }) {
-  const { camera } = useThree();
-  const keys = useRef<Record<string, boolean>>({});
+  const { camera, gl } = useThree();
+  const keys = useRef<MoveKeys>({});
   const velocity = useRef(new THREE.Vector3());
+  const goal = useRef<{ pos: THREE.Vector3; quat: THREE.Quaternion } | null>(null);
 
-  // Initial view mirrors the reference: a diagonal sightline across the near wall,
-  // long white side wall, and charcoal floor.
+  // Initial view: a diagonal sightline across the near wall, long white side
+  // wall, and charcoal floor.
   useEffect(() => {
     camera.position.set(-5.8, 1.65, 7.5);
     camera.lookAt(3.2, 1.7, -3.8);
   }, [camera]);
 
   useEffect(() => {
+    goal.current = mode === "tour" && focus ? viewpointFor(focus, focusOffset) : null;
+  }, [mode, focus, focusOffset]);
+
+  useEffect(() => {
+    if (mode !== "free") {
+      keys.current = {};
+      return;
+    }
     const down = (e: KeyboardEvent) => {
       keys.current[e.key.toLowerCase()] = true;
       setKeysActive({ ...keys.current });
@@ -986,20 +1025,49 @@ function Player({
       window.removeEventListener("keydown", down);
       window.removeEventListener("keyup", up);
     };
-  }, [setKeysActive]);
+  }, [mode, setKeysActive]);
 
-  // When a zone is chosen, smoothly place the camera directly facing that zone's artworks
+  // Drag to look around on touch screens (pointer lock does not exist there).
   useEffect(() => {
-    if (zoneTarget == null) return;
-    const vp = ZONE_VIEWPOINTS[zoneTarget];
-    if (vp) {
-      camera.position.set(...vp.pos);
-      camera.lookAt(...vp.lookAt);
-    }
-    onZoneReached();
-  }, [zoneTarget, camera, onZoneReached]);
+    if (mode !== "free") return;
+    const el = gl.domElement;
+    let last: { x: number; y: number } | null = null;
+    const euler = new THREE.Euler(0, 0, 0, "YXZ");
+    const onDown = (e: PointerEvent) => {
+      if (e.pointerType !== "touch") return;
+      last = { x: e.clientX, y: e.clientY };
+    };
+    const onMove = (e: PointerEvent) => {
+      if (!last || e.pointerType !== "touch") return;
+      euler.setFromQuaternion(camera.quaternion);
+      euler.y += (e.clientX - last.x) * 0.005;
+      euler.x = THREE.MathUtils.clamp(euler.x + (e.clientY - last.y) * 0.003, -0.6, 0.6);
+      camera.quaternion.setFromEuler(euler);
+      last = { x: e.clientX, y: e.clientY };
+    };
+    const onUp = () => {
+      last = null;
+    };
+    el.addEventListener("pointerdown", onDown);
+    el.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    return () => {
+      el.removeEventListener("pointerdown", onDown);
+      el.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+  }, [mode, gl, camera]);
 
   useFrame((_, delta) => {
+    if (mode === "tour") {
+      if (goal.current) {
+        const k = 1 - Math.exp(-delta * 2.6);
+        camera.position.lerp(goal.current.pos, k);
+        camera.quaternion.slerp(goal.current.quat, k);
+      }
+      return;
+    }
+
     const speed = 4.2;
     const dir = new THREE.Vector3();
     const fwd = new THREE.Vector3();
@@ -1007,11 +1075,12 @@ function Player({
     fwd.y = 0;
     fwd.normalize();
     const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0, 1, 0)).normalize();
+    const pressed = (k: string) => keys.current[k] || touchKeys.current[k];
 
-    if (keys.current["w"] || keys.current["arrowup"]) dir.add(fwd);
-    if (keys.current["s"] || keys.current["arrowdown"]) dir.sub(fwd);
-    if (keys.current["d"] || keys.current["arrowright"]) dir.add(right);
-    if (keys.current["a"] || keys.current["arrowleft"]) dir.sub(right);
+    if (pressed("w") || pressed("arrowup")) dir.add(fwd);
+    if (pressed("s") || pressed("arrowdown")) dir.sub(fwd);
+    if (pressed("d") || pressed("arrowright")) dir.add(right);
+    if (pressed("a") || pressed("arrowleft")) dir.sub(right);
 
     if (dir.lengthSq() > 0) {
       dir.normalize().multiplyScalar(speed * delta);
@@ -1071,27 +1140,34 @@ function SceneRig() {
 
 export default function VirtualMuseum({
   artworks,
-  zoneTarget,
-  onZoneReached,
+  mode = "free",
+  focus = null,
+  focusOffset = 0,
   onSelectArtwork,
   onKeysChange,
   onLoadProgress,
 }: {
   artworks: Artwork[];
-  zoneTarget: number | null;
-  onZoneReached: () => void;
+  mode?: "tour" | "free";
+  /** Artwork the camera glides to in tour mode. */
+  focus?: Artwork | null;
+  /** Sideways shift (metres) so the focused painting clears an overlay panel. */
+  focusOffset?: number;
   onSelectArtwork: (a: Artwork) => void;
   onKeysChange?: (keys: Record<string, boolean>) => void;
   onLoadProgress?: (loaded: number, total: number, errors: number) => void;
 }) {
-  const { theme } = useTheme();
   const { t } = useLanguage();
   const palette = MUSEUM_PALETTE;
-  const isDark = theme === "dark";
-  const [locked, setLocked] = useState(false);
+  const touchKeys = useRef<MoveKeys>({});
+  const [tipOpen, setTipOpen] = useState(true);
+  // Only ever rendered in the browser (lazy-loaded after a tap), so reading
+  // matchMedia during the first render is safe.
+  const [coarse] = useState(() => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches);
   const [entries, setEntries] = useState<Record<string, TexEntry>>(() =>
     Object.fromEntries(artworks.map((a) => [a.id, { status: "loading" as TexStatus }])),
   );
+
 
   useEffect(() => {
     const loader = new THREE.TextureLoader();
@@ -1177,65 +1253,71 @@ export default function VirtualMuseum({
         ))}
 
         <Player
-          zoneTarget={zoneTarget}
-          onZoneReached={onZoneReached}
+          mode={mode}
+          focus={focus}
+          focusOffset={focusOffset}
+          touchKeys={touchKeys}
           setKeysActive={(k) => onKeysChange?.(k)}
         />
 
-        <PointerLockControls
-          selector="#virtual-museum-viewport"
-          onLock={() => setLocked(true)}
-          onUnlock={() => setLocked(false)}
-        />
+        {mode === "free" && !coarse && <PointerLockControls selector="#virtual-museum-viewport" />}
       </Canvas>
 
-      {!locked && (
-        <div
-          className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          style={{
-            background: isDark
-              ? "radial-gradient(circle at center, rgba(22,22,22,0.3), rgba(22,22,22,0.65))"
-              : "radial-gradient(circle at center, rgba(255,255,255,0.2), rgba(255,255,255,0.5))",
-          }}
-        >
-          <div
-            className="px-6 py-5 text-center w-[min(360px,88%)] backdrop-blur-md shadow-2xl"
-            style={{
-              background: isDark ? "rgba(22,22,22,0.8)" : "rgba(255,255,255,0.88)",
-              border: isDark
-                ? "1px solid rgba(255,255,255,0.14)"
-                : "1px solid rgba(31,31,31,0.12)",
-              borderLeft: "2px solid var(--nua-red)",
-            }}
+      {/* Free exploration only: a small, dismissible tip instead of a
+          W/A/S/D panel on entry (change brief, section 4). */}
+      {mode === "free" && tipOpen && (
+        <div className={`absolute ${coarse ? "top-20" : "bottom-20"} left-1/2 z-10 flex w-[min(420px,calc(100%-2rem))] -translate-x-1/2 items-start gap-3 border border-[var(--nua-line-dark)] bg-[var(--nua-charcoal-deep)]/90 px-4 py-3 text-sm text-[var(--nua-white)] shadow-lg backdrop-blur-md`}>
+          <p className="flex-1 leading-snug">
+            {coarse
+              ? t("Drag to look around. Use the arrows to walk.")
+              : t("Click the room to look around with the mouse. Walk with W A S D or the arrow keys; Esc releases the mouse.")}
+          </p>
+          <button
+            type="button"
+            onClick={() => setTipOpen(false)}
+            aria-label={t("Dismiss tip")}
+            className="-mr-2 -mt-1 flex h-11 w-11 shrink-0 items-center justify-center text-[var(--nua-grey-light)] hover:text-[var(--nua-white)]"
           >
-            <p
-              className="font-label-caps text-[10px] tracking-[0.35em] mb-2"
-              style={{ color: "var(--nua-red)" }}
-            >
-              {t("IMMERSIVE MODE")}
-            </p>
-            <p
-              className="font-headline-sm text-base md:text-lg uppercase tracking-wider mb-3"
-              style={{ color: isDark ? "#FFFFFF" : "#1F1F1F" }}
-            >
-              {t("Click to enter the museum")}
-            </p>
-            <div className="flex flex-wrap justify-center gap-1.5 text-[9px] font-label-caps tracking-wider">
-              {["WASD · MOVE", "MOUSE · LOOK", "ESC · EXIT"].map((ctrl) => (
-                <span
-                  key={ctrl}
-                  className="px-2 py-1 border"
-                  style={{
-                    color: isDark ? "#B8B8B8" : "#5C5C5C",
-                    borderColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(31,31,31,0.15)",
-                    background: isDark ? "rgba(255,255,255,0.04)" : "rgba(31,31,31,0.03)",
-                  }}
-                >
-                  {t(ctrl)}
+            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+              close
+            </span>
+          </button>
+        </div>
+      )}
+
+      {/* Touch screens: visible walking buttons, at least 44 × 44 px. */}
+      {mode === "free" && coarse && (
+        <div className="absolute bottom-4 left-4 z-10 grid grid-cols-3 gap-1">
+          {(
+            [
+              ["", ""],
+              ["w", "arrow_upward"],
+              ["", ""],
+              ["a", "arrow_back"],
+              ["s", "arrow_downward"],
+              ["d", "arrow_forward"],
+            ] as const
+          ).map(([key, icon], i) =>
+            key ? (
+              <button
+                key={key}
+                type="button"
+                aria-label={t({ w: "Walk forward", s: "Walk back", a: "Step left", d: "Step right" }[key])}
+                onPointerDown={() => (touchKeys.current[key] = true)}
+                onPointerUp={() => (touchKeys.current[key] = false)}
+                onPointerLeave={() => (touchKeys.current[key] = false)}
+                onPointerCancel={() => (touchKeys.current[key] = false)}
+                className="flex h-12 w-12 select-none items-center justify-center border border-[var(--nua-line-dark)] bg-[var(--nua-charcoal-deep)]/80 text-[var(--nua-white)] active:bg-[var(--nua-charcoal)]"
+                style={{ touchAction: "none" }}
+              >
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  {icon}
                 </span>
-              ))}
-            </div>
-          </div>
+              </button>
+            ) : (
+              <span key={i} />
+            ),
+          )}
         </div>
       )}
     </div>

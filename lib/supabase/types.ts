@@ -424,6 +424,84 @@ export type Database = {
         }
         Relationships: []
       }
+      gallery_tracks: {
+        Row: {
+          id: string
+          title: string
+          country_slug: string | null
+          audio_path: string
+          duration_seconds: number | null
+          position: number
+          active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          country_slug?: string | null
+          audio_path: string
+          duration_seconds?: number | null
+          position?: number
+          active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          country_slug?: string | null
+          audio_path?: string
+          duration_seconds?: number | null
+          position?: number
+          active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      site_heroes: {
+        Row: {
+          id: string
+          page: string
+          image_desktop: string
+          image_mobile: string | null
+          alt_text: string
+          credit: string | null
+          focal_point: string
+          active: boolean
+          translations: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          page: string
+          image_desktop: string
+          image_mobile?: string | null
+          alt_text?: string
+          credit?: string | null
+          focal_point?: string
+          active?: boolean
+          translations?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          page?: string
+          image_desktop?: string
+          image_mobile?: string | null
+          alt_text?: string
+          credit?: string | null
+          focal_point?: string
+          active?: boolean
+          translations?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       page_blocks: {
         Row: {
           translations: Json

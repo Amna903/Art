@@ -10,7 +10,7 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 
 const NAV = [
   { href: "/artists", label: "Artists" },
-  { href: "/virtual-gallery", label: "Galleries" },
+  { href: "/virtual-gallery", label: "Virtual gallery" },
   { href: "/collections", label: "Collections" },
   { href: "/exhibitions", label: "Exhibitions" },
   { href: "/journal", label: "Journal" },

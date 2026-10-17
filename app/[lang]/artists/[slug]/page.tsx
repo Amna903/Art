@@ -10,6 +10,7 @@ import { getArtistBySlug as getStaticArtistBySlug } from "@/lib/data/artists";
 import { getDirectoryArtists } from "@/lib/data/directory";
 import Link from "@/components/i18n/Link";
 import Image from "next/image";
+import { ArtistPhoto } from "@/components/artist/ArtistPhoto";
 import { getI18n } from "@/lib/i18n/server";
 import type { Language } from "@/lib/i18n/config";
 import type { Translator } from "@/lib/i18n/translate";
@@ -168,11 +169,10 @@ export default async function ArtistProfilePage({ params }: Props) {
         </div>
         <div className="col-span-12 lg:col-span-7 relative group">
           <div className="relative overflow-hidden aspect-[4/5] rounded-xl shadow-2xl">
-            <Image
-              fill
+            <ArtistPhoto
               sizes="(max-width: 1024px) 100vw, 58vw"
-              priority
               className="object-cover transform scale-105 group-hover:scale-100 transition-transform duration-1000"
+              name={artist.name}
               alt={artist.imageAlt ?? t("Portrait of {name}", { name: artist.name })}
               src={heroImage}
             />
@@ -360,12 +360,12 @@ export default async function ArtistProfilePage({ params }: Props) {
             {similarArtists.map((a) => (
               <Link key={a.slug} href={`/artists/${a.slug}`} className="group">
                 <div className="relative aspect-square overflow-hidden rounded-lg mb-4 bg-surface-container">
-                  <Image
-                    fill
+                  <ArtistPhoto
                     sizes="(max-width: 768px) 50vw, 25vw"
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    name={a.name}
                     alt={t("Portrait of {name}", { name: a.name })}
-                    src={a.image?.trim() || heroImage}
+                    src={a.image}
                   />
                 </div>
                 <h3 className="text-body-lg font-bold group-hover:text-secondary transition-colors">{a.name}</h3>

@@ -58,7 +58,7 @@ export function SiteFooter() {
             </li>
             <li>
               <Link href="/virtual-gallery" className="opacity-85 hover:opacity-100 hover:text-secondary-fixed-dim">
-                {t("Virtual Gallery")}
+                {t("Virtual gallery")}
               </Link>
             </li>
             <li>
@@ -92,18 +92,13 @@ export function SiteFooter() {
                 {t("FAQ")}
               </Link>
             </li>
-            <li>
-              <a href="#" className="opacity-85 hover:opacity-100 hover:text-secondary-fixed-dim">
-                {t("Press")}
-              </a>
-            </li>
           </ul>
         </div>
       </div>
       <div>
         <div className="max-w-container-max mx-auto px-gutter-page py-6 flex flex-col md:flex-row gap-2 md:gap-6 justify-between text-[10.5px] uppercase tracking-[0.22em] opacity-55">
-          <span>© {new Date().getFullYear()} {t("NUA-ARTE Collective")}</span>
-          <span>{t("Lagos · Dakar · Johannesburg · Lisboa")}</span>
+          <span translate="no">© {new Date().getFullYear()} NUA-ARTE</span>
+          <span translate="no">New York · Luanda</span>
         </div>
       </div>
     </footer>

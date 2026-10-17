@@ -17,6 +17,9 @@ import {
 import { getI18n } from "@/lib/i18n/server";
 import { localizeRow } from "@/lib/i18n/content";
 import { pickImage } from "@/lib/data/african-imagery";
+import { getSiteHero } from "@/lib/data/site-heroes";
+import { ArtistPhoto } from "@/components/artist/ArtistPhoto";
+import { HeroCredit, HeroPicture } from "@/components/sections/HeroPicture";
 import { getCountryGalleryBySlug } from "@/lib/sanity/queries";
 import { getRealArtists, getPublishedArtworks } from "@/lib/data/supabase-artists-cached";
 import { getPublishedJournalPosts } from "@/lib/data/journal";
@@ -98,7 +101,9 @@ export default async function CountryExperience({ params }: Props) {
       slug: a.slug,
       name: a.name,
       role: "emerging",
-      bio: a.bio || mockArtistBio(a.name, country, t),
+      // No generated filler bio for real artists (it invented media such as
+      // "painting, sculpture and mixed media"); their technique stands in.
+      bio: a.bio || (a.technique ? t(a.technique) : ""),
       avatarSwatch: swatchFor(a.slug),
       image: a.image || undefined,
     }));
@@ -129,11 +134,14 @@ export default async function CountryExperience({ params }: Props) {
   const galleryArtworks = gallery.artworks.map((w) =>
     w.description === mockArtworkDescription(country) ? { ...w, description: mockArtworkDescription(country, lang, t) } : w,
   );
-  const mergedArtists = mergeSlots(realCountryArtists, galleryArtists).map((a, i) => ({
+  // Countries with NUA-ARTE artists show only real content (change brief §6:
+  // no sample works, exhibitions or stories); the others keep the template.
+  const hasRealArtists = realCountryArtists.length > 0;
+  const mergedArtists = (hasRealArtists ? realCountryArtists : mergeSlots(realCountryArtists, galleryArtists)).map((a, i) => ({
     ...a,
     role: (i === 0 ? "featured" : "emerging") as MockArtist["role"],
   }));
-  const mergedArtworks = mergeSlots(realCountryArtworks, galleryArtworks);
+  const mergedArtworks = hasRealArtists ? realCountryArtworks : mergeSlots(realCountryArtworks, galleryArtworks);
 
   const stats = {
     artistsCount: mergedArtists.length,
@@ -162,6 +170,8 @@ export default async function CountryExperience({ params }: Props) {
 
 
   const heroImg = pickImage(`hero-${country.slug}`, "hero");
+  // Dashboard → Hero images; falls back to the homepage hero, then the built-in image.
+  const siteHero = await getSiteHero(`country:${country.slug}`, lang);
   const editorialImg = pickImage(`edit-${country.slug}`, "editorial");
 
   // Real journal posts tagged with this country take over the mock editorial
@@ -209,7 +219,7 @@ export default async function CountryExperience({ params }: Props) {
       slug: JOURNAL_FALLBACK_STORIES[2]?.slug as string | undefined,
     },
   ];
-  const stories = mergeSlots(realCountryStories, mockStories);
+  const stories = hasRealArtists ? realCountryStories : mergeSlots(realCountryStories, mockStories);
 
   // Real exhibitions tagged with this country take over the mock programme
   // slots one-for-one — same exchange as artworks and stories above — the
@@ -237,23 +247,30 @@ export default async function CountryExperience({ params }: Props) {
       img: pickImage(`exh2-${country.slug}`, "gallery"),
     },
   ];
-  const exhibitions = mergeSlots(realCountryExhibitions, mockExhibitions);
+  const exhibitions = hasRealArtists ? realCountryExhibitions : mergeSlots(realCountryExhibitions, mockExhibitions);
 
   return (
     <main className="bg-background text-foreground">
       {/* ============================== HERO ============================== */}
       <section className="relative isolate overflow-hidden">
         <div className="absolute inset-0">
-          <Image
-            src={heroImg}
-            alt={t("Editorial hero image evoking contemporary art from {name}", { name })}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
+          {siteHero ? (
+            <HeroPicture hero={siteHero} />
+          ) : (
+            <Image
+              src={heroImg}
+              alt={t("Editorial hero image evoking contemporary art from {name}", { name })}
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-background" />
         </div>
+        {siteHero?.credit && (
+          <HeroCredit credit={siteHero.credit} label={t("Artwork: {credit}", { credit: siteHero.credit })} className="right-4 top-20" />
+        )}
 
         <div className="relative max-w-container-max mx-auto px-gutter-page pt-24 md:pt-32 pb-24 md:pb-40 text-[#FFFFFF]">
           <Link
@@ -319,18 +336,22 @@ export default async function CountryExperience({ params }: Props) {
 
           <div className="grid md:grid-cols-[1.1fr_1fr] gap-10 md:gap-16 items-center">
             <div className="relative h-[520px] md:h-[640px]">
-              <Image
-                src={featuredArtist.image ?? pickImage(`artist-${country.slug}-${featuredArtist.slug}`, "portrait")}
-                alt={t("Portrait of {name}", { name: featuredArtist.name })}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover"
-              />
-              <div
-                className="absolute -bottom-4 -right-4 w-24 h-24"
-                style={{ background: `#${featuredArtist.avatarSwatch}` }}
-                aria-hidden
-              />
+              {hasRealArtists ? (
+                <ArtistPhoto
+                  src={featuredArtist.image}
+                  name={featuredArtist.name}
+                  alt={t("Portrait of {name}", { name: featuredArtist.name })}
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+              ) : (
+                <Image
+                  src={featuredArtist.image ?? pickImage(`artist-${country.slug}-${featuredArtist.slug}`, "portrait")}
+                  alt={t("Portrait of {name}", { name: featuredArtist.name })}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover"
+                />
+              )}
             </div>
 
             <div>
@@ -342,16 +363,23 @@ export default async function CountryExperience({ params }: Props) {
               </p>
               <div className="red-thread w-16 my-6" />
               <p className="font-body-lg text-lg text-on-surface-variant leading-relaxed max-w-xl">
-                {featuredArtist.bio}{" "}
-                {t(
-                  "Working across painting, sculpture and mixed media, {first}'s practice is a cornerstone of NUA-ARTE's programme for {country}.",
-                  { first: featuredArtist.name.split(" ")[0], country: name },
+                {featuredArtist.bio}
+                {/* Template sentence only for countries without real artists:
+                    it would misstate a real artist's medium. */}
+                {!hasRealArtists && (
+                  <>
+                    {" "}
+                    {t(
+                      "Working across painting, sculpture and mixed media, {first}'s practice is a cornerstone of NUA-ARTE's programme for {country}.",
+                      { first: featuredArtist.name.split(" ")[0], country: name },
+                    )}
+                  </>
                 )}
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
-                  href={`/artists?country=${country.slug}`}
+                  href={hasRealArtists ? `/artists/${featuredArtist.slug}` : `/artists?country=${country.slug}`}
                   className="bg-primary text-beige px-6 py-3 font-label-caps tracking-widest hover:bg-red-blood transition-colors"
                 >
                   {t("VIEW ARTIST →")}
@@ -388,6 +416,8 @@ export default async function CountryExperience({ params }: Props) {
         </section>
       )}
 
+      {curatedWorks.length > 0 && (
+        <>
       {/* ============================ ARTWORKS ============================ */}
       <section className="bg-surface-container-low/50 border-y border-outline/30">
         <div className="max-w-container-max mx-auto px-gutter-page py-20 md:py-28">
@@ -409,7 +439,11 @@ export default async function CountryExperience({ params }: Props) {
           <CuratedWorksGrid works={curatedWorks} />
         </div>
       </section>
+        </>
+      )}
 
+      {stories.length > 0 && (
+        <>
       {/* ============================ STORIES ============================ */}
       <section className="max-w-container-max mx-auto px-gutter-page py-20 md:py-28">
         <div className="grid md:grid-cols-[1fr_2fr] gap-10 md:gap-16 mb-14 items-end">
@@ -461,7 +495,11 @@ export default async function CountryExperience({ params }: Props) {
           ))}
         </div>
       </section>
+        </>
+      )}
 
+      {exhibitions.length > 0 && (
+        <>
       {/* ========================== EXHIBITIONS ========================== */}
       <section className="bg-surface-container-low/50 border-y border-outline/30">
         <div className="max-w-container-max mx-auto px-gutter-page py-20 md:py-28">
@@ -506,6 +544,8 @@ export default async function CountryExperience({ params }: Props) {
           </div>
         </div>
       </section>
+        </>
+      )}
 
       {/* ======================== VIRTUAL GALLERY ======================== */}
       <section className="relative isolate overflow-hidden">

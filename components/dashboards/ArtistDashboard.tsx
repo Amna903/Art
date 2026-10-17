@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useLanguage, useRouter } from "@/lib/i18n";
 import Image from "next/image";
 import { toast } from "sonner";
+import { prepareArtistPhoto } from "@/lib/utils/compress-image";
 import { supabase } from "@/lib/supabase/client";
 import { AFRICAN_COUNTRIES, getCountryDisplayName } from "@/lib/data/africa";
 import type { Database } from "@/lib/supabase/types";
@@ -137,8 +138,16 @@ export function ArtistDashboard({ userId }: { userId: string }) {
 
   const uploadProfileAvatar = async (file: File) => {
     setProfileUploading(true);
-    const path = `${userId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
-    const { error: upErr } = await supabase.storage.from("avatars").upload(path, file);
+    let photo: File;
+    try {
+      photo = await prepareArtistPhoto(file);
+    } catch (err) {
+      alert(t(err instanceof Error ? err.message : "Upload failed."));
+      setProfileUploading(false);
+      return;
+    }
+    const path = `${userId}/${Date.now()}-${photo.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
+    const { error: upErr } = await supabase.storage.from("avatars").upload(path, photo, { contentType: "image/webp" });
     if (upErr) {
       alert(upErr.message);
       setProfileUploading(false);

@@ -1,51 +1,67 @@
 "use client";
 
+import { useState } from "react";
+import Image from "next/image";
 import Link from "@/components/i18n/Link";
-import { fixtureBio, type Artist } from "@/lib/data/artists";
-import { getCountryBySlug } from "@/lib/data/africa";
+import type { Artist } from "@/lib/data/artists";
+import { getCountryBySlug, getCountryDisplayName } from "@/lib/data/africa";
 import { useLanguage } from "@/lib/i18n";
 
-export function ArtistCard({ artist, offset }: { artist: Artist; offset: boolean }) {
-  const { t } = useLanguage();
-  const fixtureCountry = artist.fixture && getCountryBySlug(artist.fixture.countrySlug);
-  const bio = artist.fixture && fixtureCountry ? fixtureBio(artist.fixture.first, fixtureCountry, t) : artist.bio;
+function initials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter((w) => w && w[0] === w[0].toUpperCase())
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("");
+}
+
+/**
+ * Square artist card (change brief §8): ~240 px on desktop, ~160 px on
+ * phones, served through next/image at card size instead of the full-size
+ * original. A missing or broken photo shows the artist's initials on
+ * --nua-paper, never an empty box.
+ */
+export function ArtistCard({ artist, index }: { artist: Artist; index: number }) {
+  const { t, language } = useLanguage();
+  const [broken, setBroken] = useState(false);
+  const country = getCountryBySlug(artist.countrySlug)
+    ? getCountryDisplayName(artist.countrySlug, language)
+    : artist.countryName;
+  const place = [artist.city, country].filter(Boolean).join(", ");
+  const meta = [artist.age ? t("Age {age}", { age: artist.age }) : "", place].filter(Boolean).join(" · ");
+  const showPhoto = !!artist.image && !broken;
 
   return (
-    <Link
-      href={`/artists/${artist.slug}`}
-      className={["artist-card-container group flex flex-col relative", offset ? "lg:translate-y-10" : ""].join(" ")}
-    >
-      <div className="relative aspect-[3/4] overflow-hidden bg-surface-container-low mb-6 cursor-pointer">
-        <div
-          className="absolute inset-0 z-10 transition-opacity duration-700 group-hover:opacity-0 bg-cover bg-center"
-          style={{ backgroundImage: `url('${artist.image}')` }}
-        />
-        <div className="absolute inset-0 z-0 bg-surface-container flex flex-col justify-end p-7">
-          <div className="mb-4">
-            <span className="font-label-caps text-secondary">{t("FEATURED WORK")}</span>
-            <h4 className="font-headline-sm text-primary">“{artist.featuredWork}”</h4>
-          </div>
-          <p className="font-body-md text-on-surface-variant line-clamp-4 italic">{bio}</p>
-          <div className="mt-6 flex justify-between items-center">
-            <span className="font-label-caps uppercase tracking-widest border-b border-primary">{t("View Bio")}</span>
-            <span className="material-symbols-outlined">north_east</span>
-          </div>
-        </div>
+    <Link href={`/artists/${artist.slug}`} className="group flex flex-col">
+      <div className="relative mb-3 aspect-square overflow-hidden bg-[var(--nua-paper)]">
+        {showPhoto ? (
+          <Image
+            src={artist.image}
+            alt={artist.name}
+            fill
+            sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 300px"
+            loading={index < 4 ? "eager" : "lazy"}
+            className="object-cover object-[50%_30%] transition-transform duration-500 group-hover:scale-[1.03]"
+            onError={() => setBroken(true)}
+          />
+        ) : (
+          <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center font-display text-5xl text-[var(--nua-grey)]">
+            {initials(artist.name)}
+          </span>
+        )}
       </div>
-      <div className="flex flex-col gap-2">
-        <div className="flex justify-between items-start gap-3">
-          <h3 className="font-headline-sm text-primary">{artist.name}</h3>
-          <span className="font-label-caps text-on-surface-variant text-right">
-            {artist.city}, {artist.countryCode.slice(0, 2)}
+      <h3 className="font-headline-sm text-lg leading-snug text-primary group-hover:underline">{artist.name}</h3>
+      {meta && <p className="text-sm text-on-surface-variant">{meta}</p>}
+      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+        <p className="font-label-caps text-xs uppercase tracking-wider text-on-surface-variant">{t(artist.technique)}</p>
+        {artist.newDiscovery ? (
+          <span className="whitespace-nowrap text-[10px] font-bold text-secondary">{t("NEW DISCOVERY")}</span>
+        ) : artist.worksCount > 0 ? (
+          <span className="whitespace-nowrap text-[10px] font-bold text-on-surface-variant">
+            {t("{count} WORKS", { count: artist.worksCount })}
           </span>
-        </div>
-        <div className="red-thread mb-2" />
-        <div className="flex justify-between items-center gap-3">
-          <p className="font-label-caps text-on-surface-variant tracking-wider uppercase">{t(artist.technique)}</p>
-          <span className="text-[10px] font-bold bg-secondary-container/10 text-secondary px-2 py-0.5 rounded-full whitespace-nowrap">
-            {artist.newDiscovery ? t("NEW DISCOVERY") : t("{count} WORKS", { count: artist.worksCount })}
-          </span>
-        </div>
+        ) : null}
       </div>
     </Link>
   );

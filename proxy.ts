@@ -1,5 +1,27 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { DEFAULT_LOCALE, LOCALE_COOKIE, isEnabledLocale, isLocale, splitLocale } from "@/lib/i18n/config";
+import {
+  DEFAULT_LOCALE,
+  LOCALES,
+  LOCALE_COOKIE,
+  REVIEWED,
+  isEnabledLocale,
+  isLocale,
+  localizePath,
+  splitLocale,
+} from "@/lib/i18n/config";
+
+/** hreflang alternates for search engines (change brief §9), sent as an HTTP
+ * Link header on every page: one URL per public language plus x-default
+ * (English). Preview (unreviewed) languages are noindex and left out. */
+function withAlternates(response: NextResponse, request: NextRequest, path: string) {
+  const origin = request.nextUrl.origin;
+  const links = LOCALES.filter((lang) => REVIEWED[lang]).map(
+    (lang) => `<${origin}${localizePath(path, lang)}>; rel="alternate"; hreflang="${lang}"`,
+  );
+  links.push(`<${origin}${localizePath(path, DEFAULT_LOCALE)}>; rel="alternate"; hreflang="x-default"`);
+  response.headers.set("Link", links.join(", "));
+  return response;
+}
 
 /**
  * Locale routing. Every page lives under app/[lang]; English is served
@@ -23,7 +45,7 @@ export function proxy(request: NextRequest) {
       url.pathname = path;
       return NextResponse.redirect(url, prefix === DEFAULT_LOCALE ? 308 : 307);
     }
-    return NextResponse.next();
+    return withAlternates(NextResponse.next(), request, path);
   }
 
   const remembered = request.cookies.get(LOCALE_COOKIE)?.value;
@@ -36,7 +58,7 @@ export function proxy(request: NextRequest) {
   const url = request.nextUrl.clone();
   url.pathname = `/${DEFAULT_LOCALE}${pathname === "/" ? "" : pathname}`;
   url.search = search;
-  return NextResponse.rewrite(url);
+  return withAlternates(NextResponse.rewrite(url), request, pathname);
 }
 
 export const config = {

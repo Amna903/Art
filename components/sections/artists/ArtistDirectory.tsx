@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { COUNTRY_COUNT, TECHNIQUES, type Artist, type Technique } from "@/lib/data/artists";
+import { TECHNIQUES, type Artist, type Technique } from "@/lib/data/artists";
 import { AFRICAN_COUNTRIES, getCountryDisplayName } from "@/lib/data/africa";
+import { INTL_LOCALES } from "@/lib/i18n/config";
 import { useLanguage } from "@/lib/i18n";
 import { ArtistCard } from "./ArtistCard";
 
@@ -70,6 +71,31 @@ export function ArtistDirectory({ artists }: { artists: Artist[] }) {
     syncUrl({ f: "All", country: "", q: "" });
   };
 
+  // Only offer filters that return someone (change brief §6).
+  const techniquesInUse = useMemo(
+    () => new Set(sourceArtists.flatMap((a) => a.filterTechniques ?? [a.technique as Technique])),
+    [sourceArtists],
+  );
+  const visibleFilters = FILTERS.filter((label) =>
+    label === "All" ? true : label === "New Discoveries" ? sourceArtists.some((a) => a.newDiscovery) : techniquesInUse.has(label),
+  );
+  const countriesInUse = useMemo(
+    () => AFRICAN_COUNTRIES.filter((c) => sourceArtists.some((a) => a.countrySlug === c.slug)),
+    [sourceArtists],
+  );
+  // "12 artists from Angola and DR Congo" — the real countries, not "54 nations".
+  const countryNames = countriesInUse.map((c) => getCountryDisplayName(c, language));
+  const intro =
+    countryNames.length > 0 && countryNames.length <= 4
+      ? t("{artists} artists from {countries}", {
+          artists: formatNumber(totalCount),
+          countries: new Intl.ListFormat(INTL_LOCALES[language], { type: "conjunction" }).format(countryNames),
+        })
+      : t("{artists} artists across {count} countries", {
+          artists: formatNumber(totalCount),
+          count: formatNumber(countryNames.length),
+        });
+
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return sourceArtists.filter((a) => {
@@ -98,17 +124,14 @@ export function ArtistDirectory({ artists }: { artists: Artist[] }) {
         <span className="font-label-caps text-secondary tracking-widest">{t("The Movement")}</span>
         <h1 className="font-display text-primary text-5xl md:text-7xl mt-3 mb-4">{t("Artists")}</h1>
         <p className="font-body-lg text-on-surface-variant max-w-2xl">
-          {t(
-            "{artists} artists across {countries} nations — painters, sculptors, photographers, weavers, and digital pioneers shaping the contemporary African canon.",
-            { artists: formatNumber(totalCount), countries: COUNTRY_COUNT },
-          )}
+          {intro}
         </p>
         <div className="red-thread mt-8" />
       </header>
 
       <div className="flex flex-col gap-6 mb-12">
         <div className="flex flex-wrap gap-2">
-          {FILTERS.map((label) => {
+          {visibleFilters.map((label) => {
             const active = f === label;
             return (
               <button
@@ -134,8 +157,8 @@ export function ArtistDirectory({ artists }: { artists: Artist[] }) {
               onChange={(e) => updateParams({ country: e.target.value })}
               className="bg-transparent border border-outline text-primary font-label-caps uppercase text-xs px-3 py-2 rounded-full min-w-[200px]"
             >
-              <option value="">{t("All countries (54)")}</option>
-              {AFRICAN_COUNTRIES.map((c) => (
+              <option value="">{t("All countries")}</option>
+              {countriesInUse.map((c) => (
                 <option key={c.slug} value={c.slug}>
                   {c.flag} {getCountryDisplayName(c, language)}
                 </option>
@@ -166,9 +189,9 @@ export function ArtistDirectory({ artists }: { artists: Artist[] }) {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-16">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 md:gap-x-6 lg:grid-cols-4 lg:gap-x-8">
           {filtered.map((a, idx) => (
-            <ArtistCard key={a.slug} artist={a} offset={idx % 3 === 2} />
+            <ArtistCard key={a.slug} artist={a} index={idx} />
           ))}
         </div>
       )}

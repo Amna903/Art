@@ -8,6 +8,8 @@ import { pingRevalidate } from "@/lib/utils/revalidate";
 import { EnquiriesAdmin } from "./EnquiriesAdmin";
 import { CollectionsAdmin } from "./CollectionsAdmin";
 import { CountrySoundsAdmin } from "./CountrySoundsAdmin";
+import { GalleryMusicAdmin } from "./GalleryMusicAdmin";
+import { HeroImagesAdmin } from "./HeroImagesAdmin";
 import { ManagedArtistsAdmin } from "./ManagedArtistsAdmin";
 import { OriginalityReviewAdmin } from "./OriginalityReviewAdmin";
 import { ListRowSkeleton } from "@/components/ui/Skeleton";
@@ -39,6 +41,8 @@ export function AdminDashboard() {
     | "collections"
     | "enquiries"
     | "country sounds"
+    | "gallery music"
+    | "hero images"
     | "represented artists"
     | "originality"
   >("represented artists");
@@ -134,6 +138,8 @@ export function AdminDashboard() {
             "artworks",
             "collections",
             "enquiries",
+            "hero images",
+            "gallery music",
             "country sounds",
           ] as const
         ).map((name) => (
@@ -262,6 +268,10 @@ export function AdminDashboard() {
         <CollectionsAdmin />
       ) : tab === "enquiries" ? (
         <EnquiriesAdmin />
+      ) : tab === "hero images" ? (
+        <HeroImagesAdmin />
+      ) : tab === "gallery music" ? (
+        <GalleryMusicAdmin />
       ) : (
         <CountrySoundsAdmin />
       )}

@@ -4,6 +4,7 @@ import { useRouter, useLanguage } from "@/lib/i18n";
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "@/components/i18n/Link";
+import { prepareArtistPhoto } from "@/lib/utils/compress-image";
 import { supabase } from "@/lib/supabase/client";
 import { AFRICAN_COUNTRIES, getCountryDisplayName } from "@/lib/data/africa";
 import { ARTWORK_STATUS_LABELS } from "@/lib/data/artwork-status";
@@ -205,9 +206,17 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
   const uploadAvatar = async (file: File) => {
     if (!artistDraft) return;
     setUploadingAvatar(true);
+    let photo: File;
+    try {
+      photo = await prepareArtistPhoto(file);
+    } catch (err) {
+      setFeedback(t(err instanceof Error ? err.message : "Upload failed."));
+      setUploadingAvatar(false);
+      return;
+    }
     const folder = artistDraft.id ?? "new";
-    const path = `managed/${folder}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
-    const { error } = await supabase.storage.from("avatars").upload(path, file);
+    const path = `managed/${folder}/${Date.now()}-${photo.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
+    const { error } = await supabase.storage.from("avatars").upload(path, photo, { contentType: "image/webp" });
     if (error) {
       setFeedback(error.message);
       setUploadingAvatar(false);

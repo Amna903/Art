@@ -118,16 +118,7 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
             aria-label={t("View {name}'s profile", { name: artist.name })}
           >
             <div className="aspect-[4/5] overflow-hidden mb-6 relative bg-surface-container">
-              {artist.image?.trim() ? (
-                <Image
-                  fill
-                  sizes="400px"
-                  draggable={false}
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  alt={artist.name}
-                  src={artist.image}
-                />
-              ) : null}
+              <CardPhoto name={artist.name} src={artist.image} />
               {artist.badge && (
                 <div className="absolute bottom-4 left-4 bg-primary text-on-primary px-3 py-1 font-label-caps text-[10px]">
                   {t(artist.badge)}
@@ -142,5 +133,33 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
         ))}
       </div>
     </>
+  );
+}
+
+/** The artist's photo, or their initials on --nua-paper when it is missing
+ * or fails to load (change brief §8: never an empty box). */
+function CardPhoto({ name, src }: { name: string; src: string }) {
+  const [broken, setBroken] = useState(false);
+  if (!src?.trim() || broken) {
+    return (
+      <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center bg-[var(--nua-paper)] font-display text-6xl text-[var(--nua-grey)]">
+        {name
+          .split(/\s+/)
+          .slice(0, 2)
+          .map((w) => w[0])
+          .join("")}
+      </span>
+    );
+  }
+  return (
+    <Image
+      fill
+      sizes="400px"
+      draggable={false}
+      className="object-cover transition-transform duration-700 group-hover:scale-105"
+      alt={name}
+      src={src}
+      onError={() => setBroken(true)}
+    />
   );
 }

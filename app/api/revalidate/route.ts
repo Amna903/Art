@@ -21,12 +21,14 @@ const ALLOWED_TAGS = new Set([
   "artworks",
   "collections",
   "page-blocks",
+  "site-heroes",
 ]);
 
 const PAGE_BLOCK_PATHS: Record<string, string> = {
   home: "/",
   journal: "/journal",
   exhibitions: "/exhibitions",
+  "virtual-gallery": "/virtual-gallery",
 };
 
 // Full Route Cache (ISR) is separate from Data Cache (unstable_cache tags).
@@ -37,6 +39,7 @@ const PATHS_BY_TAG: Record<string, string[]> = {
   "journal-posts": ["/", "/journal", "/discover"],
   exhibitions: ["/", "/exhibitions", "/discover"],
   "page-blocks": ["/", "/journal", "/exhibitions", "/discover"],
+  "site-heroes": ["/", "/virtual-gallery", "/exhibitions", "/about", "/discover"],
 };
 
 export async function POST(req: Request) {

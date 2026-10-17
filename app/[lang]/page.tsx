@@ -3,18 +3,20 @@ import { AfricaMapSection } from "@/components/sections/home/AtlasMap";
 import { FeaturedArtists } from "@/components/sections/home/FeaturedArtists";
 import { CollectorPicks, type CollectorPick } from "@/components/sections/home/CollectorPicks";
 import { DiscoverOrigin } from "@/components/sections/home/DiscoverOrigin";
-import { MissionStats } from "@/components/sections/home/MissionStats";
 import { ProcessSteps, Newsletter } from "@/components/sections/home/ProcessAndNewsletter";
-import { ARTWORKS } from "@/lib/data/content";
 import { getDirectoryArtists } from "@/lib/data/directory";
 import { normalizeCountrySlug } from "@/lib/data/africa";
 import { getMostRequestedArtworks } from "@/lib/data/supabase-artists-cached";
-import { getPublishedArtworks } from "@/lib/data/supabase-artists";
+import { getPublishedArtworks, type SupabaseArtwork } from "@/lib/data/supabase-artists";
 import { getPageBlocks } from "@/lib/data/pageBlocks";
-import { mergeSlots } from "@/lib/utils/mergeSlots";
+import { getSiteHero } from "@/lib/data/site-heroes";
 import { resolveLang } from "@/lib/i18n/server";
 
 export const revalidate = 60;
+
+function toPick(artwork: SupabaseArtwork): Omit<CollectorPick, "collection"> {
+  return { slug: artwork.slug, title: artwork.title, artist: artwork.artistName, image: artwork.imageUrl };
+}
 
 function ThreadDivider() {
   return (
@@ -26,12 +28,13 @@ function ThreadDivider() {
 
 export default async function HomePage({ params }: PageProps<"/[lang]">) {
   const lang = resolveLang((await params).lang);
-  const [mostRequested, publishedArtworks, directoryArtists, blocks] =
+  const [mostRequested, publishedArtworks, directoryArtists, blocks, siteHero] =
     await Promise.all([
       getMostRequestedArtworks(6, lang),
       getPublishedArtworks(lang),
       getDirectoryArtists(lang),
       getPageBlocks("home", lang),
+      getSiteHero("home", lang),
     ]);
 
   // Countries represent the distinct nations the artists are associated with
@@ -57,35 +60,23 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
     countries: uniqueCountries.size,
   };
 
-  // The code decides Collector Picks: artworks ranked by "Request Price"
-  // enquiry volume take over the static demo slots one-for-one — same
-  // exchange as the Collections page — most sought-after first.
-  const staticPicks: CollectorPick[] = ARTWORKS.slice(1, 4).map((artwork) => ({
-    slug: artwork.slug,
-    title: artwork.title,
-    artist: artwork.artist,
-    collection: "CURATORIAL SELECTION",
-    image: artwork.image,
-  }));
-  const realPicks: CollectorPick[] = mostRequested.map((artwork) => ({
-    slug: artwork.slug,
-    title: artwork.title,
-    artist: artwork.artistName,
-    collection: "MOST REQUESTED",
-    image: artwork.imageUrl,
-  }));
-  const picks = mergeSlots(realPicks, staticPicks);
+  // Collector Picks: real published works only, most requested first, then
+  // the newest (change brief §6: no sample works by invented artists).
+  const requestedIds = new Set(mostRequested.map((a) => a.id));
+  const picks: CollectorPick[] = [
+    ...mostRequested.map((artwork) => ({ ...toPick(artwork), collection: "MOST REQUESTED" })),
+    ...publishedArtworks.filter((a) => !requestedIds.has(a.id)).map((artwork) => ({ ...toPick(artwork), collection: "CURATORIAL SELECTION" })),
+  ].slice(0, 3);
 
   return (
     <>
-      <Hero blocks={blocks} />
+      <Hero blocks={blocks} siteHero={siteHero} />
       <ThreadDivider />
       <AfricaMapSection stats={atlasStats} />
       <ThreadDivider />
       <FeaturedArtists />
-      <CollectorPicks picks={picks} />
+      {picks.length > 0 && <CollectorPicks picks={picks} />}
       <DiscoverOrigin />
-      <MissionStats />
       <ThreadDivider />
       <ProcessSteps />
       <Newsletter />

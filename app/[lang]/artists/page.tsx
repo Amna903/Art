@@ -7,12 +7,16 @@ import { getArtists } from "@/lib/sanity/queries";
 import { getRealArtists } from "@/lib/data/supabase-artists-cached";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
-  const { t } = await getI18n(params);
+  const { lang, t } = await getI18n(params);
+  // The real count (change brief §6), not a fixed "178 artists across 54 nations".
+  const real = await getRealArtists(lang);
+  const count = real.length > 0 ? real.length : ARTIST_COUNT;
+  const countries = real.length > 0 ? new Set(real.map((a) => a.countrySlug).filter(Boolean)).size : COUNTRY_COUNT;
   return {
     title: t("Artists | NUA-ARTE"),
     description: t("{artists} contemporary African artists across {countries} nations.", {
-      artists: ARTIST_COUNT,
-      countries: COUNTRY_COUNT,
+      artists: count,
+      countries,
     }),
   };
 }

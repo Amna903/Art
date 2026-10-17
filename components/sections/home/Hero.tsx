@@ -6,6 +6,8 @@ import Link from "@/components/i18n/Link";
 import { useAuth } from "@/lib/auth";
 import { useLanguage } from "@/lib/i18n";
 import { blockImage, blockText, type PageBlocks } from "@/lib/data/pageBlocks";
+import type { SiteHero } from "@/lib/data/site-heroes";
+import { HeroCredit, HeroPicture } from "@/components/sections/HeroPicture";
 import { HeroEditor, HERO_DEFAULTS, type HeroContent } from "./HeroEditor";
 
 /** Reads the hero's page blocks, falling back to the built-in defaults. */
@@ -36,7 +38,7 @@ function readHero(blocks: PageBlocks): HeroContent {
  * translated page is saved for that language only; the title always stays as
  * entered (it is English in every language).
  */
-export function Hero({ blocks }: { blocks: PageBlocks }) {
+export function Hero({ blocks, siteHero }: { blocks: PageBlocks; siteHero: SiteHero | null }) {
   const { t } = useLanguage();
   const { role } = useAuth();
   const [editing, setEditing] = useState(false);
@@ -47,14 +49,18 @@ export function Hero({ blocks }: { blocks: PageBlocks }) {
       <div className="relative min-h-[min(calc(100svh-4rem),640px)] lg:min-h-[min(calc(100svh-4rem),720px)]">
         {/* Portrait: right side on desktop, full background on mobile. */}
         <div className="absolute inset-0 lg:left-[42%]">
-          <Image
-            src={hero.imageSrc}
-            alt={t(hero.imageAlt)}
-            fill
-            priority
-            sizes="(max-width: 1023px) 100vw, 58vw"
-            className="object-cover object-[60%_center]"
-          />
+          {siteHero ? (
+            <HeroPicture hero={siteHero} />
+          ) : (
+            <Image
+              src={hero.imageSrc}
+              alt={t(hero.imageAlt)}
+              fill
+              priority
+              sizes="(max-width: 1023px) 100vw, 58vw"
+              className="object-cover object-[60%_center]"
+            />
+          )}
         </div>
         {/* Fades so the text sits on a plain field: white in light mode, charcoal in dark. */}
         <div
@@ -93,6 +99,14 @@ export function Hero({ blocks }: { blocks: PageBlocks }) {
             </Link>
           </div>
         </div>
+
+        {siteHero?.credit && (
+          <HeroCredit
+            credit={siteHero.credit}
+            label={t("Artwork: {credit}", { credit: siteHero.credit })}
+            className="right-4 top-3 lg:bottom-3 lg:top-auto"
+          />
+        )}
 
         {role === "admin" && (
           <button

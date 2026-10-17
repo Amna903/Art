@@ -3,10 +3,10 @@
 import { useLanguage } from "@/lib/i18n";
 
 const STEPS = [
-  { n: "01", title: "Discover", body: "Browse our curated selection of emerging talent from across the continent, updated weekly." },
+  { n: "01", title: "Discover", body: "Browse a curated selection of contemporary artists from Angola and the Congo." },
   { n: "02", title: "Save", body: "Follow your favorite artists and build a digital portfolio of works that resonate with you." },
-  { n: "03", title: "Collect", body: "Inquire about original pieces. We handle authentication, logistics, and direct artist payment." },
-  { n: "04", title: "Support", body: "Every acquisition directly funds the artist and fuels cultural sustainability initiatives." },
+  { n: "03", title: "Collect", body: "Enquire about an original work and our team will guide you through the acquisition." },
+  { n: "04", title: "Support", body: "Artists are paid at acquisition and earn a commission on every sale." },
 ];
 
 export function ProcessSteps() {

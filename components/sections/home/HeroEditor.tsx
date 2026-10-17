@@ -4,7 +4,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useLanguage, useRouter } from "@/lib/i18n";
 import { LOCALE_NATIVE_NAMES } from "@/lib/i18n/config";
-import { supabase } from "@/lib/supabase/client";
 import { savePageBlock } from "@/lib/data/page-block-save";
 import { pingRevalidate } from "@/lib/utils/revalidate";
 import { F } from "@/components/dashboards/FormField";
@@ -49,23 +48,9 @@ export function HeroEditor({ initial, onClose }: { initial: HeroContent; onClose
     subLine1: t(initial.subLine1),
     subLine2: t(initial.subLine2),
     ctaLabel: t(initial.ctaLabel),
-    imageAlt: t(initial.imageAlt),
   }));
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const set = <K extends keyof HeroContent>(key: K, value: HeroContent[K]) => setDraft((d) => ({ ...d, [key]: value }));
-
-  const upload = async (file: File) => {
-    setUploading(true);
-    const path = `page-blocks/home-hero-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
-    const { error } = await supabase.storage.from("home").upload(path, file);
-    if (error) {
-      toast.error(t(error.message));
-    } else {
-      set("imageSrc", supabase.storage.from("home").getPublicUrl(path).data.publicUrl);
-    }
-    setUploading(false);
-  };
 
   const save = async () => {
     setSaving(true);
@@ -90,16 +75,6 @@ export function HeroEditor({ initial, onClose }: { initial: HeroContent; onClose
             englishFallback: { value: HERO_DEFAULTS[field] },
           }),
         ),
-      draft.imageSrc !== initial.imageSrc || draft.imageAlt !== t(initial.imageAlt)
-        ? savePageBlock({
-            page: "home",
-            blockKey: "hero_v2_image",
-            lang: language,
-            value: draft.imageSrc.trim(),
-            altText: draft.imageAlt.trim(),
-            englishFallback: { value: HERO_DEFAULTS.imageSrc, altText: HERO_DEFAULTS.imageAlt },
-          })
-        : null,
     ]);
     const failed = results.find((r) => r && "error" in r && r.error);
     setSaving(false);
@@ -151,35 +126,9 @@ export function HeroEditor({ initial, onClose }: { initial: HeroContent; onClose
           <F label={t("Button text")} value={draft.ctaLabel} onChange={(v) => set("ctaLabel", v)} />
           <F label={t("Button link")} value={draft.ctaHref} onChange={(v) => set("ctaHref", v)} />
 
-          <div className="sm:col-span-2">
-            <span className="mb-2 block font-label-caps text-label-caps uppercase text-on-surface-variant">
-              {t("Image")}
-            </span>
-            <div className="flex items-start gap-4">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={draft.imageSrc} alt="" className="h-24 w-24 shrink-0 object-cover" />
-              <div className="flex-1 space-y-3">
-                <label className="block cursor-pointer border border-dashed border-primary/25 p-3 text-xs uppercase tracking-widest text-primary hover:border-secondary">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="sr-only"
-                    onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])}
-                  />
-                  {uploading ? t("Uploading…") : t("Upload image")}
-                </label>
-                <input
-                  value={draft.imageSrc}
-                  onChange={(e) => set("imageSrc", e.target.value)}
-                  placeholder={t("…or paste an image URL")}
-                  className="w-full border-b border-primary/30 bg-transparent py-2 text-sm text-primary"
-                />
-              </div>
-            </div>
-          </div>
-          <div className="sm:col-span-2">
-            <F label={t("Image description (alt text)")} value={draft.imageAlt} onChange={(v) => set("imageAlt", v)} />
-          </div>
+          <p className="sm:col-span-2 text-sm text-on-surface-variant">
+            {t("The image is changed in Dashboard → Hero images, with separate desktop and mobile versions.")}
+          </p>
         </div>
 
         <div className="mt-8 flex justify-end gap-3">
@@ -189,7 +138,7 @@ export function HeroEditor({ initial, onClose }: { initial: HeroContent; onClose
           <button
             type="button"
             onClick={save}
-            disabled={saving || uploading}
+            disabled={saving}
             className="btn-primary px-5 py-2 text-xs uppercase tracking-[0.2em] disabled:opacity-50"
           >
             {saving ? t("Saving…") : t("Save")}
