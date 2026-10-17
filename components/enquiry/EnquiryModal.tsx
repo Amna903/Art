@@ -94,7 +94,7 @@ export function EnquiryModal({
       onClick={handleClose}
     >
       <div
-        className="w-full max-w-lg bg-[#111111] text-[#F0F0EE] border border-[#333333] shadow-2xl relative overflow-hidden rounded-none my-auto transition-transform duration-200"
+        className="w-full max-w-lg bg-[#161616] text-[#F0F0EE] border border-[#333333] shadow-2xl relative overflow-hidden rounded-none my-auto transition-transform duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Subtle decorative top bar */}
@@ -133,7 +133,7 @@ export function EnquiryModal({
               </p>
               <button
                 onClick={handleClose}
-                className="w-full bg-[#FF4D57] text-[#111111] font-mono text-xs uppercase tracking-widest py-3.5 px-6 font-semibold hover:bg-[#F0F0EE] transition-colors"
+                className="w-full bg-[#FF4D57] text-[#1F1F1F] font-mono text-xs uppercase tracking-widest py-3.5 px-6 font-semibold hover:bg-[#F0F0EE] transition-colors"
               >
                 {t("Return to Gallery")}
               </button>
@@ -231,11 +231,11 @@ export function EnquiryModal({
                 <button
                   disabled={busy}
                   type="submit"
-                  className="w-full bg-[#FF4D57] text-[#111111] font-mono text-xs uppercase tracking-widest py-3.5 px-6 font-semibold hover:bg-[#F0F0EE] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                  className="w-full bg-[#FF4D57] text-[#1F1F1F] font-mono text-xs uppercase tracking-widest py-3.5 px-6 font-semibold hover:bg-[#F0F0EE] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
                 >
                   {busy ? (
                     <>
-                      <span className="w-4 h-4 border-2 border-[#111111] border-t-transparent rounded-full animate-spin" />
+                      <span className="w-4 h-4 border-2 border-[#1F1F1F] border-t-transparent rounded-full animate-spin" />
                       <span>{t("Dispatching Request...")}</span>
                     </>
                   ) : (

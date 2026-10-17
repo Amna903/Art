@@ -82,7 +82,7 @@ const MUSEUM_PALETTE: Palette = {
   wall: "#F5F5F3",
   wallPlaster: "#F5F5F3",
   floor: "#161616",
-  ceiling: "#111111",
+  ceiling: "#161616",
   skylightEmissive: "#FFFFFF",
   bg: "#161616",
   ambientIntensity: 0.45,
@@ -708,7 +708,7 @@ function TrackLightFixture({
       {/* Track mounting clip */}
       <mesh position={[0, 0.05, 0]}>
         <boxGeometry args={[0.06, 0.06, 0.06]} />
-        <meshStandardMaterial color="#111111" roughness={0.4} metalness={0.7} />
+        <meshStandardMaterial color="#161616" roughness={0.4} metalness={0.7} />
       </mesh>
       {/* Swivel head */}
       <group ref={headRef} position={[0, 0, 0]}>

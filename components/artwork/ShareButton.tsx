@@ -92,7 +92,7 @@ function ShareModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm bg-[#111111] text-[#F0F0EE] border border-[#333333] shadow-2xl relative overflow-hidden"
+        className="w-full max-w-sm bg-[#161616] text-[#F0F0EE] border border-[#333333] shadow-2xl relative overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="h-1 w-full bg-gradient-to-r from-[#D7141E] via-[#FF4D57] to-[#D7141E]" />

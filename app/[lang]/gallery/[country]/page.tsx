@@ -203,8 +203,8 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
               className="relative h-full w-full flex-shrink-0 snap-start"
               style={{
                 background: isFeatured
-                  ? "linear-gradient(180deg, #1A1A1A 0%, #111111 70%, #111111 100%)"
-                  : "linear-gradient(180deg, #161616 0%, #111111 70%, #111111 100%)",
+                  ? "linear-gradient(180deg, #1F1F1F 0%, #161616 70%, #161616 100%)"
+                  : "linear-gradient(180deg, #1F1F1F 0%, #161616 70%, #161616 100%)",
               }}
             >
               {/* Floor */}

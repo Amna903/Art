@@ -321,7 +321,7 @@ export default async function CountryExperience({ params }: Props) {
 
             <Link
               href={`/artists?country=${country.slug}`}
-              className="border border-[#FFFFFF]/60 text-[#FFFFFF] px-7 py-3 font-label-caps tracking-widest hover:bg-[#FFFFFF] hover:text-[#111111] transition-colors"
+              className="border border-[#FFFFFF]/60 text-[#FFFFFF] px-7 py-3 font-label-caps tracking-widest hover:bg-[#FFFFFF] hover:text-[#1F1F1F] transition-colors"
             >
               {t("VIEW ARTISTS ({count})", { count: stats.artistsCount })}
             </Link>

@@ -75,13 +75,13 @@ function CertificateModal({
         }
       `}</style>
       <div
-        className="certificate-print w-full max-w-lg bg-[#F0F0EE] text-[#111111] border-4 border-double border-[#333333] shadow-2xl relative p-8 sm:p-12"
+        className="certificate-print w-full max-w-lg bg-[#F0F0EE] text-[#1F1F1F] border-4 border-double border-[#333333] shadow-2xl relative p-8 sm:p-12"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
           aria-label={t("Close modal")}
-          className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-[#111111]/5 hover:bg-[#111111]/10 flex items-center justify-center transition-all print:hidden"
+          className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-[#161616]/5 hover:bg-[#161616]/10 flex items-center justify-center transition-all print:hidden"
         >
           <span className="material-symbols-outlined text-lg">close</span>
         </button>
@@ -108,7 +108,7 @@ function CertificateModal({
 
         <button
           onClick={() => window.print()}
-          className="w-full mt-8 bg-[#111111] text-[#F0F0EE] font-mono text-xs uppercase tracking-widest py-3.5 px-6 font-semibold hover:bg-[#262626] transition-colors flex items-center justify-center gap-2 print:hidden"
+          className="w-full mt-8 bg-[#161616] text-[#F0F0EE] font-mono text-xs uppercase tracking-widest py-3.5 px-6 font-semibold hover:bg-[#262626] transition-colors flex items-center justify-center gap-2 print:hidden"
         >
           <span className="material-symbols-outlined text-sm">print</span>
           {t("Print / Save as PDF")}

@@ -41,7 +41,6 @@ export default async function JournalPage({ params }: PageProps<"/[lang]/journal
           {t("Read the stories")}
         </a>
       </header>
-      {quote && <QuoteBlock quote={quote} />}
       <div id="stories" />
       {pinnedPost ? (
         <JournalArticle post={toJournalArticleData(pinnedPost, lang, t)} showBackLink={false} lang={lang} />
@@ -127,9 +126,17 @@ export default async function JournalPage({ params }: PageProps<"/[lang]/journal
       </article>
       )}
 
-      <div className="w-full h-[1px] bg-secondary/20 mb-section-gap relative">
-        <div className="absolute left-1/2 -translate-x-1/2 top-0 w-16 h-1 bg-secondary" />
-      </div>
+      {/* The quote closes the main story and leads into the other stories,
+          instead of sitting between the header and the story. */}
+      {quote ? (
+        <div className="border-t border-[var(--nua-line)] dark:border-[var(--nua-line-dark)]">
+          <QuoteBlock quote={quote} />
+        </div>
+      ) : (
+        <div className="w-full h-[1px] bg-secondary/20 mb-section-gap relative">
+          <div className="absolute left-1/2 -translate-x-1/2 top-0 w-16 h-1 bg-secondary" />
+        </div>
+      )}
 
       <LatestFromJournal lang={lang} />
 
