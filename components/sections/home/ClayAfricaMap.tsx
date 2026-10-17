@@ -1,10 +1,10 @@
 "use client";
 
+import { useRouter, useLanguage } from "@/lib/i18n";
 import { useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { geoConicEqualArea, geoPath } from "d3-geo";
 import africaGeo from "@/lib/data/africa-geo.json";
-import { ISLAND_PINS, getCountryByGeoName, getCountryBySlug } from "@/lib/data/africa";
+import { ISLAND_PINS, getCountryByGeoName, getCountryBySlug, getCountryDisplayName } from "@/lib/data/africa";
 import { buildCountryShards, type CountryInput, type Shard } from "@/lib/data/africa-shards";
 
 const W = 900;
@@ -28,6 +28,7 @@ export function ClayAfricaMap({
   onHover?: (name: string | null) => void;
   className?: string;
 }) {
+  const { t, language } = useLanguage();
   const router = useRouter();
   const svgRef = useRef<SVGSVGElement>(null);
   const [hover, setHover] = useState<string | null>(null);
@@ -86,7 +87,7 @@ export function ClayAfricaMap({
       viewBox={`0 0 ${W} ${H}`}
       className={className}
       role="img"
-      aria-label="Interactive map of Africa — click a country to explore"
+      aria-label={t("Interactive map of Africa — click a country to explore")}
     >
       <defs>
         <filter id="heroShardShadow" x="-30%" y="-30%" width="160%" height="160%">
@@ -152,7 +153,7 @@ export function ClayAfricaMap({
             opacity={hover && !isHover ? 0.55 : 1}
             onMouseEnter={() => {
               setHover(country.slug);
-              onHover?.(country.name);
+              onHover?.(getCountryDisplayName(country, language));
             }}
             onMouseLeave={() => {
               setHover((h) => (h === country.slug ? null : h));
@@ -161,7 +162,7 @@ export function ClayAfricaMap({
             onClick={() => goTo(country.slug)}
             tabIndex={0}
             role="button"
-            aria-label={country.name}
+            aria-label={getCountryDisplayName(country, language)}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
@@ -204,7 +205,7 @@ export function ClayAfricaMap({
             style={{ cursor: "pointer", transition: "r 0.2s ease" }}
             onMouseEnter={() => {
               setHover(isle.slug);
-              onHover?.(country.name);
+              onHover?.(getCountryDisplayName(country, language));
             }}
             onMouseLeave={() => {
               setHover((h) => (h === isle.slug ? null : h));
@@ -213,7 +214,7 @@ export function ClayAfricaMap({
             onClick={() => goTo(isle.slug)}
             tabIndex={0}
             role="button"
-            aria-label={country.name}
+            aria-label={getCountryDisplayName(country, language)}
           />
         );
       })}

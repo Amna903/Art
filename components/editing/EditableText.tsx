@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
-import { useLanguage } from "@/lib/i18n";
-import { supabase } from "@/lib/supabase/client";
+import { useLanguage, useRouter } from "@/lib/i18n";
 import { pingRevalidate } from "@/lib/utils/revalidate";
+import { savePageBlock } from "@/lib/data/page-block-save";
 
 type Tag = "p" | "h1" | "h2" | "h3" | "span" | "blockquote" | "cite" | "div";
 
@@ -25,7 +24,7 @@ export function EditableText({
   multiline?: boolean;
 }) {
   const { role } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const isAdmin = role === "admin";
   const router = useRouter();
   const [editing, setEditing] = useState(false);
@@ -33,7 +32,9 @@ export function EditableText({
   const [saving, setSaving] = useState(false);
   const ref = useRef<HTMLTextAreaElement | HTMLInputElement>(null);
 
-  useEffect(() => setDraft(value), [value]);
+  // Admins edit what the page currently shows, in the page's language.
+  const shown = t(value);
+  useEffect(() => setDraft(shown), [shown]);
   useEffect(() => {
     if (editing) ref.current?.focus();
   }, [editing]);
@@ -44,9 +45,7 @@ export function EditableText({
 
   const save = async () => {
     setSaving(true);
-    await supabase
-      .from("page_blocks")
-      .upsert({ page, block_key: blockKey, value: draft }, { onConflict: "page,block_key" });
+    await savePageBlock({ page, blockKey, lang: language, value: draft, englishFallback: { value } });
     await pingRevalidate("page-blocks", { page });
     setSaving(false);
     setEditing(false);
@@ -78,16 +77,16 @@ export function EditableText({
             disabled={saving}
             className="text-[10px] uppercase tracking-widest bg-secondary text-on-primary px-2 py-1 disabled:opacity-60"
           >
-            {saving ? "Saving…" : "Save"}
+            {saving ? t("Saving…") : t("Save")}
           </button>
           <button
             onClick={() => {
-              setDraft(value);
+              setDraft(shown);
               setEditing(false);
             }}
             className="text-[10px] uppercase tracking-widest border border-primary/20 px-2 py-1"
           >
-            Cancel
+            {t("Cancel")}
           </button>
         </span>
       </span>
@@ -99,7 +98,7 @@ export function EditableText({
       <Tag className={className}>{t(value)}</Tag>
       <button
         onClick={() => setEditing(true)}
-        title="Edit"
+        title={t("Edit")}
         className="absolute top-1 right-1 opacity-0 group-hover/edit:opacity-100 transition-opacity bg-secondary text-on-primary w-6 h-6 flex items-center justify-center text-xs rounded-full shadow-lg z-[60]"
       >
         ✎

@@ -1,11 +1,20 @@
 // 54 African countries — single source of truth for routing, galleries, and badges.
 
+import type { Language } from "@/lib/i18n/config";
+import type { TranslateVars } from "@/lib/i18n/translate";
+
+type Translate = (text: string, vars?: TranslateVars) => string;
+const english: Translate = (text, vars) =>
+  vars ? text.replace(/\{(\w+)\}/g, (m, k: string) => (k in vars ? String(vars[k]) : m)) : text;
+
 export type Country = {
   slug: string;
   code: string; // ISO A3
   name: string; // English (matches geojson ADMIN)
   nameFr: string;
   namePt: string;
+  nameEs: string;
+  nameIt: string;
   flag: string;
   capital: string;
   region: "North" | "West" | "Central" | "East" | "Southern";
@@ -13,60 +22,60 @@ export type Country = {
 };
 
 export const AFRICAN_COUNTRIES: Country[] = [
-  { slug: "algeria", code: "DZA", name: "Algeria", nameFr: "Algérie", namePt: "Argélia", flag: "🇩🇿", capital: "Algiers", region: "North", blurb: "Saharan calligraphy meets Mediterranean modernism." },
-  { slug: "angola", code: "AGO", name: "Angola", nameFr: "Angola", namePt: "Angola", flag: "🇦🇴", capital: "Luanda", region: "Southern", blurb: "Luanda's urban pulse and Kuduro rhythm in painting." },
-  { slug: "benin", code: "BEN", name: "Benin", nameFr: "Bénin", namePt: "Benim", flag: "🇧🇯", capital: "Porto-Novo", region: "West", blurb: "Vodun iconography reimagined for the contemporary." },
-  { slug: "botswana", code: "BWA", name: "Botswana", nameFr: "Botswana", namePt: "Botswana", flag: "🇧🇼", capital: "Gaborone", region: "Southern", blurb: "Kalahari minimalism and San heritage visuals." },
-  { slug: "burkina-faso", code: "BFA", name: "Burkina Faso", nameFr: "Burkina Faso", namePt: "Burkina Faso", flag: "🇧🇫", capital: "Ouagadougou", region: "West", blurb: "Bronze casting traditions and FESPACO cinema spirit." },
-  { slug: "burundi", code: "BDI", name: "Burundi", nameFr: "Burundi", namePt: "Burundi", flag: "🇧🇮", capital: "Gitega", region: "East", blurb: "Drum-led narratives and lakeside palettes." },
-  { slug: "cabo-verde", code: "CPV", name: "Cabo Verde", nameFr: "Cap-Vert", namePt: "Cabo Verde", flag: "🇨🇻", capital: "Praia", region: "West", blurb: "Atlantic creolité — morna and pastel salt-flat hues." },
-  { slug: "cameroon", code: "CMR", name: "Cameroon", nameFr: "Cameroun", namePt: "Camarões", flag: "🇨🇲", capital: "Yaoundé", region: "Central", blurb: "Bamileke masks recoded in mixed media." },
-  { slug: "central-african-republic", code: "CAF", name: "Central African Republic", nameFr: "République centrafricaine", namePt: "República Centro-Africana", flag: "🇨🇫", capital: "Bangui", region: "Central", blurb: "Forest cosmologies told in bark and pigment." },
-  { slug: "chad", code: "TCD", name: "Chad", nameFr: "Tchad", namePt: "Chade", flag: "🇹🇩", capital: "N'Djamena", region: "Central", blurb: "Sahel light and Lake Chad textile geometry." },
-  { slug: "comoros", code: "COM", name: "Comoros", nameFr: "Comores", namePt: "Comores", flag: "🇰🇲", capital: "Moroni", region: "East", blurb: "Volcanic island layering and Swahili calligraphy." },
-  { slug: "congo", code: "COG", name: "Republic of the Congo", nameFr: "République du Congo", namePt: "Congo", flag: "🇨🇬", capital: "Brazzaville", region: "Central", blurb: "Brazzaville's school of painting and river myth." },
-  { slug: "drc", code: "COD", name: "Democratic Republic of the Congo", nameFr: "République démocratique du Congo", namePt: "República Democrática do Congo", flag: "🇨🇩", capital: "Kinshasa", region: "Central", blurb: "Kinshasa SAPE, rumba, and urban surrealism." },
-  { slug: "djibouti", code: "DJI", name: "Djibouti", nameFr: "Djibouti", namePt: "Djibouti", flag: "🇩🇯", capital: "Djibouti", region: "East", blurb: "Salt lakes, Afar nomadism, port-city collage." },
-  { slug: "egypt", code: "EGY", name: "Egypt", nameFr: "Égypte", namePt: "Egipto", flag: "🇪🇬", capital: "Cairo", region: "North", blurb: "From hieroglyph to Cairo's contemporary scene." },
-  { slug: "equatorial-guinea", code: "GNQ", name: "Equatorial Guinea", nameFr: "Guinée équatoriale", namePt: "Guiné Equatorial", flag: "🇬🇶", capital: "Malabo", region: "Central", blurb: "Fang sculpture lineages and island modernism." },
-  { slug: "eritrea", code: "ERI", name: "Eritrea", nameFr: "Érythrée", namePt: "Eritreia", flag: "🇪🇷", capital: "Asmara", region: "East", blurb: "Asmara modernist architecture as visual grammar." },
-  { slug: "eswatini", code: "SWZ", name: "eSwatini", nameFr: "Eswatini", namePt: "Eswatini", flag: "🇸🇿", capital: "Mbabane", region: "Southern", blurb: "Reed dance pageantry and beadwork as code." },
-  { slug: "ethiopia", code: "ETH", name: "Ethiopia", nameFr: "Éthiopie", namePt: "Etiópia", flag: "🇪🇹", capital: "Addis Ababa", region: "East", blurb: "Lalibela iconography meets Addis avant-garde." },
-  { slug: "gabon", code: "GAB", name: "Gabon", nameFr: "Gabon", namePt: "Gabão", flag: "🇬🇦", capital: "Libreville", region: "Central", blurb: "Equatorial green and Bwiti spiritual abstraction." },
-  { slug: "gambia", code: "GMB", name: "Gambia", nameFr: "Gambie", namePt: "Gâmbia", flag: "🇬🇲", capital: "Banjul", region: "West", blurb: "River-line storytelling and griot portraiture." },
-  { slug: "ghana", code: "GHA", name: "Ghana", nameFr: "Ghana", namePt: "Gana", flag: "🇬🇭", capital: "Accra", region: "West", blurb: "Adinkra symbology in the Accra new-wave." },
-  { slug: "guinea", code: "GIN", name: "Guinea", nameFr: "Guinée", namePt: "Guiné", flag: "🇬🇳", capital: "Conakry", region: "West", blurb: "Djembé rhythm translated into chromatic studies." },
-  { slug: "guinea-bissau", code: "GNB", name: "Guinea-Bissau", nameFr: "Guinée-Bissau", namePt: "Guiné-Bissau", flag: "🇬🇼", capital: "Bissau", region: "West", blurb: "Bijagós cosmology and post-independence printmaking." },
-  { slug: "ivory-coast", code: "CIV", name: "Ivory Coast", nameFr: "Côte d'Ivoire", namePt: "Costa do Marfim", flag: "🇨🇮", capital: "Yamoussoukro", region: "West", blurb: "Vohou-Vohou movement and Abidjan abstraction." },
-  { slug: "kenya", code: "KEN", name: "Kenya", nameFr: "Kenya", namePt: "Quénia", flag: "🇰🇪", capital: "Nairobi", region: "East", blurb: "Nairobi-tech aesthetics and Maasai chromatics." },
-  { slug: "lesotho", code: "LSO", name: "Lesotho", nameFr: "Lesotho", namePt: "Lesoto", flag: "🇱🇸", capital: "Maseru", region: "Southern", blurb: "Basotho blankets as canvas and code." },
-  { slug: "liberia", code: "LBR", name: "Liberia", nameFr: "Libéria", namePt: "Libéria", flag: "🇱🇷", capital: "Monrovia", region: "West", blurb: "Diaspora returns and Monrovia mural revival." },
-  { slug: "libya", code: "LBY", name: "Libya", nameFr: "Libye", namePt: "Líbia", flag: "🇱🇾", capital: "Tripoli", region: "North", blurb: "Saharan rock-art lineage in contemporary form." },
-  { slug: "madagascar", code: "MDG", name: "Madagascar", nameFr: "Madagascar", namePt: "Madagáscar", flag: "🇲🇬", capital: "Antananarivo", region: "East", blurb: "Endemic biota as palette and pattern source." },
-  { slug: "malawi", code: "MWI", name: "Malawi", nameFr: "Malawi", namePt: "Malawi", flag: "🇲🇼", capital: "Lilongwe", region: "Southern", blurb: "Lake-light realism and Gule Wamkulu mask studies." },
-  { slug: "mali", code: "MLI", name: "Mali", nameFr: "Mali", namePt: "Mali", flag: "🇲🇱", capital: "Bamako", region: "West", blurb: "Bogolan mud-cloth meets Bamako photography." },
-  { slug: "mauritania", code: "MRT", name: "Mauritania", nameFr: "Mauritanie", namePt: "Mauritânia", flag: "🇲🇷", capital: "Nouakchott", region: "North", blurb: "Desert silence and Moorish illumination." },
-  { slug: "mauritius", code: "MUS", name: "Mauritius", nameFr: "Maurice", namePt: "Maurícia", flag: "🇲🇺", capital: "Port Louis", region: "East", blurb: "Creole layering: Indian Ocean modernism." },
-  { slug: "morocco", code: "MAR", name: "Morocco", nameFr: "Maroc", namePt: "Marrocos", flag: "🇲🇦", capital: "Rabat", region: "North", blurb: "Zellige geometry and Tangier school colour." },
-  { slug: "mozambique", code: "MOZ", name: "Mozambique", nameFr: "Mozambique", namePt: "Moçambique", flag: "🇲🇿", capital: "Maputo", region: "Southern", blurb: "Makonde carving and Malangatana legacy." },
-  { slug: "namibia", code: "NAM", name: "Namibia", nameFr: "Namibie", namePt: "Namíbia", flag: "🇳🇦", capital: "Windhoek", region: "Southern", blurb: "Namib dune minimalism and Herero portraiture." },
-  { slug: "niger", code: "NER", name: "Niger", nameFr: "Niger", namePt: "Níger", flag: "🇳🇪", capital: "Niamey", region: "West", blurb: "Tuareg jewellery as sculptural language." },
-  { slug: "nigeria", code: "NGA", name: "Nigeria", nameFr: "Nigéria", namePt: "Nigéria", flag: "🇳🇬", capital: "Abuja", region: "West", blurb: "Lagos new-wave: Nollywood, Afrobeats, Nsukka." },
-  { slug: "rwanda", code: "RWA", name: "Rwanda", nameFr: "Rwanda", namePt: "Ruanda", flag: "🇷🇼", capital: "Kigali", region: "East", blurb: "Imigongo geometry and post-memory practice." },
-  { slug: "sao-tome", code: "STP", name: "São Tomé and Principe", nameFr: "Sao Tomé-et-Principe", namePt: "São Tomé e Príncipe", flag: "🇸🇹", capital: "São Tomé", region: "Central", blurb: "Equator islands: cocoa, basalt, and brushwork." },
-  { slug: "senegal", code: "SEN", name: "Senegal", nameFr: "Sénégal", namePt: "Senegal", flag: "🇸🇳", capital: "Dakar", region: "West", blurb: "Teranga: from indigo to Dakar's digital horizon." },
-  { slug: "seychelles", code: "SYC", name: "Seychelles", nameFr: "Seychelles", namePt: "Seychelles", flag: "🇸🇨", capital: "Victoria", region: "East", blurb: "Granitic shores and Creole modernism." },
-  { slug: "sierra-leone", code: "SLE", name: "Sierra Leone", nameFr: "Sierra Leone", namePt: "Serra Leoa", flag: "🇸🇱", capital: "Freetown", region: "West", blurb: "Krio identity and post-war reconstruction art." },
-  { slug: "somalia", code: "SOM", name: "Somalia", nameFr: "Somalie", namePt: "Somália", flag: "🇸🇴", capital: "Mogadishu", region: "East", blurb: "Poetic tradition reborn in visual code." },
-  { slug: "south-africa", code: "ZAF", name: "South Africa", nameFr: "Afrique du Sud", namePt: "África do Sul", flag: "🇿🇦", capital: "Pretoria", region: "Southern", blurb: "Joburg, Cape Town: post-apartheid avant-garde." },
-  { slug: "south-sudan", code: "SSD", name: "South Sudan", nameFr: "Soudan du Sud", namePt: "Sudão do Sul", flag: "🇸🇸", capital: "Juba", region: "East", blurb: "Cattle-camp aesthetics and emerging Juba scene." },
-  { slug: "sudan", code: "SDN", name: "Sudan", nameFr: "Soudan", namePt: "Sudão", flag: "🇸🇩", capital: "Khartoum", region: "North", blurb: "Khartoum school: Arabic letterforms reimagined." },
-  { slug: "tanzania", code: "TZA", name: "United Republic of Tanzania", nameFr: "République-Unie de Tanzanie", namePt: "Tanzânia", flag: "🇹🇿", capital: "Dodoma", region: "East", blurb: "Tingatinga lineage and Zanzibar's stone city." },
-  { slug: "togo", code: "TGO", name: "Togo", nameFr: "Togo", namePt: "Togo", flag: "🇹🇬", capital: "Lomé", region: "West", blurb: "Lomé craft tradition and coastal abstraction." },
-  { slug: "tunisia", code: "TUN", name: "Tunisia", nameFr: "Tunisie", namePt: "Tunísia", flag: "🇹🇳", capital: "Tunis", region: "North", blurb: "Sidi Bou Said blues and Carthage palimpsest." },
-  { slug: "uganda", code: "UGA", name: "Uganda", nameFr: "Ouganda", namePt: "Uganda", flag: "🇺🇬", capital: "Kampala", region: "East", blurb: "Bark-cloth heritage and Kampala studio scene." },
-  { slug: "zambia", code: "ZMB", name: "Zambia", nameFr: "Zambie", namePt: "Zâmbia", flag: "🇿🇲", capital: "Lusaka", region: "Southern", blurb: "Copperbelt industrial form and Lusaka new-wave." },
-  { slug: "zimbabwe", code: "ZWE", name: "Zimbabwe", nameFr: "Zimbabwe", namePt: "Zimbabwe", flag: "🇿🇼", capital: "Harare", region: "Southern", blurb: "Shona stone sculpture: a global vocabulary." },
+  { slug: "algeria", code: "DZA", name: "Algeria", nameFr: "Algérie", namePt: "Argélia", nameEs: "Argelia", nameIt: "Algeria", flag: "🇩🇿", capital: "Algiers", region: "North", blurb: "Saharan calligraphy meets Mediterranean modernism." },
+  { slug: "angola", code: "AGO", name: "Angola", nameFr: "Angola", namePt: "Angola", nameEs: "Angola", nameIt: "Angola", flag: "🇦🇴", capital: "Luanda", region: "Southern", blurb: "Luanda's urban pulse and Kuduro rhythm in painting." },
+  { slug: "benin", code: "BEN", name: "Benin", nameFr: "Bénin", namePt: "Benim", nameEs: "Benín", nameIt: "Benin", flag: "🇧🇯", capital: "Porto-Novo", region: "West", blurb: "Vodun iconography reimagined for the contemporary." },
+  { slug: "botswana", code: "BWA", name: "Botswana", nameFr: "Botswana", namePt: "Botswana", nameEs: "Botsuana", nameIt: "Botswana", flag: "🇧🇼", capital: "Gaborone", region: "Southern", blurb: "Kalahari minimalism and San heritage visuals." },
+  { slug: "burkina-faso", code: "BFA", name: "Burkina Faso", nameFr: "Burkina Faso", namePt: "Burkina Faso", nameEs: "Burkina Faso", nameIt: "Burkina Faso", flag: "🇧🇫", capital: "Ouagadougou", region: "West", blurb: "Bronze casting traditions and FESPACO cinema spirit." },
+  { slug: "burundi", code: "BDI", name: "Burundi", nameFr: "Burundi", namePt: "Burundi", nameEs: "Burundi", nameIt: "Burundi", flag: "🇧🇮", capital: "Gitega", region: "East", blurb: "Drum-led narratives and lakeside palettes." },
+  { slug: "cabo-verde", code: "CPV", name: "Cabo Verde", nameFr: "Cap-Vert", namePt: "Cabo Verde", nameEs: "Cabo Verde", nameIt: "Capo Verde", flag: "🇨🇻", capital: "Praia", region: "West", blurb: "Atlantic creolité — morna and pastel salt-flat hues." },
+  { slug: "cameroon", code: "CMR", name: "Cameroon", nameFr: "Cameroun", namePt: "Camarões", nameEs: "Camerún", nameIt: "Camerun", flag: "🇨🇲", capital: "Yaoundé", region: "Central", blurb: "Bamileke masks recoded in mixed media." },
+  { slug: "central-african-republic", code: "CAF", name: "Central African Republic", nameFr: "République centrafricaine", namePt: "República Centro-Africana", nameEs: "República Centroafricana", nameIt: "Repubblica Centrafricana", flag: "🇨🇫", capital: "Bangui", region: "Central", blurb: "Forest cosmologies told in bark and pigment." },
+  { slug: "chad", code: "TCD", name: "Chad", nameFr: "Tchad", namePt: "Chade", nameEs: "Chad", nameIt: "Ciad", flag: "🇹🇩", capital: "N'Djamena", region: "Central", blurb: "Sahel light and Lake Chad textile geometry." },
+  { slug: "comoros", code: "COM", name: "Comoros", nameFr: "Comores", namePt: "Comores", nameEs: "Comoras", nameIt: "Comore", flag: "🇰🇲", capital: "Moroni", region: "East", blurb: "Volcanic island layering and Swahili calligraphy." },
+  { slug: "congo", code: "COG", name: "Republic of the Congo", nameFr: "République du Congo", namePt: "Congo", nameEs: "República del Congo", nameIt: "Repubblica del Congo", flag: "🇨🇬", capital: "Brazzaville", region: "Central", blurb: "Brazzaville's school of painting and river myth." },
+  { slug: "drc", code: "COD", name: "Democratic Republic of the Congo", nameFr: "République démocratique du Congo", namePt: "República Democrática do Congo", nameEs: "República Democrática del Congo", nameIt: "Repubblica Democratica del Congo", flag: "🇨🇩", capital: "Kinshasa", region: "Central", blurb: "Kinshasa SAPE, rumba, and urban surrealism." },
+  { slug: "djibouti", code: "DJI", name: "Djibouti", nameFr: "Djibouti", namePt: "Djibouti", nameEs: "Yibuti", nameIt: "Gibuti", flag: "🇩🇯", capital: "Djibouti", region: "East", blurb: "Salt lakes, Afar nomadism, port-city collage." },
+  { slug: "egypt", code: "EGY", name: "Egypt", nameFr: "Égypte", namePt: "Egipto", nameEs: "Egipto", nameIt: "Egitto", flag: "🇪🇬", capital: "Cairo", region: "North", blurb: "From hieroglyph to Cairo's contemporary scene." },
+  { slug: "equatorial-guinea", code: "GNQ", name: "Equatorial Guinea", nameFr: "Guinée équatoriale", namePt: "Guiné Equatorial", nameEs: "Guinea Ecuatorial", nameIt: "Guinea Equatoriale", flag: "🇬🇶", capital: "Malabo", region: "Central", blurb: "Fang sculpture lineages and island modernism." },
+  { slug: "eritrea", code: "ERI", name: "Eritrea", nameFr: "Érythrée", namePt: "Eritreia", nameEs: "Eritrea", nameIt: "Eritrea", flag: "🇪🇷", capital: "Asmara", region: "East", blurb: "Asmara modernist architecture as visual grammar." },
+  { slug: "eswatini", code: "SWZ", name: "eSwatini", nameFr: "Eswatini", namePt: "Eswatini", nameEs: "Esuatini", nameIt: "Eswatini", flag: "🇸🇿", capital: "Mbabane", region: "Southern", blurb: "Reed dance pageantry and beadwork as code." },
+  { slug: "ethiopia", code: "ETH", name: "Ethiopia", nameFr: "Éthiopie", namePt: "Etiópia", nameEs: "Etiopía", nameIt: "Etiopia", flag: "🇪🇹", capital: "Addis Ababa", region: "East", blurb: "Lalibela iconography meets Addis avant-garde." },
+  { slug: "gabon", code: "GAB", name: "Gabon", nameFr: "Gabon", namePt: "Gabão", nameEs: "Gabón", nameIt: "Gabon", flag: "🇬🇦", capital: "Libreville", region: "Central", blurb: "Equatorial green and Bwiti spiritual abstraction." },
+  { slug: "gambia", code: "GMB", name: "Gambia", nameFr: "Gambie", namePt: "Gâmbia", nameEs: "Gambia", nameIt: "Gambia", flag: "🇬🇲", capital: "Banjul", region: "West", blurb: "River-line storytelling and griot portraiture." },
+  { slug: "ghana", code: "GHA", name: "Ghana", nameFr: "Ghana", namePt: "Gana", nameEs: "Ghana", nameIt: "Ghana", flag: "🇬🇭", capital: "Accra", region: "West", blurb: "Adinkra symbology in the Accra new-wave." },
+  { slug: "guinea", code: "GIN", name: "Guinea", nameFr: "Guinée", namePt: "Guiné", nameEs: "Guinea", nameIt: "Guinea", flag: "🇬🇳", capital: "Conakry", region: "West", blurb: "Djembé rhythm translated into chromatic studies." },
+  { slug: "guinea-bissau", code: "GNB", name: "Guinea-Bissau", nameFr: "Guinée-Bissau", namePt: "Guiné-Bissau", nameEs: "Guinea-Bisáu", nameIt: "Guinea-Bissau", flag: "🇬🇼", capital: "Bissau", region: "West", blurb: "Bijagós cosmology and post-independence printmaking." },
+  { slug: "ivory-coast", code: "CIV", name: "Ivory Coast", nameFr: "Côte d'Ivoire", namePt: "Costa do Marfim", nameEs: "Costa de Marfil", nameIt: "Costa d'Avorio", flag: "🇨🇮", capital: "Yamoussoukro", region: "West", blurb: "Vohou-Vohou movement and Abidjan abstraction." },
+  { slug: "kenya", code: "KEN", name: "Kenya", nameFr: "Kenya", namePt: "Quénia", nameEs: "Kenia", nameIt: "Kenya", flag: "🇰🇪", capital: "Nairobi", region: "East", blurb: "Nairobi-tech aesthetics and Maasai chromatics." },
+  { slug: "lesotho", code: "LSO", name: "Lesotho", nameFr: "Lesotho", namePt: "Lesoto", nameEs: "Lesoto", nameIt: "Lesotho", flag: "🇱🇸", capital: "Maseru", region: "Southern", blurb: "Basotho blankets as canvas and code." },
+  { slug: "liberia", code: "LBR", name: "Liberia", nameFr: "Libéria", namePt: "Libéria", nameEs: "Liberia", nameIt: "Liberia", flag: "🇱🇷", capital: "Monrovia", region: "West", blurb: "Diaspora returns and Monrovia mural revival." },
+  { slug: "libya", code: "LBY", name: "Libya", nameFr: "Libye", namePt: "Líbia", nameEs: "Libia", nameIt: "Libia", flag: "🇱🇾", capital: "Tripoli", region: "North", blurb: "Saharan rock-art lineage in contemporary form." },
+  { slug: "madagascar", code: "MDG", name: "Madagascar", nameFr: "Madagascar", namePt: "Madagáscar", nameEs: "Madagascar", nameIt: "Madagascar", flag: "🇲🇬", capital: "Antananarivo", region: "East", blurb: "Endemic biota as palette and pattern source." },
+  { slug: "malawi", code: "MWI", name: "Malawi", nameFr: "Malawi", namePt: "Malawi", nameEs: "Malaui", nameIt: "Malawi", flag: "🇲🇼", capital: "Lilongwe", region: "Southern", blurb: "Lake-light realism and Gule Wamkulu mask studies." },
+  { slug: "mali", code: "MLI", name: "Mali", nameFr: "Mali", namePt: "Mali", nameEs: "Malí", nameIt: "Mali", flag: "🇲🇱", capital: "Bamako", region: "West", blurb: "Bogolan mud-cloth meets Bamako photography." },
+  { slug: "mauritania", code: "MRT", name: "Mauritania", nameFr: "Mauritanie", namePt: "Mauritânia", nameEs: "Mauritania", nameIt: "Mauritania", flag: "🇲🇷", capital: "Nouakchott", region: "North", blurb: "Desert silence and Moorish illumination." },
+  { slug: "mauritius", code: "MUS", name: "Mauritius", nameFr: "Maurice", namePt: "Maurícia", nameEs: "Mauricio", nameIt: "Mauritius", flag: "🇲🇺", capital: "Port Louis", region: "East", blurb: "Creole layering: Indian Ocean modernism." },
+  { slug: "morocco", code: "MAR", name: "Morocco", nameFr: "Maroc", namePt: "Marrocos", nameEs: "Marruecos", nameIt: "Marocco", flag: "🇲🇦", capital: "Rabat", region: "North", blurb: "Zellige geometry and Tangier school colour." },
+  { slug: "mozambique", code: "MOZ", name: "Mozambique", nameFr: "Mozambique", namePt: "Moçambique", nameEs: "Mozambique", nameIt: "Mozambico", flag: "🇲🇿", capital: "Maputo", region: "Southern", blurb: "Makonde carving and Malangatana legacy." },
+  { slug: "namibia", code: "NAM", name: "Namibia", nameFr: "Namibie", namePt: "Namíbia", nameEs: "Namibia", nameIt: "Namibia", flag: "🇳🇦", capital: "Windhoek", region: "Southern", blurb: "Namib dune minimalism and Herero portraiture." },
+  { slug: "niger", code: "NER", name: "Niger", nameFr: "Niger", namePt: "Níger", nameEs: "Níger", nameIt: "Niger", flag: "🇳🇪", capital: "Niamey", region: "West", blurb: "Tuareg jewellery as sculptural language." },
+  { slug: "nigeria", code: "NGA", name: "Nigeria", nameFr: "Nigéria", namePt: "Nigéria", nameEs: "Nigeria", nameIt: "Nigeria", flag: "🇳🇬", capital: "Abuja", region: "West", blurb: "Lagos new-wave: Nollywood, Afrobeats, Nsukka." },
+  { slug: "rwanda", code: "RWA", name: "Rwanda", nameFr: "Rwanda", namePt: "Ruanda", nameEs: "Ruanda", nameIt: "Ruanda", flag: "🇷🇼", capital: "Kigali", region: "East", blurb: "Imigongo geometry and post-memory practice." },
+  { slug: "sao-tome", code: "STP", name: "São Tomé and Principe", nameFr: "Sao Tomé-et-Principe", namePt: "São Tomé e Príncipe", nameEs: "Santo Tomé y Príncipe", nameIt: "São Tomé e Príncipe", flag: "🇸🇹", capital: "São Tomé", region: "Central", blurb: "Equator islands: cocoa, basalt, and brushwork." },
+  { slug: "senegal", code: "SEN", name: "Senegal", nameFr: "Sénégal", namePt: "Senegal", nameEs: "Senegal", nameIt: "Senegal", flag: "🇸🇳", capital: "Dakar", region: "West", blurb: "Teranga: from indigo to Dakar's digital horizon." },
+  { slug: "seychelles", code: "SYC", name: "Seychelles", nameFr: "Seychelles", namePt: "Seychelles", nameEs: "Seychelles", nameIt: "Seychelles", flag: "🇸🇨", capital: "Victoria", region: "East", blurb: "Granitic shores and Creole modernism." },
+  { slug: "sierra-leone", code: "SLE", name: "Sierra Leone", nameFr: "Sierra Leone", namePt: "Serra Leoa", nameEs: "Sierra Leona", nameIt: "Sierra Leone", flag: "🇸🇱", capital: "Freetown", region: "West", blurb: "Krio identity and post-war reconstruction art." },
+  { slug: "somalia", code: "SOM", name: "Somalia", nameFr: "Somalie", namePt: "Somália", nameEs: "Somalia", nameIt: "Somalia", flag: "🇸🇴", capital: "Mogadishu", region: "East", blurb: "Poetic tradition reborn in visual code." },
+  { slug: "south-africa", code: "ZAF", name: "South Africa", nameFr: "Afrique du Sud", namePt: "África do Sul", nameEs: "Sudáfrica", nameIt: "Sudafrica", flag: "🇿🇦", capital: "Pretoria", region: "Southern", blurb: "Joburg, Cape Town: post-apartheid avant-garde." },
+  { slug: "south-sudan", code: "SSD", name: "South Sudan", nameFr: "Soudan du Sud", namePt: "Sudão do Sul", nameEs: "Sudán del Sur", nameIt: "Sudan del Sud", flag: "🇸🇸", capital: "Juba", region: "East", blurb: "Cattle-camp aesthetics and emerging Juba scene." },
+  { slug: "sudan", code: "SDN", name: "Sudan", nameFr: "Soudan", namePt: "Sudão", nameEs: "Sudán", nameIt: "Sudan", flag: "🇸🇩", capital: "Khartoum", region: "North", blurb: "Khartoum school: Arabic letterforms reimagined." },
+  { slug: "tanzania", code: "TZA", name: "United Republic of Tanzania", nameFr: "République-Unie de Tanzanie", namePt: "Tanzânia", nameEs: "Tanzania", nameIt: "Tanzania", flag: "🇹🇿", capital: "Dodoma", region: "East", blurb: "Tingatinga lineage and Zanzibar's stone city." },
+  { slug: "togo", code: "TGO", name: "Togo", nameFr: "Togo", namePt: "Togo", nameEs: "Togo", nameIt: "Togo", flag: "🇹🇬", capital: "Lomé", region: "West", blurb: "Lomé craft tradition and coastal abstraction." },
+  { slug: "tunisia", code: "TUN", name: "Tunisia", nameFr: "Tunisie", namePt: "Tunísia", nameEs: "Túnez", nameIt: "Tunisia", flag: "🇹🇳", capital: "Tunis", region: "North", blurb: "Sidi Bou Said blues and Carthage palimpsest." },
+  { slug: "uganda", code: "UGA", name: "Uganda", nameFr: "Ouganda", namePt: "Uganda", nameEs: "Uganda", nameIt: "Uganda", flag: "🇺🇬", capital: "Kampala", region: "East", blurb: "Bark-cloth heritage and Kampala studio scene." },
+  { slug: "zambia", code: "ZMB", name: "Zambia", nameFr: "Zambie", namePt: "Zâmbia", nameEs: "Zambia", nameIt: "Zambia", flag: "🇿🇲", capital: "Lusaka", region: "Southern", blurb: "Copperbelt industrial form and Lusaka new-wave." },
+  { slug: "zimbabwe", code: "ZWE", name: "Zimbabwe", nameFr: "Zimbabwe", namePt: "Zimbabwe", nameEs: "Zimbabue", nameIt: "Zimbabwe", flag: "🇿🇼", capital: "Harare", region: "Southern", blurb: "Shona stone sculpture: a global vocabulary." },
 ];
 
 // Island-nation pin overrides — geojson at 50m omits or shrinks these.
@@ -98,10 +107,32 @@ export function normalizeCountrySlug(str: string): string {
       c.name.toLowerCase() === sNoHyphen ||
       c.code.toLowerCase() === s ||
       c.slug.toLowerCase().replace(/-/g, " ") === s ||
-      (c.nameFr && (c.nameFr.toLowerCase() === s || c.nameFr.toLowerCase() === sNoHyphen)) ||
-      (c.namePt && (c.namePt.toLowerCase() === s || c.namePt.toLowerCase() === sNoHyphen)),
+      [c.nameFr, c.namePt, c.nameEs, c.nameIt].some(
+        (n) => n && (n.toLowerCase() === s || n.toLowerCase() === sNoHyphen),
+      ),
   );
   return match ? match.slug : s.replace(/\s+/g, "-");
+}
+
+/** "West Africa", "Afrique de l'Ouest", … */
+export function regionLabel(region: Country["region"], t: Translate = english): string {
+  return t(`${region} Africa`);
+}
+
+/** Bio line for generated placeholder artists. Pages re-render it through t()
+ * so the placeholder reads naturally in every language. */
+export function mockArtistBio(name: string, country: Country, t: Translate = english): string {
+  return t("{first} works between {capital} and the wider {area} art scene.", {
+    first: name.split(" ")[0],
+    capital: country.capital,
+    area: regionLabel(country.region, t),
+  });
+}
+
+export function mockArtworkDescription(country: Country, lang: Language = "en", t: Translate = english): string {
+  return t("A meditation on {country}'s shifting cultural terrain — the work folds inherited symbology into a contemporary register.", {
+    country: getCountryDisplayName(country, lang),
+  });
 }
 
 // ---------- Deterministic mock content per country ----------
@@ -170,7 +201,9 @@ export type CountryGallery = {
   country: Country;
   artists: MockArtist[];
   artworks: MockArtwork[];
-  rooms: { title: string; subtitle: string }[];
+  /** `subtitle` may hold {placeholders} filled from `vars` — pages pass both
+   * to t() so the room labels translate. */
+  rooms: { title: string; subtitle: string; vars?: Record<string, string | number> }[];
   available: number;
   hasNew: boolean;
 };
@@ -189,7 +222,7 @@ export function getCountryGallery(slug: string): CountryGallery | null {
       slug: name.toLowerCase().replace(/[^a-z]+/g, "-"),
       name,
       role: i === 0 ? "featured" : "emerging",
-      bio: `${name.split(" ")[0]} works between ${country.capital} and the broader ${country.region} African scene.`,
+      bio: mockArtistBio(name, country),
       avatarSwatch: PALETTES[Math.floor(r() * PALETTES.length)],
     });
   }
@@ -212,7 +245,7 @@ export function getCountryGallery(slug: string): CountryGallery | null {
       dimensions: `${80 + Math.floor(r() * 120)} × ${60 + Math.floor(r() * 100)} cm`,
       price: forSale ? 1200 + Math.floor(r() * 18000) : null,
       city: country.capital,
-      description: `A meditation on ${country.namePt.toLowerCase()}'s shifting cultural terrain — the work folds inherited symbology into a contemporary register.`,
+      description: mockArtworkDescription(country),
       swatch: PALETTES[Math.floor(r() * PALETTES.length)],
       room,
     });
@@ -220,7 +253,7 @@ export function getCountryGallery(slug: string): CountryGallery | null {
 
   const rooms = [
     { title: "Featured Artist Room", subtitle: artists[0]?.name ?? "" },
-    { title: "Emerging Artists Room", subtitle: `${emergingCount} voices from ${country.capital}` },
+    { title: "Emerging Artists Room", subtitle: "{count} voices from {capital}", vars: { count: emergingCount, capital: country.capital } },
     { title: "Available Works Room", subtitle: "Acquire and support living artists" },
   ];
 
@@ -255,13 +288,25 @@ export function markVisited(slug: string) {
   window.dispatchEvent(new CustomEvent("nuart:visited-change"));
 }
 
-export function getCountryDisplayName(country: Country | string | null | undefined, language: "en" | "fr" = "en"): string {
+const LOCALIZED_NAME: Record<Exclude<Language, "en">, keyof Country> = {
+  fr: "nameFr",
+  pt: "namePt",
+  es: "nameEs",
+  it: "nameIt",
+};
+
+/** The country's name in `language`, falling back to English. Accepts a
+ * Country, a slug, or an English name; unknown strings are returned as-is. */
+export function getCountryDisplayName(country: Country | string | null | undefined, language: Language = "en"): string {
   if (!country) return "";
-  if (typeof country === "string") {
-    const found = getCountryBySlug(country) || AFRICAN_COUNTRIES.find((c) => c.name.toLowerCase() === country.toLowerCase());
-    if (found) return language === "fr" ? (found.nameFr || found.name) : found.name;
-    return country;
-  }
-  return language === "fr" ? (country.nameFr || country.name) : country.name;
+  const found =
+    typeof country === "string"
+      ? getCountryBySlug(country) ||
+        AFRICAN_COUNTRIES.find((c) => c.name.toLowerCase() === country.toLowerCase()) ||
+        getCountryBySlug(normalizeCountrySlug(country))
+      : country;
+  if (!found) return country as string;
+  if (language === "en") return found.name;
+  return (found[LOCALIZED_NAME[language]] as string) || found.name;
 }
 

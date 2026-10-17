@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import Link from "@/components/i18n/Link";
 import { useAuth } from "@/lib/auth";
 import { useLanguage } from "@/lib/i18n";
 

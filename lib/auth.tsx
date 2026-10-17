@@ -3,6 +3,13 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
+import { localizePath, splitLocale } from "@/lib/i18n/config";
+
+/** Email links (sign-up confirmation, password reset, OAuth) return the
+ * visitor to the language they were browsing in. */
+function inCurrentLanguage(path: string): string {
+  return localizePath(path, splitLocale(window.location.pathname).lang);
+}
 
 export type AppRole = "admin" | "artist" | "client";
 
@@ -86,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: error?.message };
       },
       signInWithGoogle: async (signupRole?: AppRole) => {
-        const redirectUrl = `${window.location.origin}/dashboard${signupRole ? `?signup_role=${signupRole}` : ""}`;
+        const redirectUrl = `${window.location.origin}${inCurrentLanguage("/dashboard")}${signupRole ? `?signup_role=${signupRole}` : ""}`;
         const { error } = await supabase.auth.signInWithOAuth({
           provider: "google",
           options: {
@@ -98,7 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       resetPassword: async (email) => {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/auth?mode=update-password`,
+          redirectTo: `${window.location.origin}${inCurrentLanguage("/auth")}?mode=update-password`,
         });
         return { error: error?.message };
       },
@@ -107,7 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: error?.message };
       },
       signUp: async (email, password, role, displayName, country) => {
-        const redirect = `${window.location.origin}/dashboard`;
+        const redirect = `${window.location.origin}${inCurrentLanguage("/dashboard")}`;
         const { error } = await supabase.auth.signUp({
           email,
           password,

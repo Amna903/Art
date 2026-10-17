@@ -58,9 +58,9 @@ function CertificateModal({
   year,
   onClose,
 }: Props & { onClose: () => void }) {
-  const { t } = useLanguage();
+  const { t, formatDate } = useLanguage();
   const number = certificateNumber(`${artworkTitle}-${artistName ?? ""}`);
-  const issued = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  const issued = formatDate(new Date());
 
   const modalContent = (
     <div
@@ -89,17 +89,17 @@ function CertificateModal({
         <div className="text-center mb-8">
           <span className="material-symbols-outlined text-3xl text-[#b85d38]">verified_user</span>
           <h3 className="font-serif text-2xl mt-2 mb-1 tracking-wide">{t("Certificate of Authenticity")}</h3>
-          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#665e57]">NUA-ARTE Collective</p>
+          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#665e57]">{t("NUA-ARTE Collective")}</p>
         </div>
 
         <div className="border-t border-b border-[#38302c]/30 py-6 space-y-4 text-sm">
-          <Row label={t("Title", "Titre")} value={artworkTitle} emphasis />
+          <Row label={t("Title")} value={artworkTitle} emphasis />
           {artistName && <Row label={t("Artist")} value={artistName} />}
           {medium && <Row label={t("Medium")} value={medium} />}
           {year && <Row label={t("Year")} value={year} />}
           <Row label={t("Edition")} value={t("Unique piece (1 of 1)")} />
           <Row label={t("Certificate No.")} value={number} />
-          <Row label={t("Issued", "Émis le")} value={issued} />
+          <Row label={t("Issued")} value={issued} />
         </div>
 
         <p className="text-xs text-[#665e57] leading-relaxed mt-6 text-center">

@@ -5,6 +5,45 @@ Router), styled entirely with Tailwind CSS v4 — no separate/external CSS
 files. Every design token, keyframe, and one-off utility class lives in the
 single Tailwind entry point: `app/globals.css`.
 
+## Languages (EN · FR · PT · ES · IT)
+
+Every page exists in five languages. English is unprefixed (`/artists`), the
+others have their own prefix (`/fr/artists`, `/pt/artists`, `/es/artists`,
+`/it/artists`).
+
+- **Routing**: all pages live under `app/[lang]/`. `proxy.ts` rewrites
+  unprefixed URLs to `/en/…` internally, redirects `/en/…` to the unprefixed
+  URL, and sends a visitor who picked a language in the switcher (cookie
+  `NUA_LOCALE`) to the same page in that language. Internal links use
+  `@/components/i18n/Link` and `useRouter` from `@/lib/i18n`, which keep the
+  current language. Don't import `next/link` directly.
+- **Interface text**: `t("English text")` from `useLanguage()` (client) or
+  `getI18n(params)` / `getT(lang)` (server). Keys are the English source, so
+  anything untranslated shows English, never a blank or a key name. Use
+  `{placeholders}` for variables: `t("Stories from {country}", { country })`,
+  not sentence fragments. Dictionaries: `lib/i18n/dictionaries/{fr,pt,es,it}.ts`.
+- **Always English**: “UNSEEN, UNHEARD” and “Illuminating Unseen Voices”
+  (`UNTRANSLATED` in `lib/i18n/translate.ts`).
+- **Country names**: `getCountryDisplayName(country, lang)` (English, French,
+  Portuguese, Spanish and Italian names in `lib/data/africa.ts`).
+- **Dates and numbers**: `formatDate`, `formatShortDate`, `formatNumber`,
+  `formatUsd` from `useLanguage()` or `lib/i18n/translate.ts`
+  (e.g. “14 de novembro de 2026”).
+- **Database content**: migration `20261017000000_content_translations.sql`
+  adds a `translations` jsonb column to artworks (title, description),
+  profiles and managed_artists (bio), journal_posts (title, excerpt, content),
+  exhibitions, collections and page_blocks. The admin and artist forms have a
+  **Translations** panel (FR / PT / ES / IT tabs) under the English fields;
+  blank fields fall back to English. Inline page copy (EditableText /
+  EditableImage alt text) is saved in whichever language the admin is viewing.
+  Run the migration against Supabase before deploying.
+- **Review gate**: Portuguese (Nilton), Spanish and Italian (native speakers)
+  are machine-drafted and must be reviewed before launch. Until
+  `REVIEWED.<lang>` is set to `true` in `lib/i18n/config.ts`, a language is
+  only served in `next dev` or on deployments built with
+  `NEXT_PUBLIC_PREVIEW_LOCALES=pt,es,it` (served `noindex`). Elsewhere it is
+  hidden from the switcher and its URLs redirect to English.
+
 ## Pricing: Price Upon Request
 
 Per client requirement, **no prices are displayed publicly** anywhere on the

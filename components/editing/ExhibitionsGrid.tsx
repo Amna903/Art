@@ -1,25 +1,33 @@
 "use client";
 
+import { useRouter, useLanguage } from "@/lib/i18n";
 import { useCallback, useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/types";
 import { slugify } from "@/lib/utils/slugify";
-import { AFRICAN_COUNTRIES } from "@/lib/data/africa";
+import { AFRICAN_COUNTRIES, getCountryDisplayName } from "@/lib/data/africa";
 import { pingRevalidate } from "@/lib/utils/revalidate";
 import { F } from "@/components/dashboards/FormField";
+import { TranslationFields } from "@/components/dashboards/TranslationFields";
+import { localizeRow } from "@/lib/i18n/content";
+import type { Language } from "@/lib/i18n/config";
+import type { Translator } from "@/lib/i18n/translate";
 
 type Exhibition = Database["public"]["Tables"]["exhibitions"]["Row"];
 type ExhibitionStatus = Exhibition["status"];
 type CardData = { month: string; title: string; body: string; img: string; alt: string };
 
 const STATUSES: ExhibitionStatus[] = ["upcoming", "current", "past"];
+const STATUS_LABELS: Record<ExhibitionStatus, string> = { upcoming: "Upcoming", current: "Current", past: "Past" };
 
-function toCard(e: Exhibition): CardData {
+/** Display card for a real row, in `lang` where translated. The editor always
+ * works on the raw row, never on this. */
+function toCard(row: Exhibition, lang: Language, t: Translator): CardData {
+  const e = localizeRow(row, ["title", "description", "date_label"], lang);
   return {
-    month: [e.status === "current" ? "LIVE NOW" : null, e.date_label].filter(Boolean).join(" · "),
+    month: [e.status === "current" ? t("LIVE NOW") : null, e.date_label].filter(Boolean).join(" · "),
     title: e.title,
     body: e.description ?? "",
     img: e.cover_image_url,
@@ -34,6 +42,7 @@ export function ExhibitionsGrid({
   initialItems: Exhibition[];
   fallbackItems: CardData[];
 }) {
+  const { t, language } = useLanguage();
   const { role } = useAuth();
   const isAdmin = role === "admin";
   const router = useRouter();
@@ -60,6 +69,7 @@ export function ExhibitionsGrid({
       date_label: editing.date_label ?? null,
       status: (editing.status as ExhibitionStatus) ?? "upcoming",
       country: editing.country ?? null,
+      translations: editing.translations ?? {},
     };
     if (editing.id) {
       await supabase.from("exhibitions").update(payload).eq("id", editing.id);
@@ -73,7 +83,7 @@ export function ExhibitionsGrid({
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Delete this exhibition?")) return;
+    if (!confirm(t("Delete this exhibition?"))) return;
     await supabase.from("exhibitions").delete().eq("id", id);
     reload();
     await pingRevalidate("exhibitions");
@@ -94,7 +104,7 @@ export function ExhibitionsGrid({
     setUploading(false);
   };
 
-  const cards = items.length > 0 ? items.map(toCard) : fallbackItems;
+  const cards = items.length > 0 ? items.map((item) => toCard(item, language, t)) : fallbackItems;
 
   return (
     <>
@@ -106,34 +116,34 @@ export function ExhibitionsGrid({
                 <button
                   onClick={() => setEditing(items[i])}
                   className="bg-secondary text-on-primary w-8 h-8 flex items-center justify-center text-sm rounded-full shadow-lg"
-                  title="Edit"
+                  title={t("Edit")}
                 >
                   ✎
                 </button>
                 <button
                   onClick={() => remove(items[i].id)}
                   className="bg-primary text-on-primary w-8 h-8 flex items-center justify-center text-sm rounded-full shadow-lg"
-                  title="Delete"
+                  title={t("Delete")}
                 >
                   ✕
                 </button>
               </div>
             )}
-            <span className="font-label-caps text-label-caps text-on-surface-variant block mb-4">{ev.month}</span>
+            <span className="font-label-caps text-label-caps text-on-surface-variant block mb-4">{t(ev.month)}</span>
             <div className="mb-6 relative overflow-hidden aspect-[4/5]">
               <Image
                 fill
                 sizes="(max-width: 768px) 100vw, 33vw"
                 className="object-cover filter grayscale group-hover:grayscale-0 transition-all duration-500"
-                alt={ev.alt}
+                alt={t(ev.alt)}
                 src={ev.img}
               />
               <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 to-transparent translate-y-full group-hover:translate-y-0 transition-transform">
-                <button className="w-full py-3 bg-beige text-black font-navigation text-navigation uppercase">Remind Me</button>
+                <button className="w-full py-3 bg-beige text-black font-navigation text-navigation uppercase">{t("Remind Me")}</button>
               </div>
             </div>
-            <h3 className="font-headline-sm text-headline-sm mb-2">{ev.title}</h3>
-            <p className="font-body-md text-body-md text-on-surface-variant">{ev.body}</p>
+            <h3 className="font-headline-sm text-headline-sm mb-2">{t(ev.title)}</h3>
+            <p className="font-body-md text-body-md text-on-surface-variant">{t(ev.body)}</p>
           </div>
         ))}
 
@@ -143,7 +153,7 @@ export function ExhibitionsGrid({
             className="border border-dashed border-primary/25 hover:border-secondary flex flex-col items-center justify-center gap-2 min-h-[280px] text-on-surface-variant hover:text-secondary transition-colors"
           >
             <span className="text-3xl">+</span>
-            <span className="font-label-caps text-[10px] uppercase tracking-widest">Add exhibition</span>
+            <span className="font-label-caps text-[10px] uppercase tracking-widest">{t("Add exhibition")}</span>
           </button>
         )}
       </div>
@@ -152,55 +162,65 @@ export function ExhibitionsGrid({
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-auto">
           <div className="bg-background w-full max-w-2xl p-8 max-h-[90vh] overflow-auto">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="font-display-sm text-display-sm text-primary">{editing.id ? "Edit exhibition" : "New exhibition"}</h3>
+              <h3 className="font-display-sm text-display-sm text-primary">{editing.id ? t("Edit exhibition") : t("New exhibition")}</h3>
               <button onClick={() => setEditing(null)} className="text-on-surface-variant">✕</button>
             </div>
             <div className="space-y-4">
-              <F label="Title" value={editing.title ?? ""} onChange={(v) => setEditing({ ...editing, title: v })} />
-              <F label="Description" textarea value={editing.description ?? ""} onChange={(v) => setEditing({ ...editing, description: v })} />
+              <F label={t("Title")} value={editing.title ?? ""} onChange={(v) => setEditing({ ...editing, title: v })} />
+              <F label={t("Description")} textarea value={editing.description ?? ""} onChange={(v) => setEditing({ ...editing, description: v })} />
               <div className="grid grid-cols-2 gap-4">
-                <F label="Location" value={editing.location ?? ""} onChange={(v) => setEditing({ ...editing, location: v })} />
-                <F label="Date label" value={editing.date_label ?? ""} onChange={(v) => setEditing({ ...editing, date_label: v })} />
+                <F label={t("Location")} value={editing.location ?? ""} onChange={(v) => setEditing({ ...editing, location: v })} />
+                <F label={t("Date label")} value={editing.date_label ?? ""} onChange={(v) => setEditing({ ...editing, date_label: v })} />
                 <label className="block">
-                  <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">Status</span>
+                  <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">{t("Status")}</span>
                   <select
                     value={editing.status ?? "upcoming"}
                     onChange={(e) => setEditing({ ...editing, status: e.target.value as ExhibitionStatus })}
                     className="w-full bg-transparent border-b border-primary/30 py-2 text-primary"
                   >
                     {STATUSES.map((s) => (
-                      <option key={s} value={s}>{s}</option>
+                      <option key={s} value={s}>{t(STATUS_LABELS[s])}</option>
                     ))}
                   </select>
                 </label>
+                <TranslationFields
+                  fields={[
+                    { name: "title", label: "Title" },
+                    { name: "description", label: "Description", textarea: true },
+                    { name: "location", label: "Location" },
+                    { name: "date_label", label: "Date label" },
+                  ]}
+                  value={editing.translations}
+                  onChange={(translations) => setEditing({ ...editing, translations })}
+                />
                 <label className="block">
                   <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">
-                    Country <span className="normal-case text-on-surface-variant/60">(optional — links to /discover)</span>
+                    {t("Country")}{" "}<span className="normal-case text-on-surface-variant/60">{t("(optional — links to /discover)")}</span>
                   </span>
                   <select
                     value={editing.country ?? ""}
                     onChange={(e) => setEditing({ ...editing, country: e.target.value || null })}
                     className="w-full bg-transparent border-b border-primary/30 py-2 text-primary"
                   >
-                    <option value="">— None (not country-specific) —</option>
+                    <option value="">{t("— None (not country-specific) —")}</option>
                     {AFRICAN_COUNTRIES.map((c) => (
-                      <option key={c.slug} value={c.name}>{c.flag} {c.name}</option>
+                      <option key={c.slug} value={c.name}>{c.flag} {getCountryDisplayName(c, language)}</option>
                     ))}
                   </select>
                 </label>
               </div>
               <div>
-                <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">Cover image</span>
+                <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">{t("Cover image")}</span>
                 <label className="block border border-dashed border-primary/25 bg-surface/60 hover:border-secondary cursor-pointer p-4">
                   <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} className="sr-only" />
                   <div className="flex items-start justify-between gap-4">
-                    <div className="font-navigation text-navigation uppercase tracking-[0.18em] text-primary">Click to upload a picture</div>
-                    <div className="shrink-0 border border-primary/15 px-3 py-2 text-xs uppercase tracking-[0.18em] text-primary">Choose file</div>
+                    <div className="font-navigation text-navigation uppercase tracking-[0.18em] text-primary">{t("Click to upload a picture")}</div>
+                    <div className="shrink-0 border border-primary/15 px-3 py-2 text-xs uppercase tracking-[0.18em] text-primary">{t("Choose file")}</div>
                   </div>
                 </label>
-                {uploading && <div className="mt-2 text-xs text-secondary">Uploading…</div>}
+                {uploading && <div className="mt-2 text-xs text-secondary">{t("Uploading…")}</div>}
                 <input
-                  placeholder="…or paste an image URL"
+                  placeholder={t("…or paste an image URL")}
                   value={editing.cover_image_url ?? ""}
                   onChange={(e) => setEditing({ ...editing, cover_image_url: e.target.value })}
                   className="mt-3 w-full bg-transparent border-b border-primary/30 py-2 text-primary text-sm"
@@ -208,8 +228,8 @@ export function ExhibitionsGrid({
                 {editing.cover_image_url && <img src={editing.cover_image_url} alt="" className="mt-3 max-h-40 object-cover" />}
               </div>
               <div className="flex justify-end gap-3 pt-4">
-                <button onClick={() => setEditing(null)} className="border border-primary/20 px-5 py-2 text-xs uppercase tracking-[0.2em]">Cancel</button>
-                <button onClick={save} className="bg-primary text-on-primary px-5 py-2 text-xs uppercase tracking-[0.2em]">Publish</button>
+                <button onClick={() => setEditing(null)} className="border border-primary/20 px-5 py-2 text-xs uppercase tracking-[0.2em]">{t("Cancel")}</button>
+                <button onClick={save} className="bg-primary text-on-primary px-5 py-2 text-xs uppercase tracking-[0.2em]">{t("Publish")}</button>
               </div>
             </div>
           </div>

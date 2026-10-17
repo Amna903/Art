@@ -27,7 +27,25 @@ export type Artist = {
   featuredWork: string;
   bio: string;
   image: string;
+  /** Set on generated fixture artists so the bio can be re-rendered in the
+   * visitor's language (see fixtureBio). */
+  fixture?: { first: string; countrySlug: string };
 };
+
+/** The generated fixture bio, through t() so it reads in every language. */
+export function fixtureBio(
+  first: string,
+  country: { capital: string; blurb: string },
+  t: (text: string, vars?: Record<string, string | number>) => string = (s, v) =>
+    v ? s.replace(/\{(\w+)\}/g, (m, k: string) => (k in v ? String(v[k]) : m)) : s,
+): string {
+  const blurb = t(country.blurb);
+  return t("{first} works between {capital} and international residencies, translating {blurb}", {
+    first,
+    capital: country.capital,
+    blurb: blurb.charAt(0).toLowerCase() + blurb.slice(1),
+  });
+}
 
 // Deterministic PRNG (mulberry32) so the directory is stable across renders.
 function rng(seed: number) {
@@ -96,7 +114,7 @@ function buildArtists(): Artist[] {
         "Portrait of a Continent", "After the Harmattan", "Salt, Light, Bone",
       ];
       const featuredWork = featuredWorks[Math.floor(rand() * featuredWorks.length)];
-      const bio = `${first} works between ${country.capital} and international residencies, translating ${country.blurb.toLowerCase()}`;
+      const bio = fixtureBio(first, country);
       // Deterministic African-first imagery per artist — portraits alternate,
       // featured works are matched to the artist's technique for authenticity.
       const wantsPortrait = i % 2 === 0;
@@ -118,6 +136,7 @@ function buildArtists(): Artist[] {
         featuredWork,
         bio,
         image,
+        fixture: { first, countrySlug: country.slug },
       });
     }
   });

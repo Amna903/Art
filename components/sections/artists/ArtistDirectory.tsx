@@ -12,7 +12,7 @@ type Filter = (typeof FILTERS)[number];
 
 export function ArtistDirectory({ artists }: { artists: Artist[] }) {
   const searchParams = useSearchParams();
-  const { t, language } = useLanguage();
+  const { t, language, formatNumber } = useLanguage();
 
   const sourceArtists = artists;
   const totalCount = artists.length;
@@ -98,15 +98,9 @@ export function ArtistDirectory({ artists }: { artists: Artist[] }) {
         <span className="font-label-caps text-secondary tracking-widest">{t("The Movement")}</span>
         <h1 className="font-display text-primary text-5xl md:text-7xl mt-3 mb-4">{t("Artists")}</h1>
         <p className="font-body-lg text-on-surface-variant max-w-2xl">
-          {totalCount}{" "}
           {t(
-            "artists across",
-            "artistes à travers"
-          )}{" "}
-          {COUNTRY_COUNT}{" "}
-          {t(
-            "nations — painters, sculptors, photographers, weavers, and digital pioneers shaping the contemporary African canon.",
-            "nations — peintres, sculpteurs, photographes, tisserands et pionniers numériques façonnant le canon contemporain africain."
+            "{artists} artists across {countries} nations — painters, sculptors, photographers, weavers, and digital pioneers shaping the contemporary African canon.",
+            { artists: formatNumber(totalCount), countries: COUNTRY_COUNT },
           )}
         </p>
         <div className="red-thread mt-8" />
@@ -156,7 +150,7 @@ export function ArtistDirectory({ artists }: { artists: Artist[] }) {
             />
           </div>
           <p className="font-label-caps text-on-surface-variant text-xs tracking-widest">
-            {t("Showing")} {filtered.length} {t("of")} {totalCount}
+            {t("Showing {shown} of {total}", { shown: formatNumber(filtered.length), total: formatNumber(totalCount) })}
           </p>
         </div>
       </div>

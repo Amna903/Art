@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/lib/i18n";
 import { useRef, useState, type WheelEvent as ReactWheelEvent } from "react";
 import Image from "next/image";
 
@@ -23,6 +24,7 @@ function distance(t: TouchList): number {
  * ... like Google Maps" and "Click Opens full-screen lightbox viewer".
  */
 export function ZoomableImage({ src, alt, className }: Props) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [scale, setScale] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -102,7 +104,7 @@ export function ZoomableImage({ src, alt, className }: Props) {
             e.stopPropagation();
             setOpen(true);
           }}
-          aria-label="View fullscreen"
+          aria-label={t("View fullscreen")}
           className="absolute bottom-6 right-6 p-3 bg-beige/90 backdrop-blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"
         >
           <span className="material-symbols-outlined text-primary">fullscreen</span>
@@ -122,18 +124,18 @@ export function ZoomableImage({ src, alt, className }: Props) {
         >
           <button
             onClick={close}
-            aria-label="Close"
+            aria-label={t("Close")}
             className="absolute top-4 right-4 z-10 w-11 h-11 flex items-center justify-center text-white material-symbols-outlined"
           >
             close
           </button>
           <button
             onClick={reset}
-            aria-label="Reset zoom"
+            aria-label={t("Reset zoom")}
             className="absolute top-4 left-4 z-10 flex items-center gap-1.5 px-3 h-11 text-white/80 hover:text-white font-label-caps text-[10px] uppercase tracking-widest"
           >
             <span className="material-symbols-outlined text-[18px]">restart_alt</span>
-            Reset
+            {t("Reset")}
           </button>
           {/* Raw img, not next/image: only mounts once opened (not part of initial page
               weight), and needs its natural size under a live pan/zoom transform rather
@@ -151,7 +153,7 @@ export function ZoomableImage({ src, alt, className }: Props) {
             onClick={(e) => e.stopPropagation()}
           />
           <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/50 text-xs font-label-caps uppercase tracking-widest">
-            Scroll or pinch to zoom · drag to pan
+            {t("Scroll or pinch to zoom · drag to pan")}
           </p>
         </div>
       )}

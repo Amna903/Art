@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage, useRouter } from "@/lib/i18n";
 import { isArtistFollowed, followArtist, unfollowArtist } from "@/lib/data/followed-artists";
 
 type Props = {

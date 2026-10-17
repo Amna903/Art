@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       artworks: {
         Row: {
+          translations: Json
           artist_id: string
           managed_artist_id: string | null
           country: string | null
@@ -38,6 +39,7 @@ export type Database = {
           year: number | null
         }
         Insert: {
+          translations?: Json
           artist_id: string
           managed_artist_id?: string | null
           country?: string | null
@@ -60,6 +62,7 @@ export type Database = {
           year?: number | null
         }
         Update: {
+          translations?: Json
           artist_id?: string
           managed_artist_id?: string | null
           country?: string | null
@@ -85,6 +88,7 @@ export type Database = {
       }
       collections: {
         Row: {
+          translations: Json
           id: string
           title: string
           slug: string
@@ -94,6 +98,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          translations?: Json
           id?: string
           title: string
           slug: string
@@ -103,6 +108,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          translations?: Json
           id?: string
           title?: string
           slug?: string
@@ -226,6 +232,7 @@ export type Database = {
       }
       exhibitions: {
         Row: {
+          translations: Json
           id: string
           title: string
           slug: string
@@ -239,6 +246,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          translations?: Json
           id?: string
           title: string
           slug: string
@@ -252,6 +260,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          translations?: Json
           id?: string
           title?: string
           slug?: string
@@ -294,6 +303,7 @@ export type Database = {
       }
       journal_posts: {
         Row: {
+          translations: Json
           id: string
           title: string
           slug: string
@@ -309,6 +319,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          translations?: Json
           id?: string
           title: string
           slug: string
@@ -324,6 +335,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          translations?: Json
           id?: string
           title?: string
           slug?: string
@@ -414,6 +426,7 @@ export type Database = {
       }
       page_blocks: {
         Row: {
+          translations: Json
           id: string
           page: string
           block_key: string
@@ -422,6 +435,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          translations?: Json
           id?: string
           page: string
           block_key: string
@@ -430,6 +444,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          translations?: Json
           id?: string
           page?: string
           block_key?: string
@@ -441,6 +456,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          translations: Json
           avatar_url: string | null
           bio: string | null
           country: string | null
@@ -450,6 +466,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          translations?: Json
           avatar_url?: string | null
           bio?: string | null
           country?: string | null
@@ -459,6 +476,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          translations?: Json
           avatar_url?: string | null
           bio?: string | null
           country?: string | null
@@ -471,6 +489,7 @@ export type Database = {
       }
       managed_artists: {
         Row: {
+          translations: Json
           id: string
           slug: string
           display_name: string
@@ -484,6 +503,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          translations?: Json
           id?: string
           slug: string
           display_name: string
@@ -497,6 +517,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          translations?: Json
           id?: string
           slug?: string
           display_name?: string

@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/i18n/Link";
 import Image from "next/image";
 import { PriceUponRequest } from "@/components/enquiry/PriceUponRequest";
 import { COLLECTIONS, type Collection } from "@/lib/data/collections";
 import type { SupabaseCollection } from "@/lib/data/supabase-collections";
 import { mergeSlots } from "@/lib/utils/mergeSlots";
 import { useLanguage } from "@/lib/i18n";
+import { getCountryBySlug, getCountryDisplayName, normalizeCountrySlug } from "@/lib/data/africa";
 
 type ViewMode = "grid" | "list";
 type MenuKey = "country" | "medium" | null;
@@ -21,17 +22,40 @@ function fromSupabase(c: SupabaseCollection): Collection {
     imageAlt: c.title,
     country: "",
     medium: "",
-    artists: `${c.artworkCount} artwork${c.artworkCount === 1 ? "" : "s"}`,
+    artists: c.artworkCount === 1 ? "1 artwork" : `${c.artworkCount} artworks`,
   };
 }
 
 export function CollectionsView({ initialItems = [] }: { initialItems?: SupabaseCollection[] }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   // Oldest real collection takes slot 0, so a slot never jumps once filled —
   // the rest stay static until replaced by admin-created collections.
+  // Real collections arrive already in this language; the built-in demo
+  // collections are site copy and go through the dictionary. Filters below
+  // work on these display values.
   const allItems = useMemo(
-    () => mergeSlots(initialItems.map(fromSupabase), COLLECTIONS),
-    [initialItems],
+    () =>
+      mergeSlots(initialItems.map(fromSupabase), COLLECTIONS).map((c) => {
+        const artworkCount = c.artists.match(/^(\d+) artworks?$/);
+        return {
+          ...c,
+          title: t(c.title),
+          tag: c.tag && t(c.tag),
+          description: t(c.description),
+          imageAlt: t(c.imageAlt),
+          country:
+            c.country && getCountryBySlug(normalizeCountrySlug(c.country))
+              ? getCountryDisplayName(c.country, language)
+              : c.country && t(c.country),
+          medium: c.medium && t(c.medium),
+          artists: !artworkCount
+            ? t(c.artists)
+            : artworkCount[1] === "1"
+              ? t("1 artwork")
+              : t("{count} artworks", { count: Number(artworkCount[1]) }),
+        };
+      }),
+    [initialItems, t, language],
   );
 
   const [country, setCountry] = useState("All");
@@ -263,7 +287,7 @@ export function CollectionsView({ initialItems = [] }: { initialItems?: Supabase
               fill
               sizes="50vw"
               className="object-cover opacity-80"
-              alt="Contemporary African ceramic vessel curated for NUA-ARTE."
+              alt={t("Contemporary African ceramic vessel curated for NUA-ARTE.")}
               src="https://nu-artcollective.lovable.app/__l5e/assets-v1/8fb36909-f581-4701-9e44-3a179fcb76d5/afr-ceramic.jpg"
             />
           </div>
@@ -306,6 +330,7 @@ function FilterButton({
   options: string[];
   onSelect: (v: string) => void;
 }) {
+  const { t } = useLanguage();
   const active = value !== "All";
   return (
     <div className="relative">
@@ -313,7 +338,7 @@ function FilterButton({
         onClick={onToggle}
         className={`font-label-caps text-label-caps uppercase flex items-center gap-2 tracking-widest transition-colors ${active ? "text-secondary" : "hover:text-secondary"}`}
       >
-        {active ? `${label}: ${value}` : label}
+        {active ? `${label}: ${t(value)}` : label}
         <span className={`material-symbols-outlined text-[16px] transition-transform ${open ? "rotate-180" : ""}`}>
           expand_more
         </span>
@@ -328,7 +353,7 @@ function FilterButton({
                 onClick={() => onSelect(opt)}
                 className={`w-full text-left px-5 py-2 font-label-caps text-label-caps uppercase tracking-widest transition-colors ${selected ? "text-secondary" : "text-primary hover:text-secondary"}`}
               >
-                {opt}
+                {t(opt)}
               </button>
             );
           })}

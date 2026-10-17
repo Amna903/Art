@@ -1,7 +1,7 @@
 "use client";
 
+import { useRouter, useLanguage } from "@/lib/i18n";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/types";
@@ -14,6 +14,7 @@ type Collection = Database["public"]["Tables"]["collections"]["Row"];
 type Artwork = Database["public"]["Tables"]["artworks"]["Row"];
 
 export function CollectionsAdmin() {
+  const { t } = useLanguage();
   const router = useRouter();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [artworks, setArtworks] = useState<Artwork[]>([]);
@@ -90,7 +91,7 @@ export function CollectionsAdmin() {
   };
 
   const deleteCollection = async (id: string) => {
-    if (!confirm("Delete this collection?")) return;
+    if (!confirm(t("Delete this collection?"))) return;
     const { error } = await supabase.from("collections").delete().eq("id", id);
     if (error) {
       alert(error.message);
@@ -147,21 +148,21 @@ export function CollectionsAdmin() {
   return (
     <section className="space-y-10">
       <div className="border border-primary/10 p-6 space-y-4">
-        <h3 className="font-label-caps text-label-caps uppercase text-on-surface-variant">New collection</h3>
+        <h3 className="font-label-caps text-label-caps uppercase text-on-surface-variant">{t("New collection")}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <F label="Title" value={title} onChange={setTitle} />
-          <F label="Description" value={description} onChange={setDescription} />
+          <F label={t("Title")} value={title} onChange={setTitle} />
+          <F label={t("Description")} value={description} onChange={setDescription} />
         </div>
         <div>
-          <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">Cover image</span>
+          <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">{t("Cover image")}</span>
           <label className="block border border-dashed border-primary/25 bg-surface/60 hover:border-secondary cursor-pointer p-4">
             <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && uploadCover(e.target.files[0])} className="sr-only" />
             <div className="flex items-start justify-between gap-4">
-              <div className="font-navigation text-navigation uppercase tracking-[0.18em] text-primary">Click to upload a picture</div>
-              <div className="shrink-0 border border-primary/15 px-3 py-2 text-xs uppercase tracking-[0.18em] text-primary">Choose file</div>
+              <div className="font-navigation text-navigation uppercase tracking-[0.18em] text-primary">{t("Click to upload a picture")}</div>
+              <div className="shrink-0 border border-primary/15 px-3 py-2 text-xs uppercase tracking-[0.18em] text-primary">{t("Choose file")}</div>
             </div>
           </label>
-          {uploading && <div className="mt-2 text-xs text-secondary">Uploading…</div>}
+          {uploading && <div className="mt-2 text-xs text-secondary">{t("Uploading…")}</div>}
           {coverUrl && <img src={coverUrl} alt="" className="mt-3 max-h-32 object-cover" />}
         </div>
         <button
@@ -169,13 +170,13 @@ export function CollectionsAdmin() {
           disabled={!title.trim() || creating}
           className="bg-primary text-on-primary px-5 py-2 text-xs uppercase tracking-[0.2em] disabled:opacity-40"
         >
-          {creating ? "Creating…" : "Create"}
+          {creating ? t("Creating…") : t("Create")}
         </button>
       </div>
 
       <div className="space-y-3">
         {collections.length === 0 ? (
-          <p className="text-on-surface-variant text-sm">No collections yet.</p>
+          <p className="text-on-surface-variant text-sm">{t("No collections yet.")}</p>
         ) : (
           collections.map((c) => {
             const count = membership.get(c.id)?.size ?? 0;
@@ -187,7 +188,7 @@ export function CollectionsAdmin() {
                   )}
                   <div className="min-w-0">
                     <div className="text-primary truncate">{c.title}</div>
-                    <div className="text-xs text-on-surface-variant">{count} artwork{count === 1 ? "" : "s"}</div>
+                    <div className="text-xs text-on-surface-variant">{count === 1 ? t("1 artwork") : t("{count} artworks", { count })}</div>
                   </div>
                 </div>
                 <div className="flex gap-2 shrink-0">
@@ -195,13 +196,13 @@ export function CollectionsAdmin() {
                     onClick={() => setManaging(c.id)}
                     className="text-[10px] uppercase tracking-widest px-3 py-2 border border-primary/20 hover:border-primary"
                   >
-                    Manage Artworks
+                    {t("Manage Artworks")}
                   </button>
                   <button
                     onClick={() => deleteCollection(c.id)}
                     className="text-[10px] uppercase tracking-widest px-3 py-2 border border-secondary text-secondary hover:bg-secondary hover:text-on-primary"
                   >
-                    Delete
+                    {t("Delete")}
                   </button>
                 </div>
               </div>
@@ -218,7 +219,7 @@ export function CollectionsAdmin() {
               <button onClick={() => setManaging(null)} className="text-on-surface-variant">✕</button>
             </div>
             {artworks.length === 0 ? (
-              <p className="text-on-surface-variant text-sm">No published artworks yet.</p>
+              <p className="text-on-surface-variant text-sm">{t("No published artworks yet.")}</p>
             ) : (
               <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
                 {artworks.map((a) => {

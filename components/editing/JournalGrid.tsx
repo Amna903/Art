@@ -1,16 +1,19 @@
 "use client";
 
+import { useRouter, useLanguage } from "@/lib/i18n";
 import { useCallback, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/i18n/Link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/types";
 import { slugify } from "@/lib/utils/slugify";
-import { AFRICAN_COUNTRIES } from "@/lib/data/africa";
+import { AFRICAN_COUNTRIES, getCountryDisplayName } from "@/lib/data/africa";
 import { pingRevalidate } from "@/lib/utils/revalidate";
 import { F } from "@/components/dashboards/FormField";
+import { TranslationFields } from "@/components/dashboards/TranslationFields";
+import { localizeRow } from "@/lib/i18n/content";
+import type { Language } from "@/lib/i18n/config";
 
 type JournalPost = Database["public"]["Tables"]["journal_posts"]["Row"];
 type CardData = { slug: string; tag: string; date: string; read: string; title: string; body: string; img: string; alt: string };
@@ -34,11 +37,14 @@ function toDraft(card: CardData): Partial<JournalPost> {
   };
 }
 
-function toCard(p: JournalPost): CardData {
+/** Display card for a real row, in `lang` where translated. The editor always
+ * works on the raw row, never on this. */
+function toCard(row: JournalPost, lang: Language): CardData {
+  const p = localizeRow(row, ["title", "excerpt"], lang);
   return {
     slug: p.slug,
     tag: p.category,
-    date: new Date(p.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
+    date: p.created_at,
     read: p.read_minutes ? `${p.read_minutes} Min Read` : "",
     title: p.title,
     body: p.excerpt ?? "",
@@ -54,6 +60,7 @@ export function JournalGrid({
   initialItems: JournalPost[];
   fallbackItems: CardData[];
 }) {
+  const { t, language, formatDate } = useLanguage();
   const { role } = useAuth();
   const isAdmin = role === "admin";
   const router = useRouter();
@@ -81,6 +88,7 @@ export function JournalGrid({
       read_minutes: editing.read_minutes ?? null,
       country: editing.country ?? null,
       quote_author: editing.quote_author?.trim() || null,
+      translations: editing.translations ?? {},
     };
     // Claiming a still-static card carries its slug over so the same /journal/<slug> URL keeps
     // working — but that slug may already belong to a real row (e.g. claimed a moment ago from
@@ -89,7 +97,7 @@ export function JournalGrid({
       ? await supabase.from("journal_posts").update(payload).eq("id", editing.id)
       : await supabase.from("journal_posts").insert(payload);
     if (error) {
-      alert(error.message);
+      alert(t(error.message));
       return;
     }
     setEditing(null);
@@ -99,7 +107,7 @@ export function JournalGrid({
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Delete this journal post?")) return;
+    if (!confirm(t("Delete this journal post?"))) return;
     await supabase.from("journal_posts").delete().eq("id", id);
     reload();
     await pingRevalidate("journal-posts");
@@ -131,7 +139,14 @@ export function JournalGrid({
     setUploading(false);
   };
 
-  const cards = items.length > 0 ? items.map(toCard) : fallbackItems;
+  const cards = items.length > 0 ? items.map((item) => toCard(item, language)) : fallbackItems;
+  // Real rows are already localized by toCard; t() also covers the built-in
+  // demo cards, whose copy lives in the dictionary.
+  const showDate = (value: string) => (Number.isNaN(Date.parse(value)) ? value : formatDate(value));
+  const showRead = (value: string) => {
+    const minutes = parseInt(value, 10);
+    return Number.isNaN(minutes) ? t(value) : t("{count} Min Read", { count: minutes });
+  };
 
   return (
     <>
@@ -150,7 +165,7 @@ export function JournalGrid({
                     <button
                       onClick={() => setAsMainStory(realItem.id)}
                       className={`w-8 h-8 flex items-center justify-center text-sm rounded-full shadow-lg ${realItem.is_pinned ? "bg-secondary text-on-primary" : "bg-background text-primary"}`}
-                      title={realItem.is_pinned ? "Currently the main story on /journal" : "Set as main story on /journal"}
+                      title={realItem.is_pinned ? t("Currently the main story on /journal") : t("Set as main story on /journal")}
                     >
                       {realItem.is_pinned ? "★" : "☆"}
                     </button>
@@ -158,7 +173,7 @@ export function JournalGrid({
                   <button
                     onClick={() => setEditing(realItem ?? toDraft(s))}
                     className="bg-secondary text-on-primary w-8 h-8 flex items-center justify-center text-sm rounded-full shadow-lg"
-                    title={realItem ? "Edit" : "Edit to publish this as a real post"}
+                    title={realItem ? t("Edit") : t("Edit to publish this as a real post")}
                   >
                     ✎
                   </button>
@@ -166,7 +181,7 @@ export function JournalGrid({
                     <button
                       onClick={() => remove(realItem.id)}
                       className="bg-primary text-on-primary w-8 h-8 flex items-center justify-center text-sm rounded-full shadow-lg"
-                      title="Delete"
+                      title={t("Delete")}
                     >
                       ✕
                     </button>
@@ -179,26 +194,26 @@ export function JournalGrid({
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
-                    alt={s.alt}
+                    alt={t(s.alt)}
                     src={s.img}
                   />
                   <div className="absolute bottom-0 left-0 bg-primary text-on-primary px-4 py-1 font-label-caps text-[10px] uppercase">
-                    {s.tag}
+                    {t(s.tag)}
                   </div>
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-on-surface-variant font-label-caps text-[10px] uppercase tracking-widest">
-                    <span>{s.date}</span>
+                    <span>{showDate(s.date)}</span>
                     {s.read && (
                       <span className="flex items-center gap-1">
-                        <span className="material-symbols-outlined text-sm">schedule</span> {s.read}
+                        <span className="material-symbols-outlined text-sm">schedule</span> {showRead(s.read)}
                       </span>
                     )}
                   </div>
                   <h3 className="font-headline-sm text-headline-sm group-hover:text-secondary transition-colors">
-                    {s.title}
+                    {t(s.title)}
                   </h3>
-                  <p className="font-body-md text-body-md text-on-surface-variant line-clamp-2">{s.body}</p>
+                  <p className="font-body-md text-body-md text-on-surface-variant line-clamp-2">{t(s.body)}</p>
                 </div>
               </Link>
             </div>
@@ -211,7 +226,7 @@ export function JournalGrid({
             className="border border-dashed border-primary/25 hover:border-secondary flex flex-col items-center justify-center gap-2 min-h-[280px] text-on-surface-variant hover:text-secondary transition-colors"
           >
             <span className="text-3xl">+</span>
-            <span className="font-label-caps text-[10px] uppercase tracking-widest">Add journal post</span>
+            <span className="font-label-caps text-[10px] uppercase tracking-widest">{t("Add journal post")}</span>
           </button>
         )}
       </div>
@@ -220,76 +235,85 @@ export function JournalGrid({
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-auto">
           <div className="bg-background w-full max-w-2xl p-8 max-h-[90vh] overflow-auto">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="font-display-sm text-display-sm text-primary">{editing.id ? "Edit post" : "New post"}</h3>
+              <h3 className="font-display-sm text-display-sm text-primary">{editing.id ? t("Edit post") : t("New post")}</h3>
               <button onClick={() => setEditing(null)} className="text-on-surface-variant">✕</button>
             </div>
             <div className="space-y-4">
-              <F label="Title" value={editing.title ?? ""} onChange={(v) => setEditing({ ...editing, title: v })} />
+              <F label={t("Title")} value={editing.title ?? ""} onChange={(v) => setEditing({ ...editing, title: v })} />
               <div className="grid grid-cols-2 gap-4">
                 <label className="block">
-                  <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">Category</span>
+                  <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">{t("Category")}</span>
                   <select
                     value={editing.category ?? CATEGORIES[0]}
                     onChange={(e) => setEditing({ ...editing, category: e.target.value })}
                     className="w-full bg-transparent border-b border-primary/30 py-2 text-primary"
                   >
                     {CATEGORIES.map((c) => (
-                      <option key={c} value={c}>{c}</option>
+                      <option key={c} value={c}>{t(c)}</option>
                     ))}
                   </select>
                 </label>
                 <F
-                  label="Read minutes"
+                  label={t("Read minutes")}
                   type="number"
                   value={editing.read_minutes != null ? String(editing.read_minutes) : ""}
                   onChange={(v) => setEditing({ ...editing, read_minutes: v ? Number(v) : null })}
                 />
                 <label className="block col-span-2">
                   <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">
-                    Country <span className="normal-case text-on-surface-variant/60">(optional — shows this post on that country&apos;s page)</span>
+                    {t("Country")}{" "}<span className="normal-case text-on-surface-variant/60">{t("(optional — shows this post on that country's page)")}</span>
                   </span>
                   <select
                     value={editing.country ?? ""}
                     onChange={(e) => setEditing({ ...editing, country: e.target.value || null })}
                     className="w-full bg-transparent border-b border-primary/30 py-2 text-primary"
                   >
-                    <option value="">— None (not country-specific) —</option>
+                    <option value="">{t("— None (not country-specific) —")}</option>
                     {AFRICAN_COUNTRIES.map((c) => (
-                      <option key={c.slug} value={c.name}>{c.flag} {c.name}</option>
+                      <option key={c.slug} value={c.name}>{c.flag} {getCountryDisplayName(c, language)}</option>
                     ))}
                   </select>
                 </label>
               </div>
               <F
-                label="Excerpt"
+                label={t("Excerpt")}
                 textarea
                 value={editing.excerpt ?? ""}
                 onChange={(v) => setEditing({ ...editing, excerpt: v })}
               />
               <label className="block">
                 <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">
-                  Quote author <span className="normal-case text-on-surface-variant/60">(optional — shown under the pull quote instead of the category)</span>
+                  {t("Quote author")}{" "}<span className="normal-case text-on-surface-variant/60">{t("(optional — shown under the pull quote instead of the category)")}</span>
                 </span>
                 <input
                   value={editing.quote_author ?? ""}
                   onChange={(e) => setEditing({ ...editing, quote_author: e.target.value || null })}
-                  placeholder="e.g. Kofi Mensah"
+                  placeholder={t("e.g. Kofi Mensah")}
                   className="w-full bg-transparent border-b border-primary/30 py-2 text-primary"
                 />
               </label>
-              <F label="Content" textarea value={editing.content ?? ""} onChange={(v) => setEditing({ ...editing, content: v })} />
+              <F label={t("Content")} textarea value={editing.content ?? ""} onChange={(v) => setEditing({ ...editing, content: v })} />
+              <TranslationFields
+                fields={[
+                  { name: "title", label: "Title" },
+                  { name: "excerpt", label: "Excerpt", textarea: true },
+                  { name: "content", label: "Content", textarea: true },
+                ]}
+                value={editing.translations}
+                onChange={(translations) => setEditing({ ...editing, translations })}
+              />
               <div>
-                <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">Cover image</span>
+                <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">{t("Cover image")}</span>
                 <label className="block border border-dashed border-primary/25 bg-surface/60 hover:border-secondary cursor-pointer p-4">
                   <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} className="sr-only" />
                   <div className="flex items-start justify-between gap-4">
-                    <div className="font-navigation text-navigation uppercase tracking-[0.18em] text-primary">Click to upload a picture</div>
-                    <div className="shrink-0 border border-primary/15 px-3 py-2 text-xs uppercase tracking-[0.18em] text-primary">Choose file</div>
+                    <div className="font-navigation text-navigation uppercase tracking-[0.18em] text-primary">{t("Click to upload a picture")}</div>
+                    <div className="shrink-0 border border-primary/15 px-3 py-2 text-xs uppercase tracking-[0.18em] text-primary">{t("Choose file")}</div>
                   </div>
                 </label>
-                {uploading && <div className="mt-2 text-xs text-secondary">Uploading…</div>}
+                {uploading && <div className="mt-2 text-xs text-secondary">{t("Uploading…")}</div>}
                 <input
-                  placeholder="…or paste an image URL"
+                  placeholder={t("…or paste an image URL")}
                   value={editing.cover_image_url ?? ""}
                   onChange={(e) => setEditing({ ...editing, cover_image_url: e.target.value })}
                   className="mt-3 w-full bg-transparent border-b border-primary/30 py-2 text-primary text-sm"
@@ -297,8 +321,8 @@ export function JournalGrid({
                 {editing.cover_image_url && <img src={editing.cover_image_url} alt="" className="mt-3 max-h-40 object-cover" />}
               </div>
               <div className="flex justify-end gap-3 pt-4">
-                <button onClick={() => setEditing(null)} className="border border-primary/20 px-5 py-2 text-xs uppercase tracking-[0.2em]">Cancel</button>
-                <button onClick={save} className="bg-primary text-on-primary px-5 py-2 text-xs uppercase tracking-[0.2em]">Publish</button>
+                <button onClick={() => setEditing(null)} className="border border-primary/20 px-5 py-2 text-xs uppercase tracking-[0.2em]">{t("Cancel")}</button>
+                <button onClick={save} className="bg-primary text-on-primary px-5 py-2 text-xs uppercase tracking-[0.2em]">{t("Publish")}</button>
               </div>
             </div>
           </div>

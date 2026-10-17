@@ -1,5 +1,14 @@
 import { NextResponse } from "next/server";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath as revalidateInternalPath, revalidateTag } from "next/cache";
+import { LOCALES } from "@/lib/i18n/config";
+
+// Pages live under app/[lang] (English is rewritten to /en internally), so a
+// public path like "/artists" is cached once per language.
+function revalidatePath(path: string, type?: "layout" | "page") {
+  for (const lang of LOCALES) {
+    revalidateInternalPath(path === "/" ? `/${lang}` : `/${lang}${path}`, type);
+  }
+}
 
 // Client-side editors write straight to Supabase from the browser — there's no
 // server action in that path to call revalidateTag from directly. This lets

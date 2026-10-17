@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage, useRouter } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
 import { isArtworkSaved, saveArtwork, unsaveArtwork } from "@/lib/data/saved";
 

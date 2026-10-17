@@ -1,10 +1,17 @@
 import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { TECHNIQUES, type Artist, type Technique } from "@/lib/data/artists";
+import type { Json } from "@/lib/supabase/types";
+import type { Language } from "@/lib/i18n/config";
+import { localized } from "@/lib/i18n/content";
 
 // Real artist/artwork data from Supabase:
 //   - Self-service artists → artworks.artist_id + profiles
 //   - Admin-represented artists (no login) → artworks.managed_artist_id + managed_artists
 // Distinct from Sanity CMS and static fixtures.
+//
+// Every reader takes an optional language; titles, descriptions and bios are
+// returned in that language when the admin/artist has entered a translation
+// (the `translations` column), otherwise in English.
 
 export type SupabaseArtwork = {
   id: string;
@@ -38,6 +45,7 @@ type ArtworkRow = {
   image_url: string;
   artist_id: string;
   managed_artist_id: string | null;
+  translations: Json;
 };
 
 type ProfileRow = {
@@ -46,6 +54,7 @@ type ProfileRow = {
   bio: string | null;
   country: string | null;
   avatar_url: string | null;
+  translations: Json;
 };
 
 type ManagedArtistRow = {
@@ -57,32 +66,38 @@ type ManagedArtistRow = {
   city: string | null;
   technique: string | null;
   avatar_url: string | null;
+  translations: Json;
 };
 
 const ARTWORK_SELECT =
-  "id, slug, title, medium, year, country, description, image_url, artist_id, managed_artist_id";
+  "id, slug, title, medium, year, country, description, image_url, artist_id, managed_artist_id, translations";
+const PROFILE_SELECT = "id, display_name, bio, country, avatar_url, translations";
+const MANAGED_SELECT = "id, slug, display_name, bio, country, city, technique, avatar_url, translations";
 
 function toArtwork(
   row: ArtworkRow,
   profile: ProfileRow | undefined,
   managed: ManagedArtistRow | undefined,
+  lang: Language,
 ): SupabaseArtwork {
+  const title = localized(row.translations, "title", lang, row.title);
+  const description = localized(row.translations, "description", lang, row.description);
   if (managed) {
     return {
       id: row.id,
       slug: row.slug,
-      title: row.title,
+      title,
       medium: row.medium,
       year: row.year,
       country: row.country,
-      description: row.description,
+      description,
       imageUrl: row.image_url,
       artistId: managed.id,
       artistSlug: managed.slug,
       artistName: managed.display_name?.trim() || "Artist",
       artistCountry: managed.country ?? row.country ?? null,
       artistCity: managed.city ?? null,
-      artistBio: managed.bio ?? null,
+      artistBio: localized(managed.translations, "bio", lang, managed.bio) ?? null,
       artistAvatarUrl: managed.avatar_url ?? null,
       artistTechnique: managed.technique ?? null,
     };
@@ -91,18 +106,18 @@ function toArtwork(
   return {
     id: row.id,
     slug: row.slug,
-    title: row.title,
+    title,
     medium: row.medium,
     year: row.year,
     country: row.country,
-    description: row.description,
+    description,
     imageUrl: row.image_url,
     artistId: row.artist_id,
     artistSlug: row.artist_id,
     artistName: profile?.display_name?.trim() || "Artist",
     artistCountry: profile?.country ?? row.country ?? null,
     artistCity: null,
-    artistBio: profile?.bio ?? null,
+    artistBio: (profile && localized(profile.translations, "bio", lang, profile.bio)) ?? null,
     artistAvatarUrl: profile?.avatar_url ?? null,
     artistTechnique: null,
   };
@@ -112,7 +127,7 @@ function toArtwork(
  * artworks.artist_id → profiles (account artists)
  * artworks.managed_artist_id → managed_artists (admin-represented, no login)
  */
-async function attachArtistMeta(rows: ArtworkRow[]): Promise<SupabaseArtwork[]> {
+async function attachArtistMeta(rows: ArtworkRow[], lang: Language): Promise<SupabaseArtwork[]> {
   if (rows.length === 0) return [];
 
   const accountIds = Array.from(
@@ -124,12 +139,12 @@ async function attachArtistMeta(rows: ArtworkRow[]): Promise<SupabaseArtwork[]> 
 
   const [profileRes, managedRes] = await Promise.all([
     accountIds.length
-      ? supabase.from("profiles").select("id, display_name, bio, country, avatar_url").in("id", accountIds)
+      ? supabase.from("profiles").select(PROFILE_SELECT).in("id", accountIds)
       : Promise.resolve({ data: [] as ProfileRow[] }),
     managedIds.length
       ? supabase
           .from("managed_artists")
-          .select("id, slug, display_name, bio, country, city, technique, avatar_url")
+          .select(MANAGED_SELECT)
           .in("id", managedIds)
       : Promise.resolve({ data: [] as ManagedArtistRow[] }),
   ]);
@@ -142,12 +157,13 @@ async function attachArtistMeta(rows: ArtworkRow[]): Promise<SupabaseArtwork[]> 
       r,
       r.managed_artist_id ? undefined : profileById.get(r.artist_id),
       r.managed_artist_id ? managedById.get(r.managed_artist_id) : undefined,
+      lang,
     ),
   );
 }
 
 /** Returns [] when Supabase isn't configured or has no published artworks yet. */
-export async function getPublishedArtworks(): Promise<SupabaseArtwork[]> {
+export async function getPublishedArtworks(lang: Language = "en"): Promise<SupabaseArtwork[]> {
   if (!isSupabaseConfigured()) return [];
   try {
     const { data, error } = await supabase
@@ -160,14 +176,14 @@ export async function getPublishedArtworks(): Promise<SupabaseArtwork[]> {
       if (error) console.error("[Supabase] Failed to fetch published artworks:", error.message);
       return [];
     }
-    return attachArtistMeta(data as ArtworkRow[]);
+    return attachArtistMeta(data as ArtworkRow[], lang);
   } catch (err) {
     console.error("[Supabase] Failed to fetch published artworks:", err);
     return [];
   }
 }
 
-export async function getPublishedArtworksByIds(ids: string[]): Promise<SupabaseArtwork[]> {
+export async function getPublishedArtworksByIds(ids: string[], lang: Language = "en"): Promise<SupabaseArtwork[]> {
   if (!isSupabaseConfigured() || ids.length === 0) return [];
   try {
     const { data, error } = await supabase
@@ -180,14 +196,14 @@ export async function getPublishedArtworksByIds(ids: string[]): Promise<Supabase
       if (error) console.error("[Supabase] Failed to fetch artworks by ids:", error.message);
       return [];
     }
-    return attachArtistMeta(data as ArtworkRow[]);
+    return attachArtistMeta(data as ArtworkRow[], lang);
   } catch (err) {
     console.error("[Supabase] Failed to fetch artworks by ids:", err);
     return [];
   }
 }
 
-export async function getMostRequestedArtworks(limit = 6): Promise<SupabaseArtwork[]> {
+export async function getMostRequestedArtworks(limit = 6, lang: Language = "en"): Promise<SupabaseArtwork[]> {
   if (!isSupabaseConfigured()) return [];
   try {
     const { data: ranked, error: rpcError } = await supabase.rpc("get_top_requested_artwork_slugs", {
@@ -212,14 +228,14 @@ export async function getMostRequestedArtworks(limit = 6): Promise<SupabaseArtwo
 
     const bySlug = new Map((data as ArtworkRow[]).map((row) => [row.slug, row]));
     const orderedRows = slugs.map((s) => bySlug.get(s)).filter((row): row is ArtworkRow => Boolean(row));
-    return attachArtistMeta(orderedRows);
+    return attachArtistMeta(orderedRows, lang);
   } catch (err) {
     console.error("[Supabase] Failed to fetch requested artworks:", err);
     return [];
   }
 }
 
-export async function getPublishedArtworkBySlug(slug: string): Promise<SupabaseArtwork | null> {
+export async function getPublishedArtworkBySlug(slug: string, lang: Language = "en"): Promise<SupabaseArtwork | null> {
   if (!isSupabaseConfigured()) return null;
   try {
     const { data, error } = await supabase
@@ -230,7 +246,7 @@ export async function getPublishedArtworkBySlug(slug: string): Promise<SupabaseA
       .maybeSingle();
 
     if (error || !data) return null;
-    const [artwork] = await attachArtistMeta([data as ArtworkRow]);
+    const [artwork] = await attachArtistMeta([data as ArtworkRow], lang);
     return artwork ?? null;
   } catch (err) {
     console.error("[Supabase] Failed to fetch artwork by slug:", err);
@@ -283,10 +299,10 @@ function artistFromWorks(works: SupabaseArtwork[]): Artist {
  * `Artist` shape used by the directory. Also includes managed profiles that
  * have no published works yet so admins can preview the public page.
  */
-export async function getRealArtists(): Promise<Artist[]> {
+export async function getRealArtists(lang: Language = "en"): Promise<Artist[]> {
   if (!isSupabaseConfigured()) return [];
 
-  const artworks = await getPublishedArtworks();
+  const artworks = await getPublishedArtworks(lang);
   const bySlug = new Map<string, SupabaseArtwork[]>();
   for (const a of artworks) {
     const list = bySlug.get(a.artistSlug) ?? [];
@@ -300,7 +316,7 @@ export async function getRealArtists(): Promise<Artist[]> {
   try {
     const { data: managedRows } = await supabase
       .from("managed_artists")
-      .select("id, slug, display_name, bio, country, city, technique, avatar_url")
+      .select(MANAGED_SELECT)
       .order("created_at", { ascending: false });
 
     for (const m of (managedRows ?? []) as ManagedArtistRow[]) {
@@ -319,7 +335,7 @@ export async function getRealArtists(): Promise<Artist[]> {
         worksCount: 0,
         newDiscovery: true,
         featuredWork: "",
-        bio: m.bio ?? "",
+        bio: localized(m.translations, "bio", lang, m.bio) ?? "",
         image: m.avatar_url ?? "",
       });
     }

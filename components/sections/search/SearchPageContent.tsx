@@ -1,13 +1,13 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/i18n/Link";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import type { Artist } from "@/lib/data/artists";
-import { AFRICAN_COUNTRIES } from "@/lib/data/africa";
+import { AFRICAN_COUNTRIES, getCountryDisplayName } from "@/lib/data/africa";
 import type { DirectoryArtwork } from "@/lib/data/directory";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage, useRouter } from "@/lib/i18n";
 
 type Props = {
   artists: Artist[];
@@ -15,7 +15,7 @@ type Props = {
 };
 
 function SearchPageInner({ artists, artworks }: Props) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialQ = searchParams.get("q") ?? "";
@@ -44,7 +44,9 @@ function SearchPageInner({ artists, artworks }: Props) {
 
   const countryResults = useMemo(() => {
     if (!needle) return [];
-    return AFRICAN_COUNTRIES.filter((c) => c.name.toLowerCase().includes(needle)).slice(0, 8);
+    return AFRICAN_COUNTRIES.filter(
+      (c) => c.name.toLowerCase().includes(needle) || getCountryDisplayName(c, language).toLowerCase().includes(needle),
+    ).slice(0, 8);
   }, [needle]);
 
   const artworkResults = useMemo(() => {
@@ -84,7 +86,9 @@ function SearchPageInner({ artists, artworks }: Props) {
         </div>
         {needle && (
           <p className="font-label-caps text-[11px] uppercase tracking-widest text-on-surface-variant mt-4">
-            {totalCount} {totalCount === 1 ? t("result") : t("results")} {t("for")} &ldquo;{query}&rdquo;
+            {totalCount === 1
+              ? t("1 result for “{query}”", { query })
+              : t("{count} results for “{query}”", { count: totalCount, query })}
           </p>
         )}
       </header>
@@ -92,7 +96,7 @@ function SearchPageInner({ artists, artworks }: Props) {
       {!needle ? (
         <p className="text-on-surface-variant">{t("Start typing to search across artists, countries, and artworks.")}</p>
       ) : totalCount === 0 ? (
-        <p className="text-on-surface-variant">{t("No results for")} &ldquo;{query}&rdquo;. {t("Try a different term.")}</p>
+        <p className="text-on-surface-variant">{t("No results for “{query}”.", { query })} {t("Try a different term.")}</p>
       ) : (
         <div className="space-y-16">
           {artistResults.length > 0 && (
@@ -140,7 +144,7 @@ function SearchPageInner({ artists, artworks }: Props) {
                     className="flex items-center gap-3 p-4 border border-outline-variant hover:border-secondary transition-colors"
                   >
                     <span className="text-2xl">{c.flag}</span>
-                    <span className="font-label-caps text-[11px] uppercase tracking-widest">{c.name}</span>
+                    <span className="font-label-caps text-[11px] uppercase tracking-widest">{getCountryDisplayName(c, language)}</span>
                   </Link>
                 ))}
               </div>

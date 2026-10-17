@@ -1,11 +1,22 @@
-import Link from "next/link";
+import Link from "@/components/i18n/Link";
 import Image from "next/image";
 import type { JournalArticleData } from "@/lib/data/journal-article";
 import { ShareLinks } from "@/components/journal/ShareLinks";
+import { getT } from "@/lib/i18n/server";
+import type { Language } from "@/lib/i18n/config";
 
 /** The full magazine-style article layout — sticky sidebar, drop-cap lead, quote rail — shared by
  * the /journal/[slug] detail page and the pinned "main story" on /journal itself. */
-export function JournalArticle({ post, showBackLink = true }: { post: JournalArticleData; showBackLink?: boolean }) {
+export async function JournalArticle({
+  post,
+  lang,
+  showBackLink = true,
+}: {
+  post: JournalArticleData;
+  lang: Language;
+  showBackLink?: boolean;
+}) {
+  const t = await getT(lang);
   const [lead, ...rest] = post.paragraphs;
 
   return (
@@ -19,22 +30,22 @@ export function JournalArticle({ post, showBackLink = true }: { post: JournalArt
                 className="font-label-caps text-label-caps uppercase tracking-widest text-on-surface-variant hover:text-secondary transition-colors inline-flex items-center gap-2 mb-12"
               >
                 <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-                Journal
+                {t("Journal")}
               </Link>
             </div>
           )}
           {post.read && (
             <div>
-              <h4 className="font-label-caps text-label-caps uppercase text-secondary mb-4">Read Time</h4>
+              <h4 className="font-label-caps text-label-caps uppercase text-secondary mb-4">{t("Read Time")}</h4>
               <p className="font-body-md text-body-md">{post.read}</p>
             </div>
           )}
           <div>
-            <h4 className="font-label-caps text-label-caps uppercase text-secondary mb-4">Topic</h4>
+            <h4 className="font-label-caps text-label-caps uppercase text-secondary mb-4">{t("Topic")}</h4>
             <p className="font-body-md text-body-md">{post.tag}</p>
           </div>
           <div>
-            <h4 className="font-label-caps text-label-caps uppercase text-secondary mb-4">Share</h4>
+            <h4 className="font-label-caps text-label-caps uppercase text-secondary mb-4">{t("Share")}</h4>
             <ShareLinks />
           </div>
         </div>

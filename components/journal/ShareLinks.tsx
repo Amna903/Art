@@ -1,10 +1,12 @@
 "use client";
 
+import { useLanguage } from "@/lib/i18n";
 import { useState } from "react";
 
 const LINK_CLASS = "text-left font-body-md text-body-md hover:text-secondary underline decoration-1 underline-offset-4";
 
 export function ShareLinks() {
+  const { t } = useLanguage();
   const [copied, setCopied] = useState(false);
 
   const currentUrl = () => (typeof window !== "undefined" ? window.location.href : "");
@@ -27,10 +29,10 @@ export function ShareLinks() {
         rel="noopener noreferrer"
         className={LINK_CLASS}
       >
-        Instagram
+        {t("Instagram")}
       </a>
       <button onClick={copyLink} className={LINK_CLASS}>
-        {copied ? "Copied!" : "Copy Link"}
+        {copied ? t("Copied!") : t("Copy Link")}
       </button>
     </div>
   );

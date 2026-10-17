@@ -1,11 +1,12 @@
 "use client";
 
+import { useRouter, useLanguage } from "@/lib/i18n";
 import { useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase/client";
 import { pingRevalidate } from "@/lib/utils/revalidate";
+import { savePageBlock } from "@/lib/data/page-block-save";
 
 export function EditableImage({
   page,
@@ -25,12 +26,14 @@ export function EditableImage({
   /** "contain" for marks/logos that shouldn't crop; defaults to "cover" for photo blocks. */
   fit?: "cover" | "contain";
 }) {
+  const { t, language } = useLanguage();
+  const shownAlt = t(alt);
   const { role } = useAuth();
   const isAdmin = role === "admin";
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [draftSrc, setDraftSrc] = useState(src);
-  const [draftAlt, setDraftAlt] = useState(alt);
+  const [draftAlt, setDraftAlt] = useState(shownAlt);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const fitClass = fit === "contain" ? "object-contain" : "object-cover";
@@ -44,10 +47,10 @@ export function EditableImage({
   if (!isAdmin) {
     return useFill ? (
       <div className={`relative ${className ?? ""}`}>
-        <Image fill sizes="100vw" className={fitClass} src={src} alt={alt} />
+        <Image fill sizes="100vw" className={fitClass} src={src} alt={shownAlt} />
       </div>
     ) : (
-      <img className={`${fitClass} ${className ?? ""}`} src={src} alt={alt} />
+      <img className={`${fitClass} ${className ?? ""}`} src={src} alt={shownAlt} />
     );
   }
 
@@ -67,12 +70,14 @@ export function EditableImage({
 
   const save = async () => {
     setSaving(true);
-    await supabase
-      .from("page_blocks")
-      .upsert(
-        { page, block_key: blockKey, value: draftSrc, alt_text: draftAlt },
-        { onConflict: "page,block_key" },
-      );
+    await savePageBlock({
+      page,
+      blockKey,
+      lang: language,
+      value: draftSrc,
+      altText: draftAlt,
+      englishFallback: { value: src, altText: alt },
+    });
     await pingRevalidate("page-blocks", { page });
     setSaving(false);
     setEditing(false);
@@ -95,16 +100,16 @@ export function EditableImage({
               className="sr-only"
               onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])}
             />
-            {uploading ? "Uploading…" : "Upload image"}
+            {uploading ? t("Uploading…") : t("Upload image")}
           </label>
           <input
-            placeholder="…or paste an image URL"
+            placeholder={t("…or paste an image URL")}
             value={draftSrc}
             onChange={(e) => setDraftSrc(e.target.value)}
             className="w-full bg-white/10 border border-white/30 text-white placeholder-white/50 text-xs p-2"
           />
           <input
-            placeholder="Alt text"
+            placeholder={t("Alt text")}
             value={draftAlt}
             onChange={(e) => setDraftAlt(e.target.value)}
             className="w-full bg-white/10 border border-white/30 text-white placeholder-white/50 text-xs p-2"
@@ -115,17 +120,17 @@ export function EditableImage({
               disabled={saving}
               className="text-[10px] uppercase tracking-widest bg-secondary text-on-primary px-3 py-1.5 disabled:opacity-60"
             >
-              {saving ? "Saving…" : "Save"}
+              {saving ? t("Saving…") : t("Save")}
             </button>
             <button
               onClick={() => {
                 setDraftSrc(src);
-                setDraftAlt(alt);
+                setDraftAlt(shownAlt);
                 setEditing(false);
               }}
               className="text-[10px] uppercase tracking-widest border border-white/40 text-white px-3 py-1.5"
             >
-              Cancel
+              {t("Cancel")}
             </button>
           </div>
         </div>
@@ -136,13 +141,13 @@ export function EditableImage({
   return (
     <div className={`relative group/edit ${className ?? ""}`}>
       {useFill ? (
-        <Image fill sizes="100vw" className={fitClass} src={src} alt={alt} />
+        <Image fill sizes="100vw" className={fitClass} src={src} alt={shownAlt} />
       ) : (
-        <img className={`w-full h-full ${fitClass}`} src={src} alt={alt} />
+        <img className={`w-full h-full ${fitClass}`} src={src} alt={shownAlt} />
       )}
       <button
         onClick={() => setEditing(true)}
-        title="Edit image"
+        title={t("Edit image")}
         className="absolute top-2 right-2 opacity-0 group-hover/edit:opacity-100 transition-opacity bg-secondary text-on-primary w-8 h-8 flex items-center justify-center text-sm rounded-full shadow-lg z-[60]"
       >
         ✎

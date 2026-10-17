@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/lib/i18n";
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { PriceUponRequest } from "@/components/enquiry/PriceUponRequest";
@@ -20,6 +21,7 @@ export type CuratedWork = {
 const PAGE_SIZE = 6;
 
 export function CuratedWorksGrid({ works }: { works: CuratedWork[] }) {
+  const { t } = useLanguage();
   const [medium, setMedium] = useState("All");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
@@ -54,14 +56,14 @@ export function CuratedWorksGrid({ works }: { works: CuratedWork[] }) {
                   : "border-outline/30 text-on-surface-variant hover:border-primary hover:text-primary"
               }`}
             >
-              {m}
+              {t(m)}
             </button>
           ))}
         </div>
       )}
 
       {filtered.length === 0 ? (
-        <p className="text-on-surface-variant py-12 text-center">No works found for this medium yet.</p>
+        <p className="text-on-surface-variant py-12 text-center">{t("No works found for this medium yet.")}</p>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
@@ -73,14 +75,14 @@ export function CuratedWorksGrid({ works }: { works: CuratedWork[] }) {
                 >
                   <Image
                     src={w.image}
-                    alt={`${w.title} by ${w.artist}`}
+                    alt={t("{title} by {artist}", { title: w.title, artist: w.artist })}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="object-cover mix-blend-multiply opacity-95 transition-transform duration-700 group-hover:scale-[1.04]"
                   />
                   {w.price !== null && (
                     <span className="absolute top-4 left-4 bg-beige text-primary px-3 py-1 font-label-caps tracking-widest text-[10px]">
-                      AVAILABLE
+                      {t("AVAILABLE")}
                     </span>
                   )}
                 </div>
@@ -91,7 +93,7 @@ export function CuratedWorksGrid({ works }: { works: CuratedWork[] }) {
                   {w.title}
                 </h3>
                 <p className="text-sm text-on-surface-variant italic mt-1">
-                  {w.technique} · {w.dimensions}
+                  {t(w.technique)} · {w.dimensions}
                 </p>
                 <div className="mt-4 flex items-center justify-between">
                   {w.price !== null ? (
@@ -104,12 +106,12 @@ export function CuratedWorksGrid({ works }: { works: CuratedWork[] }) {
                         artworkImage={w.image}
                         className="font-label-caps tracking-widest text-primary border-b border-primary hover:text-secondary hover:border-secondary transition-colors"
                       >
-                        REQUEST PRICE →
+                        {t("REQUEST PRICE →")}
                       </RequestPriceButton>
                     </>
                   ) : (
                     <span className="font-label-caps tracking-widest text-on-surface-variant">
-                      Exhibition only
+                      {t("Exhibition only")}
                     </span>
                   )}
                 </div>
@@ -123,7 +125,7 @@ export function CuratedWorksGrid({ works }: { works: CuratedWork[] }) {
                 onClick={() => setVisibleCount((v) => v + PAGE_SIZE)}
                 className="bg-primary text-beige px-10 py-4 font-label-caps tracking-widest hover:bg-red-blood transition-colors"
               >
-                LOAD MORE ({filtered.length - visibleCount} remaining)
+                {t("LOAD MORE ({count} remaining)", { count: filtered.length - visibleCount })}
               </button>
             </div>
           )}

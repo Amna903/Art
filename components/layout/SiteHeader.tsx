@@ -1,11 +1,10 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/i18n/Link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage, useRouter, useUnlocalizedPathname } from "@/lib/i18n";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
@@ -29,7 +28,7 @@ function useScrolled(threshold = 24) {
 }
 
 export function SiteHeader() {
-  const pathname = usePathname();
+  const pathname = useUnlocalizedPathname();
   const { user, role, signOut } = useAuth();
   const { t } = useLanguage();
   const router = useRouter();
@@ -140,7 +139,7 @@ export function SiteHeader() {
                     </Link>
                   ) : role ? (
                     <span className="font-label-caps text-[9px] uppercase tracking-widest text-on-surface-variant">
-                      {role}
+                      {t(role)}
                     </span>
                   ) : null}
                 </div>
@@ -168,7 +167,7 @@ export function SiteHeader() {
                 setSearchOpen(false);
                 setMobileOpen((v) => !v);
               }}
-              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+              aria-label={mobileOpen ? t("Close menu") : t("Open menu")}
               aria-expanded={mobileOpen}
               className="material-symbols-outlined w-10 h-10 flex items-center justify-center text-on-surface hover:text-secondary transition-colors"
             >
@@ -260,7 +259,7 @@ export function SiteHeader() {
                       </Link>
                     ) : role ? (
                       <span className="min-h-[36px] flex items-center pl-4 font-label-caps text-[10px] uppercase tracking-widest text-on-surface-variant">
-                        {role}
+                        {t(role)}
                       </span>
                     ) : null}
                   </div>

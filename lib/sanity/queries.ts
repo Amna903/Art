@@ -323,10 +323,14 @@ export async function getCountryGalleryBySlug(countrySlug: string): Promise<Coun
     return getCountryGallery(countrySlug);
   }
 
-  const rooms = [
+  const rooms: CountryGallery["rooms"] = [
     { title: "Featured Artist Room", subtitle: artists[0]?.name ?? country.capital },
-    { title: "Emerging Artists Room", subtitle: `${Math.max(0, artists.length - 1)} voices from ${country.capital}` },
-    { title: "Available Works Room", subtitle: `${artworks.length} works drawn from Sanity` },
+    {
+      title: "Emerging Artists Room",
+      subtitle: "{count} voices from {capital}",
+      vars: { count: Math.max(0, artists.length - 1), capital: country.capital },
+    },
+    { title: "Available Works Room", subtitle: "{count} works drawn from Sanity", vars: { count: artworks.length } },
   ];
 
   return {

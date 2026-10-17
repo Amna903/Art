@@ -1,7 +1,8 @@
 "use client";
 
+import { useLanguage } from "@/lib/i18n";
 import { useCallback, useEffect, useState, useRef } from "react";
-import { AFRICAN_COUNTRIES, type Country } from "@/lib/data/africa";
+import { AFRICAN_COUNTRIES, getCountryDisplayName, regionLabel, type Country } from "@/lib/data/africa";
 import {
   listCountrySounds,
   uploadCountrySound,
@@ -52,6 +53,7 @@ function getAudioDuration(file: File): Promise<number> {
 }
 
 export function CountrySoundsAdmin() {
+  const { t, language, formatNumber } = useLanguage();
   const [soundsMap, setSoundsMap] = useState<Record<string, CountrySound>>({});
   const [soundUrls, setSoundUrls] = useState<Record<string, string>>({});
   const [search, setSearch] = useState("");
@@ -93,7 +95,7 @@ export function CountrySoundsAdmin() {
         setSoundUrls(urlMap);
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to load country sounds";
+      const msg = err instanceof Error ? t(err.message) : t("Failed to load country sounds");
       console.error("[CountrySoundsAdmin]", msg);
     } finally {
       setLoading(false);
@@ -140,7 +142,7 @@ export function CountrySoundsAdmin() {
     if (!file) return;
 
     if (file.size > MAX_AUDIO_SIZE_BYTES) {
-      setMessage({ text: "Audio file is too large. Please select a file under 10MB.", type: "error" });
+      setMessage({ text: t("Audio file is too large. Please select a file under 10MB."), type: "error" });
       return;
     }
 
@@ -151,18 +153,24 @@ export function CountrySoundsAdmin() {
       const duration = await getAudioDuration(file);
       if (duration > MAX_AUDIO_DURATION_SECONDS) {
         setMessage({
-          text: `Audio is ${duration.toFixed(1)} seconds. Please upload a sound around ${MAX_AUDIO_DURATION_SECONDS} seconds or shorter.`,
+          text: t("Audio is {duration} seconds. Please upload a sound around {max} seconds or shorter.", {
+            duration: formatNumber(duration, { maximumFractionDigits: 1, minimumFractionDigits: 1 }),
+            max: MAX_AUDIO_DURATION_SECONDS,
+          }),
           type: "error",
         });
         return;
       }
 
       await uploadCountrySound(country.slug, file, `${country.name} Sound`);
-      setMessage({ text: `Characteristic sound for ${country.name} uploaded successfully!`, type: "success" });
+      setMessage({
+        text: t("Characteristic sound for {country} uploaded successfully!", { country: getCountryDisplayName(country, language) }),
+        type: "success",
+      });
       await loadSounds();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Upload failed";
-      setMessage({ text: `Failed to upload: ${msg}`, type: "error" });
+      const msg = err instanceof Error ? t(err.message) : t("Upload failed");
+      setMessage({ text: t("Failed to upload: {message}", { message: msg }), type: "error" });
     } finally {
       setUploadingSlug(null);
     }
@@ -172,20 +180,21 @@ export function CountrySoundsAdmin() {
     const existing = soundsMap[country.slug];
     if (!existing) return;
 
-    if (!confirm(`Remove characteristic sound for ${country.name}?`)) return;
+    if (!confirm(t("Remove characteristic sound for {name}?", { name: getCountryDisplayName(country, language) }))) return;
 
     try {
       await deleteCountrySound(country.slug, existing.audio_url);
-      setMessage({ text: `Sound for ${country.name} removed.`, type: "success" });
+      setMessage({ text: t("Sound for {country} removed.", { country: getCountryDisplayName(country, language) }), type: "success" });
       await loadSounds();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Delete failed";
-      setMessage({ text: `Failed to delete sound: ${msg}`, type: "error" });
+      const msg = err instanceof Error ? t(err.message) : t("Delete failed");
+      setMessage({ text: t("Failed to delete sound: {message}", { message: msg }), type: "error" });
     }
   };
 
   const filteredCountries = AFRICAN_COUNTRIES.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase()) ||
+    getCountryDisplayName(c, language).toLowerCase().includes(search.toLowerCase()) ||
     c.region.toLowerCase().includes(search.toLowerCase()) ||
     c.capital.toLowerCase().includes(search.toLowerCase())
   );
@@ -194,14 +203,14 @@ export function CountrySoundsAdmin() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-primary/10">
         <div>
-          <h2 className="font-display text-xl text-primary">Country Sound Identity</h2>
+          <h2 className="font-display text-xl text-primary">{t("Country Sound Identity")}</h2>
           <p className="text-sm text-on-surface-variant mt-1">
-            Upload characteristic sounds up to 6 seconds for each of the 54 African nations. These sounds play when users hover over countries on the interactive map.
+            {t("Upload characteristic sounds up to 6 seconds for each of the 54 African nations. These sounds play when users hover over countries on the interactive map.")}
           </p>
         </div>
         <input
           type="text"
-          placeholder="Search nation or region…"
+          placeholder={t("Search nation or region…")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="px-3 py-2 bg-transparent border border-primary/20 text-sm text-primary placeholder:text-on-surface-variant/50 focus:outline-none focus:border-secondary w-full md:w-64"
@@ -216,12 +225,12 @@ export function CountrySoundsAdmin() {
               : "bg-rose-950/40 border-rose-500/50 text-rose-300"
           }`}
         >
-          {message.text}
+          {t(message.text)}
         </div>
       )}
 
       {loading ? (
-        <div className="p-8 text-center text-on-surface-variant text-sm">Loading country sound directory…</div>
+        <div className="p-8 text-center text-on-surface-variant text-sm">{t("Loading country sound directory…")}</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredCountries.map((c) => {
@@ -239,7 +248,7 @@ export function CountrySoundsAdmin() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-xl">{c.flag}</span>
-                      <h3 className="font-display text-base text-primary">{c.name}</h3>
+                      <h3 className="font-display text-base text-primary">{getCountryDisplayName(c, language)}</h3>
                     </div>
                     <span
                       className={`text-[9px] uppercase tracking-widest px-2 py-0.5 border ${
@@ -248,11 +257,11 @@ export function CountrySoundsAdmin() {
                           : "border-primary/20 text-on-surface-variant"
                       }`}
                     >
-                      {hasSound ? "Uploaded" : "Procedural"}
+                      {hasSound ? t("Uploaded") : t("Procedural")}
                     </span>
                   </div>
                   <p className="text-xs text-on-surface-variant mt-1 line-clamp-1">
-                    {c.capital} · {c.region} Africa
+                    {c.capital} · {regionLabel(c.region, t)}
                   </p>
                 </div>
 
@@ -266,11 +275,11 @@ export function CountrySoundsAdmin() {
                       <span className="material-symbols-outlined text-[16px]">
                         {isPlaying ? "pause_circle" : "play_circle"}
                       </span>
-                      {isPlaying ? "Playing…" : "Preview"}
+                      {isPlaying ? t("Playing…") : t("Preview")}
                     </button>
                   ) : (
                     <span className="text-[10px] uppercase tracking-widest text-on-surface-variant">
-                      No custom audio
+                      {t("No custom audio")}
                     </span>
                   )}
 
@@ -283,7 +292,7 @@ export function CountrySoundsAdmin() {
                       }`}
                     >
                       <span className="material-symbols-outlined text-[14px]">upload_file</span>
-                      {isUploading ? "Uploading…" : hasSound ? "Replace" : "Upload Sound"}
+                      {isUploading ? t("Uploading…") : hasSound ? t("Replace") : t("Upload Sound")}
                       <input
                         type="file"
                         accept="audio/*"
@@ -300,7 +309,7 @@ export function CountrySoundsAdmin() {
                         type="button"
                         onClick={() => handleDelete(c)}
                         className="p-1.5 text-on-surface-variant hover:text-rose-400 border border-primary/10 hover:border-rose-400/40"
-                        title="Delete Sound"
+                        title={t("Delete Sound")}
                       >
                         <span className="material-symbols-outlined text-[14px]">delete</span>
                       </button>

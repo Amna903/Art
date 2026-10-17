@@ -1,7 +1,7 @@
 "use client";
 
+import { useRouter, useLanguage } from "@/lib/i18n";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/types";
 import { pingRevalidate } from "@/lib/utils/revalidate";
@@ -26,6 +26,7 @@ type ProfileRow = {
 type Artwork = Database["public"]["Tables"]["artworks"]["Row"];
 
 export function AdminDashboard() {
+  const { t, formatShortDate, formatUsd } = useLanguage();
   const router = useRouter();
   const { user } = useAuth();
   const [profiles, setProfiles] = useState<ProfileRow[]>([]);
@@ -90,7 +91,7 @@ export function AdminDashboard() {
   };
 
   const deleteUser = async (userId: string, displayName: string) => {
-    if (!confirm(`Permanently delete ${displayName || "this user"}? This cannot be undone.`)) return;
+    if (!confirm(t("Permanently delete {value}? This cannot be undone.", { value: displayName || "this user" }))) return;
     const {
       data: { session },
     } = await supabase.auth.getSession();
@@ -102,7 +103,7 @@ export function AdminDashboard() {
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      alert(body.error || "Failed to delete user.");
+      alert(body.error ? t(body.error) : t("Failed to delete user."));
       return;
     }
     load();
@@ -119,9 +120,9 @@ export function AdminDashboard() {
   return (
     <div className="space-y-12">
       <section className="grid grid-cols-2 md:grid-cols-3 gap-6">
-        <Stat label="Members" value={profiles.length} />
-        <Stat label="Artworks" value={artworks.length} />
-        <Stat label="Enquiries" value={enquiryCount} />
+        <Stat label={t("Members")} value={profiles.length} />
+        <Stat label={t("Artworks")} value={artworks.length} />
+        <Stat label={t("Enquiries")} value={enquiryCount} />
       </section>
 
       <nav className="flex gap-8 border-b border-primary/10 overflow-x-auto">
@@ -135,16 +136,16 @@ export function AdminDashboard() {
             "enquiries",
             "country sounds",
           ] as const
-        ).map((t) => (
+        ).map((name) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={name}
+            onClick={() => setTab(name)}
             className={
               "py-3 text-xs uppercase tracking-[0.2em] whitespace-nowrap " +
-              (tab === t ? "text-secondary border-b border-secondary -mb-px" : "text-on-surface-variant")
+              (tab === name ? "text-secondary border-b border-secondary -mb-px" : "text-on-surface-variant")
             }
           >
-            {t}
+            {t(name)}
           </button>
         ))}
       </nav>
@@ -160,11 +161,11 @@ export function AdminDashboard() {
           <table className="w-full text-sm">
             <thead className="text-xs uppercase tracking-widest text-on-surface-variant">
               <tr className="border-b border-primary/10">
-                <th className="text-left py-3">Member</th>
-                <th className="text-left py-3">Country</th>
-                <th className="text-left py-3">Roles</th>
-                <th className="text-left py-3">Joined</th>
-                <th className="text-right py-3">Actions</th>
+                <th className="text-left py-3">{t("Member")}</th>
+                <th className="text-left py-3">{t("Country")}</th>
+                <th className="text-left py-3">{t("Roles")}</th>
+                <th className="text-left py-3">{t("Joined")}</th>
+                <th className="text-right py-3">{t("Actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -181,14 +182,14 @@ export function AdminDashboard() {
                             key={r}
                             onClick={() => revokeRole(p.id, r)}
                             className="text-[10px] uppercase tracking-widest px-2 py-1 border border-secondary/40 text-secondary hover:bg-secondary/10"
-                            title="Click to revoke"
+                            title={t("Click to revoke")}
                           >
                             {r} ✕
                           </button>
                         ))}
                       </div>
                     </td>
-                    <td className="py-3 text-on-surface-variant">{new Date(p.created_at).toLocaleDateString()}</td>
+                    <td className="py-3 text-on-surface-variant">{formatShortDate(p.created_at)}</td>
                     <td className="py-3 text-right">
                       <div className="flex gap-2 justify-end flex-wrap">
                         {(["admin", "artist", "client"] as AppRole[])
@@ -207,7 +208,7 @@ export function AdminDashboard() {
                           onClick={() => deleteUser(p.id, p.display_name)}
                           className="text-[10px] uppercase tracking-widest px-2 py-1 border border-secondary text-secondary hover:bg-secondary hover:text-on-primary"
                         >
-                          Delete
+                          {t("Delete")}
                         </button>
                       </div>
                     </td>
@@ -222,11 +223,11 @@ export function AdminDashboard() {
           <table className="w-full text-sm">
             <thead className="text-xs uppercase tracking-widest text-on-surface-variant">
               <tr className="border-b border-primary/10">
-                <th className="text-left py-3">Title</th>
-                <th className="text-left py-3">Country</th>
-                <th className="text-left py-3">Price</th>
-                <th className="text-left py-3">Status</th>
-                <th className="text-right py-3">Moderation</th>
+                <th className="text-left py-3">{t("Title")}</th>
+                <th className="text-left py-3">{t("Country")}</th>
+                <th className="text-left py-3">{t("Price")}</th>
+                <th className="text-left py-3">{t("Status")}</th>
+                <th className="text-right py-3">{t("Moderation")}</th>
               </tr>
             </thead>
             <tbody>
@@ -235,7 +236,7 @@ export function AdminDashboard() {
                   <td className="py-3 text-primary">{a.title}</td>
                   <td className="py-3 text-on-surface-variant">{a.country ?? "—"}</td>
                   <td className="py-3 text-on-surface-variant">
-                    {Number(a.price_usd) > 0 ? `$${Number(a.price_usd).toLocaleString()}` : "—"}
+                    {Number(a.price_usd) > 0 ? formatUsd(Number(a.price_usd)) : "—"}
                   </td>
                   <td className="py-3 uppercase tracking-widest text-xs text-secondary">{a.status}</td>
                   <td className="py-3 text-right">
@@ -244,12 +245,12 @@ export function AdminDashboard() {
                       onChange={(e) => setArtworkStatus(a.id, e.target.value as Artwork["status"])}
                       className="bg-transparent border border-primary/20 text-xs px-2 py-1"
                     >
-                      <option value="draft">draft</option>
-                      <option value="pending_review">pending review</option>
-                      <option value="blocked">blocked</option>
-                      <option value="published">published</option>
-                      <option value="sold">sold</option>
-                      <option value="archived">archived</option>
+                      <option value="draft">{t("Draft")}</option>
+                      <option value="pending_review">{t("Pending review")}</option>
+                      <option value="blocked">{t("Blocked")}</option>
+                      <option value="published">{t("Published")}</option>
+                      <option value="sold">{t("Sold")}</option>
+                      <option value="archived">{t("Archived")}</option>
                     </select>
                   </td>
                 </tr>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/types";
@@ -11,9 +12,17 @@ type EnquiryStatus = Enquiry["status"];
 const STATUSES: EnquiryStatus[] = ["new", "contacted", "quoted", "closed"] as EnquiryStatus[];
 
 const FILTERS = ["all", ...STATUSES] as const;
+const STATUS_LABELS: Record<string, string> = {
+  all: "All",
+  new: "New",
+  contacted: "Contacted",
+  quoted: "Quoted",
+  closed: "Closed",
+};
 type Filter = (typeof FILTERS)[number];
 
 export function EnquiriesAdmin() {
+  const { t, formatShortDate, formatUsd } = useLanguage();
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [quoteDrafts, setQuoteDrafts] = useState<Record<string, string>>({});
@@ -44,7 +53,7 @@ export function EnquiriesAdmin() {
     const draft = quoteDrafts[enquiry.id];
     const quotedPrice = Number(draft);
     if (!draft || !(quotedPrice > 0)) {
-      setFeedback((f) => ({ ...f, [enquiry.id]: "Enter a valid price first." }));
+      setFeedback((f) => ({ ...f, [enquiry.id]: t("Enter a valid price first.") }));
       return;
     }
 
@@ -70,11 +79,13 @@ export function EnquiriesAdmin() {
     const body = await res.json().catch(() => ({}));
 
     if (!res.ok) {
-      setFeedback((f) => ({ ...f, [enquiry.id]: body.error || "Failed to send quote." }));
+      setFeedback((f) => ({ ...f, [enquiry.id]: body.error ? t(body.error) : t("Failed to send quote.") }));
     } else {
       setFeedback((f) => ({
         ...f,
-        [enquiry.id]: body.emailSent ? "Quote sent." : `Quote saved — ${body.emailNote || "email not sent"}.`,
+        [enquiry.id]: body.emailSent
+          ? t("Quote sent.")
+          : t("Quote saved — {note}.", { note: body.emailNote ? t(body.emailNote) : t("email not sent") }),
       }));
       load();
     }
@@ -82,7 +93,7 @@ export function EnquiriesAdmin() {
   };
 
   if (loading) return <ListRowSkeleton count={3} />;
-  if (enquiries.length === 0) return <p className="text-on-surface-variant text-sm">No enquiries yet.</p>;
+  if (enquiries.length === 0) return <p className="text-on-surface-variant text-sm">{t("No enquiries yet.")}</p>;
 
   const filtered = filter === "all" ? enquiries : enquiries.filter((e) => e.status === filter);
 
@@ -101,14 +112,14 @@ export function EnquiriesAdmin() {
                   : "border-primary/20 text-on-surface-variant hover:border-primary"
               }`}
             >
-              {f} ({count})
+              {t(STATUS_LABELS[f] ?? f)} ({count})
             </button>
           );
         })}
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-on-surface-variant text-sm">No enquiries match this filter.</p>
+        <p className="text-on-surface-variant text-sm">{t("No enquiries match this filter.")}</p>
       ) : (
         <div className="space-y-4">
           {filtered.map((e) => (
@@ -116,14 +127,14 @@ export function EnquiriesAdmin() {
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <h3 className="font-headline-sm text-headline-sm text-primary">{e.artwork_title}</h3>
-                  {e.artist_name && <p className="text-xs text-on-surface-variant italic">By {e.artist_name}</p>}
+                  {e.artist_name && <p className="text-xs text-on-surface-variant italic">{t("By")}{" "}{e.artist_name}</p>}
                   <p className="text-sm text-on-surface mt-1">
                     {e.name} · <a href={`mailto:${e.email}`} className="text-secondary hover:underline">{e.email}</a>
                   </p>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   <span className="text-xs text-on-surface-variant">
-                    {new Date(e.created_at).toLocaleDateString()}
+                    {formatShortDate(e.created_at)}
                   </span>
                   <select
                     value={e.status}
@@ -132,7 +143,7 @@ export function EnquiriesAdmin() {
                   >
                     {STATUSES.map((s) => (
                       <option key={s} value={s}>
-                        {s}
+                        {t(STATUS_LABELS[s] ?? s)}
                       </option>
                     ))}
                   </select>
@@ -148,13 +159,13 @@ export function EnquiriesAdmin() {
               <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-primary/5">
                 {e.quoted_price != null && (
                   <span className="text-xs uppercase tracking-widest text-secondary">
-                    Quoted: ${Number(e.quoted_price).toLocaleString()}
+                    {t("Quoted: {price}", { price: formatUsd(Number(e.quoted_price)) })}
                   </span>
                 )}
                 <input
                   type="number"
                   min={1}
-                  placeholder="Quote price (USD)"
+                  placeholder={t("Quote price (USD)")}
                   value={quoteDrafts[e.id] ?? ""}
                   onChange={(ev) => setQuoteDrafts((d) => ({ ...d, [e.id]: ev.target.value }))}
                   className="bg-transparent border-b border-primary/30 text-sm px-2 py-1 w-40"
@@ -164,7 +175,7 @@ export function EnquiriesAdmin() {
                   disabled={sendingId === e.id}
                   className="bg-primary text-on-primary px-4 py-2 text-xs uppercase tracking-[0.2em] disabled:opacity-50"
                 >
-                  {sendingId === e.id ? "Sending…" : e.quoted_price != null ? "Resend Quote" : "Send Quote"}
+                  {sendingId === e.id ? t("Sending…") : e.quoted_price != null ? t("Resend Quote") : t("Send Quote")}
                 </button>
                 {feedback[e.id] && (
                   <span className="text-xs text-on-surface-variant">{feedback[e.id]}</span>

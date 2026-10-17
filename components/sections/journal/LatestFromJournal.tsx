@@ -2,11 +2,15 @@ import { getJournalPosts } from "@/lib/sanity/queries";
 import { getPublishedJournalPosts } from "@/lib/data/journal";
 import { JOURNAL_FALLBACK_STORIES } from "@/lib/data/journal-fallback";
 import { JournalGrid } from "@/components/editing/JournalGrid";
+import { getT } from "@/lib/i18n/server";
+import type { Language } from "@/lib/i18n/config";
+import { formatDate } from "@/lib/i18n/translate";
 
 const FALLBACK_IMAGE = "https://nu-artcollective.lovable.app/__l5e/assets-v1/0622c489-71d0-4a78-a45d-29fb5bb45e68/afr-charcoal.jpg";
 
 /** The "Latest from the Journal" grid + category tabs — shared by the /journal listing page and each post's detail page. */
-export async function LatestFromJournal({ excludeSlug }: { excludeSlug?: string }) {
+export async function LatestFromJournal({ excludeSlug, lang }: { excludeSlug?: string; lang: Language }) {
+  const t = await getT(lang);
   const [supaPosts, cmsPosts] = await Promise.all([getPublishedJournalPosts(), getJournalPosts()]);
 
   const fallbackItems =
@@ -14,9 +18,7 @@ export async function LatestFromJournal({ excludeSlug }: { excludeSlug?: string 
       ? cmsPosts.map((p) => ({
           slug: p.slug,
           tag: p.tag ?? "Journal",
-          date: p.publishedAt
-            ? new Date(p.publishedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
-            : "",
+          date: p.publishedAt ? formatDate(p.publishedAt, lang) : "",
           read: p.readMinutes ? `${p.readMinutes} Min Read` : "",
           title: p.title,
           body: p.excerpt ?? "",
@@ -34,22 +36,22 @@ export async function LatestFromJournal({ excludeSlug }: { excludeSlug?: string 
     <section className="px-gutter-page max-w-container-max mx-auto mb-section-gap">
       <div className="flex justify-between items-end mb-16">
         <div>
-          <h2 className="font-headline-md text-headline-md mb-4">Latest from the Journal</h2>
+          <h2 className="font-headline-md text-headline-md mb-4">{t("Latest from the Journal")}</h2>
           <div className="flex gap-8 border-b border-outline-variant pb-2">
-            <button className="font-label-caps text-label-caps uppercase text-secondary">All Stories</button>
+            <button className="font-label-caps text-label-caps uppercase text-secondary">{t("All Stories")}</button>
             <button className="font-label-caps text-label-caps uppercase text-on-surface-variant hover:text-primary transition-colors">
-              Artist Stories
+              {t("Artist Stories")}
             </button>
             <button className="font-label-caps text-label-caps uppercase text-on-surface-variant hover:text-primary transition-colors">
-              Curator Notes
+              {t("Curator Notes")}
             </button>
             <button className="font-label-caps text-label-caps uppercase text-on-surface-variant hover:text-primary transition-colors">
-              Market Analysis
+              {t("Market Analysis")}
             </button>
           </div>
         </div>
         <a className="hidden md:flex items-center gap-2 font-navigation text-navigation uppercase group" href="#">
-          View Archive
+          {t("View Archive")}
           <span className="material-symbols-outlined group-hover:translate-x-2 transition-transform">arrow_forward</span>
         </a>
       </div>

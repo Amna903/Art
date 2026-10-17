@@ -1,7 +1,7 @@
 "use client";
 
+import { useRouter, useLanguage } from "@/lib/i18n";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 import { isArtistFollowed, followArtist, unfollowArtist } from "@/lib/data/followed-artists";
@@ -23,6 +23,7 @@ export function SaveArtistButton({
   countryName,
   className,
 }: Props) {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const router = useRouter();
   const [saved, setSaved] = useState(false);
@@ -56,7 +57,11 @@ export function SaveArtistButton({
       : unfollowArtist(user?.id, artistSlug));
 
     setBusy(false);
-    toast(next ? `Saved ${artistName} to your collection` : `Removed ${artistName} from your collection`);
+    toast(
+      next
+        ? t("Saved {name} to your collection", { name: artistName })
+        : t("Removed {name} from your collection", { name: artistName }),
+    );
   };
 
   return (
@@ -65,7 +70,7 @@ export function SaveArtistButton({
       onClick={toggleSave}
       disabled={busy}
       aria-pressed={saved}
-      aria-label={saved ? "Remove artist from bookmark" : "Bookmark artist"}
+      aria-label={saved ? t("Remove artist from bookmark") : t("Bookmark artist")}
       className={
         className ??
         "group flex items-center justify-center size-14 rounded-xl border-2 border-tertiary/20 hover:border-secondary-container transition-all"

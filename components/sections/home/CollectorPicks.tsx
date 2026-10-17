@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/i18n/Link";
 import { getArtistSlugByName } from "@/lib/data/artists";
 import { EnquiryModal } from "@/components/enquiry/EnquiryModal";
 import { useLanguage } from "@/lib/i18n";
@@ -29,10 +29,7 @@ export function CollectorPicks({ picks }: CollectorPicksProps) {
         <div className="text-center mb-20">
           <h2 className="font-headline-md text-headline-md mb-4">{t("Collector Picks")}</h2>
           <p className="font-body-md text-on-surface-variant max-w-xl mx-auto">
-            {t(
-              "The most sought-after acquisitions from our global circle of discerning collectors.",
-              "Les acquisitions les plus prisées par notre cercle international de collectionneurs avisés."
-            )}
+            {t("The most sought-after acquisitions from our global circle of discerning collectors.")}
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">

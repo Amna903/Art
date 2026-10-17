@@ -98,7 +98,7 @@ function ShareModal({
         <div className="h-1 w-full bg-gradient-to-r from-[#b85d38] via-[#e58a64] to-[#b85d38]" />
         <button
           onClick={onClose}
-          aria-label="Close modal"
+          aria-label={t("Close modal")}
           className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-[#1c1816] text-[#b5a999] hover:text-[#f4efe6] hover:bg-[#2a2421] border border-[#38302c] flex items-center justify-center transition-all"
         >
           <span className="material-symbols-outlined text-lg">close</span>
@@ -106,7 +106,7 @@ function ShareModal({
 
         <div className="p-6 sm:p-8">
           <span className="text-[9px] font-mono tracking-widest text-[#e58a64] uppercase font-semibold block mb-1">
-            Share
+            {t("Share")}
           </span>
           <h3 className="font-serif text-xl font-medium text-[#f4efe6] leading-tight mb-6">{artworkTitle}</h3>
 
@@ -115,7 +115,7 @@ function ShareModal({
             className="w-full flex items-center gap-3 px-4 py-3 mb-2 bg-[#1c1816] border border-[#38302c] hover:border-[#e58a64] transition-colors text-sm"
           >
             <span className="material-symbols-outlined text-[#e58a64] text-lg">link</span>
-            Copy link
+            {t("Copy link")}
           </button>
 
           {typeof navigator !== "undefined" && "share" in navigator && (
@@ -124,7 +124,7 @@ function ShareModal({
               className="w-full flex items-center gap-3 px-4 py-3 mb-2 bg-[#1c1816] border border-[#38302c] hover:border-[#e58a64] transition-colors text-sm"
             >
               <span className="material-symbols-outlined text-[#e58a64] text-lg">ios_share</span>
-              More options
+              {t("More options")}
             </button>
           )}
 

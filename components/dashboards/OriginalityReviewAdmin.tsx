@@ -1,12 +1,20 @@
 "use client";
 
+import { ARTWORK_STATUS_LABELS } from "@/lib/data/artwork-status";
+import { useRouter, useLanguage } from "@/lib/i18n";
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import type { Database, Json } from "@/lib/supabase/types";
 import { pingRevalidate } from "@/lib/utils/revalidate";
 import { ListRowSkeleton } from "@/components/ui/Skeleton";
+
+const ORIGINALITY_LABELS: Record<string, string> = {
+  unchecked: "Unchecked",
+  clear: "Clear",
+  review: "Needs review",
+  blocked: "Blocked",
+};
 
 type Artwork = Database["public"]["Tables"]["artworks"]["Row"];
 
@@ -27,6 +35,7 @@ function asReport(value: Json | null): Report {
 }
 
 export function OriginalityReviewAdmin() {
+  const { t } = useLanguage();
   const router = useRouter();
   const [items, setItems] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,7 +84,7 @@ export function OriginalityReviewAdmin() {
   if (items.length === 0) {
     return (
       <p className="text-sm text-on-surface-variant">
-        No flagged or uncertain originality matches in the queue.
+        {t("No flagged or uncertain originality matches in the queue.")}
       </p>
     );
   }
@@ -83,8 +92,7 @@ export function OriginalityReviewAdmin() {
   return (
     <section className="space-y-6">
       <p className="text-sm text-on-surface-variant max-w-2xl">
-        Clear matches are blocked automatically. Uncertain matches wait here for a human decision.
-        Public reverse-image search cannot cover every unindexed page or private social post.
+        {t("Clear matches are blocked automatically. Uncertain matches wait here for a human decision. Public reverse-image search cannot cover every unindexed page or private social post.")}
       </p>
 
       <div className="space-y-4">
@@ -107,9 +115,10 @@ export function OriginalityReviewAdmin() {
                   <div>
                     <h3 className="font-headline-sm text-headline-sm text-primary">{a.title}</h3>
                     <p className="text-xs uppercase tracking-widest text-secondary mt-1">
-                      {a.originality_status} · status {a.status}
+                      {t(ORIGINALITY_LABELS[a.originality_status] ?? a.originality_status)} · {t("status")}{" "}
+                      {t(ARTWORK_STATUS_LABELS[a.status] ?? a.status)}
                       {a.originality_score != null
-                        ? ` · score ${(a.originality_score * 100).toFixed(0)}%`
+                        ? ` · ${t("score {percent}%", { percent: (a.originality_score * 100).toFixed(0) })}`
                         : ""}
                     </p>
                   </div>
@@ -121,7 +130,7 @@ export function OriginalityReviewAdmin() {
                       }
                       className="text-[10px] uppercase tracking-widest px-3 py-2 border border-primary/20 hover:border-primary disabled:opacity-50"
                     >
-                      Approve & publish
+                      {t("Approve & publish")}
                     </button>
                     <button
                       disabled={busy}
@@ -130,7 +139,7 @@ export function OriginalityReviewAdmin() {
                       }
                       className="text-[10px] uppercase tracking-widest px-3 py-2 border border-primary/20 hover:border-primary disabled:opacity-50"
                     >
-                      Clear flag
+                      {t("Clear flag")}
                     </button>
                     <button
                       disabled={busy}
@@ -139,7 +148,7 @@ export function OriginalityReviewAdmin() {
                       }
                       className="text-[10px] uppercase tracking-widest px-3 py-2 border border-secondary text-secondary hover:bg-secondary hover:text-on-primary disabled:opacity-50"
                     >
-                      Keep blocked
+                      {t("Keep blocked")}
                     </button>
                   </div>
                 </div>
@@ -165,10 +174,10 @@ export function OriginalityReviewAdmin() {
                             {m.title || m.url}
                           </a>
                         ) : (
-                          <span>{m.title || "Match"}</span>
+                          <span>{m.title || t("Match")}</span>
                         )}
                         <span className="ml-2 text-xs">
-                          {(m.similarity * 100).toFixed(0)}% similar
+                          {t("{percent}% similar", { percent: (m.similarity * 100).toFixed(0) })}
                         </span>
                       </li>
                     ))}

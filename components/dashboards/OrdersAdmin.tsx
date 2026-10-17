@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/types";
@@ -13,6 +14,7 @@ type OrderStatus = Order["status"];
 const STATUSES: OrderStatus[] = ["pending", "paid", "shipped", "completed", "cancelled"] as OrderStatus[];
 
 export function OrdersAdmin() {
+  const { t, formatShortDate, formatUsd } = useLanguage();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,16 +42,16 @@ export function OrdersAdmin() {
       {loading ? (
         <ListRowSkeleton count={4} />
       ) : orders.length === 0 ? (
-        <p className="text-on-surface-variant text-sm">No orders yet.</p>
+        <p className="text-on-surface-variant text-sm">{t("No orders yet.")}</p>
       ) : (
         <table className="w-full text-sm">
           <thead className="text-xs uppercase tracking-widest text-on-surface-variant">
             <tr className="border-b border-primary/10">
-              <th className="text-left py-3">Order</th>
-              <th className="text-left py-3">Items</th>
-              <th className="text-left py-3">Total</th>
-              <th className="text-left py-3">Date</th>
-              <th className="text-right py-3">Status</th>
+              <th className="text-left py-3">{t("Order")}</th>
+              <th className="text-left py-3">{t("Items")}</th>
+              <th className="text-left py-3">{t("Total")}</th>
+              <th className="text-left py-3">{t("Date")}</th>
+              <th className="text-right py-3">{t("Status")}</th>
             </tr>
           </thead>
           <tbody>
@@ -57,9 +59,9 @@ export function OrdersAdmin() {
               <tr key={o.id} className="border-b border-primary/5 align-top">
                 <td className="py-3 text-primary font-mono text-xs">{o.id.slice(0, 8)}…</td>
                 <td className="py-3 text-on-surface-variant">{o.order_items?.length ?? 0}</td>
-                <td className="py-3">${Number(o.total_usd).toLocaleString()}</td>
+                <td className="py-3">{formatUsd(Number(o.total_usd))}</td>
                 <td className="py-3 text-on-surface-variant">
-                  {new Date(o.created_at).toLocaleDateString()}
+                  {formatShortDate(o.created_at)}
                 </td>
                 <td className="py-3 text-right">
                   <select

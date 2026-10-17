@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { submitEnquiry } from "@/lib/data/enquiries";
+import { richText } from "@/lib/i18n/rich";
 import { useLanguage } from "@/lib/i18n";
 
 type Props = {
@@ -119,7 +120,16 @@ export function EnquiryModal({
               </span>
               <h3 className="font-serif text-2xl mb-3 text-[#f4efe6]">{t("Curatorial Request Sent")}</h3>
               <p className="text-[#b5a999] text-sm leading-relaxed max-w-md mx-auto mb-8">
-                Thank you, <strong className="text-[#f4efe6] font-medium">{name}</strong>. A member of our Senior Curatorial Team has received your inquiry for &ldquo;<span className="italic text-[#f4efe6]">{artworkTitle}</span>&rdquo; and will respond directly to <span className="text-[#e58a64] underline">{email}</span> within 24 business hours with pricing, provenance, and private acquisition details.
+                {richText(
+                  t(
+                    "Thank you, {name}. A member of our Senior Curatorial Team has received your inquiry for “{title}” and will respond directly to {email} within 24 business hours with pricing, provenance, and private acquisition details.",
+                  ),
+                  {
+                    name: <strong className="text-[#f4efe6] font-medium">{name}</strong>,
+                    title: <span className="italic text-[#f4efe6]">{artworkTitle}</span>,
+                    email: <span className="text-[#e58a64] underline">{email}</span>,
+                  },
+                )}
               </p>
               <button
                 onClick={handleClose}
@@ -163,7 +173,7 @@ export function EnquiryModal({
                     <input
                       required
                       type="text"
-                      placeholder="e.g. Eleanor Vance"
+                      placeholder={t("e.g. Eleanor Vance")}
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       className="w-full bg-[#1c1816] border border-[#38302c] px-3.5 py-2.5 text-sm text-[#f4efe6] placeholder-[#665e57] focus:outline-none focus:border-[#e58a64] transition-colors"
@@ -177,7 +187,7 @@ export function EnquiryModal({
                     <input
                       required
                       type="email"
-                      placeholder="e.g. collector@domain.com"
+                      placeholder={t("e.g. collector@domain.com")}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full bg-[#1c1816] border border-[#38302c] px-3.5 py-2.5 text-sm text-[#f4efe6] placeholder-[#665e57] focus:outline-none focus:border-[#e58a64] transition-colors"

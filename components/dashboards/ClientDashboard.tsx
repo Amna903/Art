@@ -1,7 +1,8 @@
 "use client";
 
+import { useLanguage } from "@/lib/i18n";
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/i18n/Link";
 import Image from "next/image";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase/client";
@@ -26,6 +27,7 @@ type Enquiry = {
 };
 
 export function ClientDashboard({ userId }: { userId: string }) {
+  const { t, formatShortDate, formatUsd } = useLanguage();
   const [favs, setFavs] = useState<SavedArtworkRow[]>([]);
   const [followed, setFollowed] = useState<FollowedArtistRow[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -68,9 +70,9 @@ export function ClientDashboard({ userId }: { userId: string }) {
     setFavs((f) => f.filter((x) => x.artwork_slug !== artworkSlug));
     const res = await unsaveArtwork(userId, artworkSlug);
     if (res?.error) {
-      toast("Couldn't remove artwork");
+      toast(t("Couldn't remove artwork"));
     } else {
-      toast("Removed from saved works");
+      toast(t("Removed from saved works"));
     }
   };
 
@@ -78,29 +80,29 @@ export function ClientDashboard({ userId }: { userId: string }) {
     setFollowed((prev) => prev.filter((a) => a.artist_slug !== artistSlug));
     const res = await unfollowArtist(userId, artistSlug);
     if (res?.error) {
-      toast("Couldn't unfollow artist");
+      toast(t("Couldn't unfollow artist"));
     } else {
-      toast("Artist unfollowed");
+      toast(t("Artist unfollowed"));
     }
   };
 
   return (
     <div className="space-y-12">
       <section className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        <Stat label="Saved works" value={favs.length} />
-        <Stat label="Followed artists" value={followed.length} />
-        <Stat label="Orders" value={orders.length} />
+        <Stat label={t("Saved works")} value={favs.length} />
+        <Stat label={t("Followed artists")} value={followed.length} />
+        <Stat label={t("Orders")} value={orders.length} />
         <Stat
-          label="Total spent"
-          value={`$${orders.reduce((s, o) => s + Number(o.total_usd), 0).toLocaleString()}`}
+          label={t("Total spent")}
+          value={formatUsd(orders.reduce((s, o) => s + Number(o.total_usd), 0))}
         />
       </section>
 
       <section>
         <div className="flex items-center justify-between mb-6 border-b border-primary/10 pb-4">
-          <h2 className="font-display-sm text-display-sm text-primary">Saved artworks</h2>
+          <h2 className="font-display-sm text-display-sm text-primary">{t("Saved artworks")}</h2>
           <Link href="/collections" className="font-label-caps text-xs uppercase tracking-widest text-secondary hover:underline">
-            Explore Gallery →
+            {t("Explore Gallery →")}
           </Link>
         </div>
         {loading ? (
@@ -108,13 +110,13 @@ export function ClientDashboard({ userId }: { userId: string }) {
         ) : favs.length === 0 ? (
           <div className="p-8 border border-primary/10 text-center rounded-xl bg-surface-container-lowest">
             <p className="text-on-surface-variant text-sm mb-4">
-              Browse the gallery and tap the heart icon on any artwork to save it to your collection.
+              {t("Browse the gallery and tap the heart icon on any artwork to save it to your collection.")}
             </p>
             <Link
               href="/collections"
               className="inline-block bg-tertiary text-on-tertiary px-6 py-2.5 font-navigation text-xs uppercase tracking-widest hover:bg-secondary transition-colors"
             >
-              Browse Artworks
+              {t("Browse Artworks")}
             </Link>
           </div>
         ) : (
@@ -132,7 +134,7 @@ export function ClientDashboard({ userId }: { userId: string }) {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-on-surface-variant/40 text-xs uppercase">
-                      No Image
+                      {t("No Image")}
                     </div>
                   )}
                 </Link>
@@ -145,7 +147,7 @@ export function ClientDashboard({ userId }: { userId: string }) {
                     onClick={() => removeFav(f.artwork_slug)}
                     className="text-xs font-bold uppercase tracking-widest text-secondary hover:text-primary shrink-0 transition-colors"
                   >
-                    Remove
+                    {t("Remove")}
                   </button>
                 </div>
               </article>
@@ -156,9 +158,9 @@ export function ClientDashboard({ userId }: { userId: string }) {
 
       <section>
         <div className="flex items-center justify-between mb-6 border-b border-primary/10 pb-4">
-          <h2 className="font-display-sm text-display-sm text-primary">Followed artists</h2>
+          <h2 className="font-display-sm text-display-sm text-primary">{t("Followed artists")}</h2>
           <Link href="/artists" className="font-label-caps text-xs uppercase tracking-widest text-secondary hover:underline">
-            View All Artists →
+            {t("View All Artists →")}
           </Link>
         </div>
         {loading ? (
@@ -166,13 +168,13 @@ export function ClientDashboard({ userId }: { userId: string }) {
         ) : followed.length === 0 ? (
           <div className="p-8 border border-primary/10 text-center rounded-xl bg-surface-container-lowest">
             <p className="text-on-surface-variant text-sm mb-4">
-              Follow contemporary artists to receive updates when new studio works enter our catalog.
+              {t("Follow contemporary artists to receive updates when new studio works enter our catalog.")}
             </p>
             <Link
               href="/artists"
               className="inline-block bg-tertiary text-on-tertiary px-6 py-2.5 font-navigation text-xs uppercase tracking-widest hover:bg-secondary transition-colors"
             >
-              Explore Artists
+              {t("Explore Artists")}
             </Link>
           </div>
         ) : (
@@ -203,7 +205,7 @@ export function ClientDashboard({ userId }: { userId: string }) {
                       {a.artist_name}
                     </Link>
                     <p className="text-xs text-on-surface-variant truncate mt-0.5">
-                      {a.technique || "Contemporary visual art"}
+                      {a.technique || t("Contemporary visual art")}
                       {a.country_name ? ` · ${a.country_name}` : ""}
                     </p>
                   </div>
@@ -213,7 +215,7 @@ export function ClientDashboard({ userId }: { userId: string }) {
                   onClick={() => handleUnfollow(a.artist_slug)}
                   className="text-xs font-bold uppercase tracking-widest text-secondary hover:text-primary shrink-0 transition-colors"
                 >
-                  Unfollow
+                  {t("Unfollow")}
                 </button>
               </div>
             ))}
@@ -223,27 +225,27 @@ export function ClientDashboard({ userId }: { userId: string }) {
 
       <section>
         <h2 className="font-display-sm text-display-sm text-primary mb-6 border-b border-primary/10 pb-4">
-          Order history & enquiries
+          {t("Order history & enquiries")}
         </h2>
         {orders.length === 0 ? (
-          <p className="text-on-surface-variant text-sm">No orders recorded yet.</p>
+          <p className="text-on-surface-variant text-sm">{t("No orders recorded yet.")}</p>
         ) : (
           <table className="w-full text-sm">
             <thead className="text-xs uppercase tracking-widest text-on-surface-variant">
               <tr className="border-b border-primary/10">
-                <th className="text-left py-3">Order</th>
-                <th className="text-left py-3">Date</th>
-                <th className="text-left py-3">Status</th>
-                <th className="text-right py-3">Total</th>
+                <th className="text-left py-3">{t("Order")}</th>
+                <th className="text-left py-3">{t("Date")}</th>
+                <th className="text-left py-3">{t("Status")}</th>
+                <th className="text-right py-3">{t("Total")}</th>
               </tr>
             </thead>
             <tbody>
               {orders.map((o) => (
                 <tr key={o.id} className="border-b border-primary/5">
                   <td className="py-3 font-mono text-xs">{o.id.slice(0, 8)}</td>
-                  <td className="py-3">{new Date(o.created_at).toLocaleDateString()}</td>
+                  <td className="py-3">{formatShortDate(o.created_at)}</td>
                   <td className="py-3 uppercase tracking-widest text-xs text-secondary">{o.status}</td>
-                  <td className="py-3 text-right">${Number(o.total_usd).toLocaleString()}</td>
+                  <td className="py-3 text-right">{formatUsd(Number(o.total_usd))}</td>
                 </tr>
               ))}
             </tbody>
@@ -251,27 +253,27 @@ export function ClientDashboard({ userId }: { userId: string }) {
         )}
 
         <div className="mt-10">
-          <h3 className="font-headline-sm text-headline-sm text-primary mb-4">Enquiries sent</h3>
+          <h3 className="font-headline-sm text-headline-sm text-primary mb-4">{t("Enquiries sent")}</h3>
           {enquiries.length === 0 ? (
-            <p className="text-on-surface-variant text-sm">No enquiries sent yet.</p>
+            <p className="text-on-surface-variant text-sm">{t("No enquiries sent yet.")}</p>
           ) : (
             <table className="w-full text-sm">
               <thead className="text-xs uppercase tracking-widest text-on-surface-variant">
                 <tr className="border-b border-primary/10">
-                  <th className="text-left py-3">Artwork</th>
-                  <th className="text-left py-3">Date</th>
-                  <th className="text-right py-3">Status</th>
+                  <th className="text-left py-3">{t("Artwork")}</th>
+                  <th className="text-left py-3">{t("Date")}</th>
+                  <th className="text-right py-3">{t("Status")}</th>
                 </tr>
               </thead>
               <tbody>
                 {enquiries.map((enquiry) => (
                   <tr key={enquiry.id} className="border-b border-primary/5">
                     <td className="py-3 text-primary">{enquiry.artwork_title}</td>
-                    <td className="py-3">{new Date(enquiry.created_at).toLocaleDateString()}</td>
+                    <td className="py-3">{formatShortDate(enquiry.created_at)}</td>
                     <td className="py-3 text-right uppercase tracking-widest text-xs text-secondary">
                       {enquiry.status === "quoted" && enquiry.quote_token ? (
                         <Link href={`/quote/${enquiry.quote_token}`} className="underline underline-offset-4">
-                          View quote · ${Number(enquiry.quoted_price).toLocaleString()}
+                          {t("View quote · {price}", { price: formatUsd(Number(enquiry.quoted_price)) })}
                         </Link>
                       ) : enquiry.status}
                     </td>

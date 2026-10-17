@@ -5,8 +5,11 @@
 // unstable_cache can't be bundled into client code. Server pages that list
 // artists/artworks (discover, artists directory, artwork detail, homepage)
 // should import from here instead so repeat page views don't each re-hit
-// Supabase — same 60s window used for Sanity CMS reads elsewhere.
+// Supabase — same 60s window used for Sanity CMS reads elsewhere. The
+// optional language argument is part of each cache key (unstable_cache keys
+// include the call arguments), so each language is cached separately.
 import { unstable_cache } from "next/cache";
+import type { Language } from "@/lib/i18n/config";
 import {
   getPublishedArtworks as fetchPublishedArtworks,
   getPublishedArtworksByIds as fetchPublishedArtworksByIds,
@@ -23,20 +26,20 @@ export const getPublishedArtworks = unstable_cache(fetchPublishedArtworks, ["pub
   tags: ["artworks"],
 });
 
-export const getPublishedArtworksByIds = (ids: string[]) =>
-  unstable_cache(() => fetchPublishedArtworksByIds(ids), ["published-artworks-by-ids", ids.join(",")], {
+export const getPublishedArtworksByIds = (ids: string[], lang: Language = "en") =>
+  unstable_cache(() => fetchPublishedArtworksByIds(ids, lang), ["published-artworks-by-ids", ids.join(","), lang], {
     revalidate: 60,
     tags: ["artworks"],
   })();
 
-export const getMostRequestedArtworks = (limit = 6) =>
-  unstable_cache(() => fetchMostRequestedArtworks(limit), ["most-requested-artworks", String(limit)], {
+export const getMostRequestedArtworks = (limit = 6, lang: Language = "en") =>
+  unstable_cache(() => fetchMostRequestedArtworks(limit, lang), ["most-requested-artworks", String(limit), lang], {
     revalidate: 60,
     tags: ["artworks"],
   })();
 
-export const getPublishedArtworkBySlug = (slug: string) =>
-  unstable_cache(() => fetchPublishedArtworkBySlug(slug), ["published-artwork-by-slug", slug], {
+export const getPublishedArtworkBySlug = (slug: string, lang: Language = "en") =>
+  unstable_cache(() => fetchPublishedArtworkBySlug(slug, lang), ["published-artwork-by-slug", slug, lang], {
     revalidate: 60,
     tags: ["artworks"],
   })();

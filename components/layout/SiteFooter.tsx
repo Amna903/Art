@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/i18n/Link";
 import { useLanguage } from "@/lib/i18n";
 
 export function SiteFooter() {
@@ -102,7 +102,7 @@ export function SiteFooter() {
       </div>
       <div>
         <div className="max-w-container-max mx-auto px-gutter-page py-6 flex flex-col md:flex-row gap-2 md:gap-6 justify-between text-[10.5px] uppercase tracking-[0.22em] opacity-55">
-          <span>© {new Date().getFullYear()} NUA-ARTE Collective</span>
+          <span>© {new Date().getFullYear()} {t("NUA-ARTE Collective")}</span>
           <span>{t("Lagos · Dakar · Johannesburg · Lisboa")}</span>
         </div>
       </div>

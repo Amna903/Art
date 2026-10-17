@@ -102,13 +102,13 @@ const MUSEUM_PALETTE: Palette = {
 };
 
 // Module-level cached placeholder textures (NUA-ARTE red brush motif on ivory)
-let _phLoading: THREE.CanvasTexture | null = null;
-let _phError: THREE.CanvasTexture | null = null;
+// Keyed by the drawn label, so each language gets its own placeholder texture.
+const _placeholders = new Map<string, THREE.CanvasTexture>();
 let _plasterTex: THREE.CanvasTexture | null = null;
 let _plasterColorTex: THREE.CanvasTexture | null = null;
 let _floorTex: THREE.CanvasTexture | null = null;
 
-function makePlaceholder(kind: "loading" | "error"): THREE.CanvasTexture {
+function makePlaceholder(label: string): THREE.CanvasTexture {
   const c = document.createElement("canvas");
   c.width = 512;
   c.height = 512;
@@ -142,7 +142,7 @@ function makePlaceholder(kind: "loading" | "error"): THREE.CanvasTexture {
   ctx.fillStyle = "#1A1715";
   ctx.font = "600 20px system-ui, sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText(kind === "error" ? "IMAGE UNAVAILABLE" : "LOADING ARTWORK…", 256, 460);
+  ctx.fillText(label, 256, 460);
 
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -151,9 +151,13 @@ function makePlaceholder(kind: "loading" | "error"): THREE.CanvasTexture {
   return tex;
 }
 
-function getPlaceholder(kind: "loading" | "error"): THREE.CanvasTexture {
-  if (kind === "loading") return (_phLoading ??= makePlaceholder("loading"));
-  return (_phError ??= makePlaceholder("error"));
+function getPlaceholder(label: string): THREE.CanvasTexture {
+  let tex = _placeholders.get(label);
+  if (!tex) {
+    tex = makePlaceholder(label);
+    _placeholders.set(label, tex);
+  }
+  return tex;
 }
 
 // Subtle natural plaster grain for museum walls. This is used as a bump and
@@ -731,9 +735,12 @@ function ArtworkFrame({
   palette: Palette;
   onSelect: (a: Artwork) => void;
 }) {
+  const { t } = useLanguage();
   const [hovered, setHovered] = useState(false);
   const targetRef = useRef<THREE.Object3D>(null);
   const spotRef = useRef<THREE.SpotLight>(null);
+  const errorLabel = t("IMAGE UNAVAILABLE");
+  const loadingLabel = t("LOADING ARTWORK…");
 
   // Artwork canvas material: lighting-independent, high-res SRGB, no z-fighting
   const mat = useMemo(() => {
@@ -763,12 +770,12 @@ function ArtworkFrame({
   useEffect(() => {
     let tex: THREE.Texture;
     if (entry.status === "ready" && entry.texture) tex = entry.texture;
-    else if (entry.status === "error") tex = getPlaceholder("error");
-    else tex = getPlaceholder("loading");
+    else if (entry.status === "error") tex = getPlaceholder(errorLabel);
+    else tex = getPlaceholder(loadingLabel);
     mat.map = tex;
     mat.color.set(0xffffff);
     mat.needsUpdate = true;
-  }, [mat, entry.status, entry.texture]);
+  }, [mat, entry.status, entry.texture, errorLabel, loadingLabel]);
 
   useEffect(() => {
     if (spotRef.current && targetRef.current) {
@@ -777,7 +784,7 @@ function ArtworkFrame({
     }
   }, []);
 
-  const label = [art.artist, art.year, art.medium].filter(Boolean).join(" · ");
+  const label = [art.artist, art.year, art.medium && t(art.medium)].filter(Boolean).join(" · ");
   const plaqueW = Math.max(1.4, Math.min(art.width * 0.85, 2.0));
   const plaqueTexture = useMemo(
     () => createPlaqueTexture(art.title, label, palette.accent),

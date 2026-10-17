@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage, useRouter } from "@/lib/i18n";
 import { fetchReviews, submitReview, type Review } from "@/lib/data/reviews";
 
 type Props = { artworkSlug: string };
@@ -27,7 +26,7 @@ function Stars({ value, size = "text-sm" }: { value: number; size?: string }) {
 
 export function ReviewsSection({ artworkSlug }: Props) {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, formatShortDate } = useLanguage();
   const router = useRouter();
 
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -70,7 +69,7 @@ export function ReviewsSection({ artworkSlug }: Props) {
     e.preventDefault();
     if (!user) {
       toast(t("Sign in to leave a review"), {
-        action: { label: "Sign in", onClick: () => router.push("/auth") },
+        action: { label: t("Sign in"), onClick: () => router.push("/auth") },
       });
       return;
     }
@@ -112,7 +111,7 @@ export function ReviewsSection({ artworkSlug }: Props) {
 
       <div className="flex flex-col gap-6">
         {loading ? (
-          <p className="text-sm text-on-surface-variant">{t("Loading…", "Chargement…")}</p>
+          <p className="text-sm text-on-surface-variant">{t("Loading…")}</p>
         ) : reviews.length === 0 ? (
           <p className="text-sm text-on-surface-variant">{t("No reviews yet — be the first to review this piece.")}</p>
         ) : (
@@ -121,10 +120,10 @@ export function ReviewsSection({ artworkSlug }: Props) {
               <div className="flex items-center justify-between mb-2">
                 <Stars value={r.rating} />
                 <span className="text-[10px] uppercase tracking-widest text-on-surface-variant">
-                  {new Date(r.created_at).toLocaleDateString()}
+                  {formatShortDate(r.created_at)}
                 </span>
               </div>
-              {r.comment && <p className="text-sm text-on-surface-variant italic leading-relaxed mb-1">&ldquo;{r.comment}&rdquo;</p>}
+              {r.comment && <p className="text-sm text-on-surface-variant italic leading-relaxed mb-1">“{r.comment}”</p>}
               <p className="text-xs text-primary font-label-caps uppercase tracking-widest">{r.author_name}</p>
             </div>
           ))
@@ -136,7 +135,7 @@ export function ReviewsSection({ artworkSlug }: Props) {
             disabled={loadingMore}
             className="self-start text-xs uppercase tracking-widest text-secondary underline decoration-secondary/30 underline-offset-4 disabled:opacity-50"
           >
-            {loadingMore ? t("Loading…", "Chargement…") : `${t("Load more", "Charger plus")} (${total - reviews.length})`}
+            {loadingMore ? t("Loading…") : `${t("Load more")} (${total - reviews.length})`}
           </button>
         )}
       </div>
@@ -150,7 +149,7 @@ export function ReviewsSection({ artworkSlug }: Props) {
               key={i}
               onMouseEnter={() => setHoverRating(i + 1)}
               onClick={() => setRating(i + 1)}
-              aria-label={`Rate ${i + 1} star${i === 0 ? "" : "s"}`}
+              aria-label={i === 0 ? t("Rate 1 star") : t("Rate {count} stars", { count: i + 1 })}
               className="text-secondary"
             >
               <span

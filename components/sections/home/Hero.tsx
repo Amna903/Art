@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/i18n/Link";
 import { useLanguage } from "@/lib/i18n";
 import { EditableText } from "@/components/editing/EditableText";
 import { EditableImage } from "@/components/editing/EditableImage";

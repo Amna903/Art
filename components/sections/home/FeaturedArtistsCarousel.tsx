@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/i18n/Link";
 import { useLanguage } from "@/lib/i18n";
+import { getCountryDisplayName } from "@/lib/data/africa";
 
 export type FeaturedCard = {
   slug: string;
@@ -21,7 +22,7 @@ export type FeaturedCard = {
  * browser's own momentum scrolling handles them).
  */
 export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{ startX: number; startScrollLeft: number } | null>(null);
   const [atStart, setAtStart] = useState(true);
@@ -76,15 +77,15 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
     <>
       <div className="flex justify-between items-end mb-10 sm:mb-16 gap-4">
         <div>
-          <span className="font-label-caps text-label-caps text-secondary block mb-2">{t("AFRICAN ARTISTS", "ARTISTES AFRICAINS")}</span>
-          <h2 className="font-headline-md text-headline-md">{t("African Arts", "Arts Africains")}</h2>
+          <span className="font-label-caps text-label-caps text-secondary block mb-2">{t("AFRICAN ARTISTS")}</span>
+          <h2 className="font-headline-md text-headline-md">{t("African Arts")}</h2>
         </div>
         <div className="flex space-x-4">
           <button
             type="button"
             onClick={() => scrollByCard(-1)}
             disabled={atStart}
-            aria-label={t("Scroll left", "Faire défiler à gauche")}
+            aria-label={t("Scroll left")}
             className="w-12 h-12 border border-primary/20 flex items-center justify-center hover:bg-primary hover:text-on-primary transition-all disabled:opacity-30 disabled:pointer-events-none"
           >
             <span className="material-symbols-outlined">west</span>
@@ -93,7 +94,7 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
             type="button"
             onClick={() => scrollByCard(1)}
             disabled={atEnd}
-            aria-label={t("Scroll right", "Faire défiler à droite")}
+            aria-label={t("Scroll right")}
             className="w-12 h-12 border border-primary/20 flex items-center justify-center hover:bg-primary hover:text-on-primary transition-all disabled:opacity-30 disabled:pointer-events-none"
           >
             <span className="material-symbols-outlined">east</span>
@@ -114,7 +115,7 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
             key={artist.slug}
             href={`/artists/${artist.slug}`}
             className="min-w-[min(82vw,400px)] snap-center group cursor-pointer"
-            aria-label={t(`View ${artist.name}'s profile`, `Voir le profil de ${artist.name}`)}
+            aria-label={t("View {name}'s profile", { name: artist.name })}
           >
             <div className="aspect-[4/5] overflow-hidden mb-6 relative bg-surface-container">
               {artist.image?.trim() ? (
@@ -135,7 +136,7 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
             </div>
             <h3 className="font-headline-sm text-headline-sm mb-1">{artist.name}</h3>
             <p className="font-body-md text-on-surface-variant uppercase tracking-widest text-xs">
-              {t(artist.country)} • {t(artist.discipline)}
+              {getCountryDisplayName(artist.country, language)} • {t(artist.discipline)}
             </p>
           </Link>
         ))}

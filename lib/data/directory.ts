@@ -6,6 +6,7 @@ import { ARTISTS as STATIC_ARTISTS, type Artist, type Technique } from "@/lib/da
 import { ARTWORKS as STATIC_ARTWORKS } from "@/lib/data/content";
 import { getArtists, getAllArtworks } from "@/lib/sanity/queries";
 import { getRealArtists, getPublishedArtworks } from "@/lib/data/supabase-artists-cached";
+import type { Language } from "@/lib/i18n/config";
 
 export type DirectoryArtwork = {
   slug: string;
@@ -15,8 +16,8 @@ export type DirectoryArtwork = {
   image: string;
 };
 
-export async function getDirectoryArtists(): Promise<Artist[]> {
-  const realArtists = await getRealArtists();
+export async function getDirectoryArtists(lang: Language = "en"): Promise<Artist[]> {
+  const realArtists = await getRealArtists(lang);
   if (realArtists.length > 0) return realArtists;
 
   const cmsArtists = await getArtists();
@@ -40,8 +41,8 @@ export async function getDirectoryArtists(): Promise<Artist[]> {
   return STATIC_ARTISTS;
 }
 
-export async function getDirectoryArtworks(): Promise<DirectoryArtwork[]> {
-  const realArtworks = await getPublishedArtworks();
+export async function getDirectoryArtworks(lang: Language = "en"): Promise<DirectoryArtwork[]> {
+  const realArtworks = await getPublishedArtworks(lang);
   if (realArtworks.length > 0) {
     return realArtworks.map((w) => ({
       slug: w.slug,

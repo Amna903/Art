@@ -1,14 +1,13 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import Link from "@/components/i18n/Link";
 import { geoConicEqualArea, geoPath } from "d3-geo";
 import africaGeo from "@/lib/data/africa-geo.json";
 import { ISLAND_PINS, getCountryByGeoName, getCountryBySlug, getCountryDisplayName } from "@/lib/data/africa";
 import { buildCountryShards, type CountryInput, type Shard } from "@/lib/data/africa-shards";
 import { useCountrySoundUrls } from "@/lib/data/country-sounds";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage, useRouter } from "@/lib/i18n";
 import "@/components/map/clay-atlas.css";
 
 const W = 1000;
@@ -162,7 +161,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
 
   // Active hovered/selected country slug (defaults to Cabo Verde)
   const [activeSlug, setActiveSlug] = useState<string>("cabo-verde");
-  const { t, language } = useLanguage();
+  const { t, language, formatNumber } = useLanguage();
   const [soundOn, setSoundOn] = useState(true);
   const audioRef = useRef<{ ctx: AudioContext; master: GainNode } | null>(null);
   const lastHoverRef = useRef<string | null>(null);
@@ -279,13 +278,13 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
               style={{ color: "var(--atlas-fg)" }}
               aria-label="NUA-ARTE"
             >
-              NUA <span className="inline-block mx-1 text-xs opacity-40 font-sans">—</span> ARTE
+              {t("NUA")}{" "}<span className="inline-block mx-1 text-xs opacity-40 font-sans">—</span> {t("ARTE")}
             </h2>
             <span
               className="block font-mono text-[9px] tracking-[0.45em] uppercase mt-1 font-semibold"
               style={{ color: "var(--atlas-accent)" }}
             >
-              {t("CURATED AFRICAN ART", "ART AFRICAIN SÉLECTIONNÉ")}
+              {t("CURATED AFRICAN ART")}
             </span>
           </div>
 
@@ -342,7 +341,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
               <span className="text-sm">{activeCountry.flag}</span>
             </div>
             <p className="text-xs leading-relaxed font-light italic min-h-[48px]" style={{ color: "var(--atlas-fg-muted)" }}>
-              &ldquo;{activeCountry.blurb}&rdquo;
+              “{t(activeCountry.blurb)}”
             </p>
             <button
               type="button"
@@ -350,7 +349,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
               className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-mono tracking-[0.2em] uppercase font-semibold transition-colors hover:underline"
               style={{ color: "var(--atlas-accent)" }}
             >
-              {t("Explore Artists & Works →", "Explorer Artistes & Œuvres →")}
+              {t("Explore Artists & Works →")}
             </button>
             <Link
               href={`/virtual-gallery?country=${activeCountry.slug}`}
@@ -368,7 +367,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
           <button
             type="button"
             onClick={toggleSound}
-            aria-label={soundOn ? "Mute audio" : "Unmute audio"}
+            aria-label={soundOn ? t("Mute audio") : t("Unmute audio")}
             className="absolute top-0 right-0 z-20 flex items-center gap-2 px-3.5 py-1.5 border rounded text-[10px] font-mono tracking-[0.2em] uppercase transition-all shadow-xs backdrop-blur-sm"
             style={{
               backgroundColor: "var(--atlas-card-bg)",
@@ -379,14 +378,14 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
             <span className="material-symbols-outlined text-[15px]">
               {soundOn ? "volume_up" : "volume_off"}
             </span>
-            <span className="font-medium">{soundOn ? "Sound On" : "Muted"}</span>
+            <span className="font-medium">{soundOn ? t("Sound On") : t("Muted")}</span>
           </button>
 
           <svg
             viewBox={`0 0 ${W} ${H}`}
             className="w-full h-auto max-h-[680px] block select-none"
             role="img"
-            aria-label="3D Sculptural Clay & Wood Map of Africa"
+            aria-label={t("3D Sculptural Clay & Wood Map of Africa")}
             onMouseLeave={handleCountryLeave}
           >
             <defs>
@@ -457,7 +456,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                   onClick={() => enterCountry(country.slug)}
                   tabIndex={0}
                   role="button"
-                  aria-label={country.name}
+                  aria-label={getCountryDisplayName(country, language)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
@@ -523,7 +522,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                     pointerEvents="none"
                   />
 
-                  <title>{country.name}</title>
+                  <title>{getCountryDisplayName(country, language)}</title>
                 </g>
               );
             })}
@@ -555,7 +554,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                   onClick={() => enterCountry(isle.slug)}
                   tabIndex={0}
                   role="button"
-                  aria-label={country.name}
+                  aria-label={getCountryDisplayName(country, language)}
                 >
                   <circle cx={isle.x} cy={isle.y} r={14} fill="transparent" />
                   {/* Bottom extrusion */}
@@ -577,7 +576,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                     fill="rgba(255, 255, 255, 0.65)"
                     pointerEvents="none"
                   />
-                  <title>{country.name}</title>
+                  <title>{getCountryDisplayName(country, language)}</title>
                 </g>
               );
             })}
@@ -591,26 +590,23 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
             {/* Kicker */}
             <div className="mb-2">
               <span className="text-[9px] tracking-[0.38em] uppercase font-mono block font-bold" style={{ color: "var(--atlas-accent)" }}>
-                {t("ONE CONTINENT.", "UN CONTINENT.")}
+                {t("ONE CONTINENT.")}
               </span>
               <span className="text-[9px] tracking-[0.38em] uppercase font-mono block mt-0.5 font-bold" style={{ color: "var(--atlas-accent)" }}>
-                {t("INFINITE VOICES.", "DES VOIX INFINIES.")}
+                {t("INFINITE VOICES.")}
               </span>
               <hr className="border-t w-8 mt-2" style={{ borderColor: "var(--atlas-accent)" }} />
             </div>
 
             {/* Title */}
             <h1 className="font-serif text-3xl lg:text-4xl leading-[1.15] font-light mt-3" style={{ color: "var(--atlas-fg)" }}>
-              {t("Explore Africa.", "Explorez l'Afrique.")} <br />
-              <span className="italic font-normal">{t("Discover Art.", "Découvrez l'Art.")}</span>
+              {t("Explore Africa.")} <br />
+              <span className="italic font-normal">{t("Discover Art.")}</span>
             </h1>
 
             {/* Paragraph */}
             <p className="text-xs leading-relaxed mt-3 max-w-xs font-light" style={{ color: "var(--atlas-fg-muted)" }}>
-              {t(
-                "A curated platform dedicated to contemporary African artists. Each country, each culture, each story.",
-                "Une plateforme dédiée aux artistes contemporains africains. Chaque pays, chaque culture, chaque histoire."
-              )}
+              {t("A curated platform dedicated to contemporary African artists. Each country, each culture, each story.")}
             </p>
           </div>
 
@@ -694,7 +690,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
             className="inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.25em] uppercase transition-colors pt-2 font-semibold hover:underline"
             style={{ color: "var(--atlas-accent)" }}
           >
-            {t("VIEW ALL COUNTRIES", "VOIR TOUS LES PAYS")}
+            {t("VIEW ALL COUNTRIES")}
             <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
           </Link>
         </div>
@@ -716,10 +712,10 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
           </div>
           <div>
             <div className="font-mono text-[9px] tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
-              {t("ARTISTS REPRESENTED", "ARTISTES REPRÉSENTÉS")}
+              {t("ARTISTS REPRESENTED")}
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
-              {stats.artists.toLocaleString()}+
+              {formatNumber(stats.artists)}+
             </div>
           </div>
         </div>
@@ -734,10 +730,10 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
           </div>
           <div>
             <div className="font-mono text-[9px] tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
-              {t("ARTWORKS AVAILABLE", "ŒUVRES DISPONIBLES")}
+              {t("ARTWORKS AVAILABLE")}
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
-              {stats.artworks.toLocaleString()}+
+              {formatNumber(stats.artworks)}+
             </div>
           </div>
         </div>
@@ -752,10 +748,10 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
           </div>
           <div>
             <div className="font-mono text-[9px] tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
-              {t("COUNTRIES", "PAYS")}
+              {t("COUNTRIES")}
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
-              {stats.countries.toLocaleString()}
+              {formatNumber(stats.countries)}
             </div>
           </div>
         </div>
@@ -770,7 +766,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
           </div>
           <div>
             <div className="font-mono text-[9px] tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
-              {t("COLLECTORS WORLDWIDE", "COLLECTIONNEURS DANS LE MONDE")}
+              {t("COLLECTORS WORLDWIDE")}
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
               1,000+
@@ -787,7 +783,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
             <span className="material-symbols-outlined text-[18px]">arrow_downward</span>
           </div>
           <div className="font-mono text-[9px] tracking-[0.25em] uppercase text-left leading-tight font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
-            {t("SCROLL TO EXPLORE", "DÉFILEZ POUR EXPLORER")}
+            {t("SCROLL TO EXPLORE")}
           </div>
         </div>
       </div>

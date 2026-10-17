@@ -1,11 +1,14 @@
 "use client";
 
+import { useRouter, useLanguage } from "@/lib/i18n";
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/i18n/Link";
 import { supabase } from "@/lib/supabase/client";
-import { AFRICAN_COUNTRIES } from "@/lib/data/africa";
+import { AFRICAN_COUNTRIES, getCountryDisplayName } from "@/lib/data/africa";
+import { ARTWORK_STATUS_LABELS } from "@/lib/data/artwork-status";
+import type { Json } from "@/lib/supabase/types";
+import { TranslationFields } from "./TranslationFields";
 import type { Database } from "@/lib/supabase/types";
 import { slugify } from "@/lib/utils/slugify";
 import { pingRevalidate } from "@/lib/utils/revalidate";
@@ -34,6 +37,7 @@ type ArtistDraft = {
   technique: string;
   avatar_url: string;
   slug: string;
+  translations: Json;
 };
 
 type ArtworkDraft = Partial<Artwork> & { customMedium?: string };
@@ -47,6 +51,7 @@ function emptyArtistDraft(): ArtistDraft {
     technique: "",
     avatar_url: "",
     slug: "",
+    translations: {},
   };
 }
 
@@ -56,6 +61,7 @@ function emptyArtistDraft(): ArtistDraft {
  * their artworks end-to-end.
  */
 export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
+  const { t, language } = useLanguage();
   const router = useRouter();
   const [artists, setArtists] = useState<ManagedArtist[]>([]);
   const [artworksByArtist, setArtworksByArtist] = useState<Map<string, Artwork[]>>(new Map());
@@ -116,13 +122,14 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
       technique: artist.technique ?? "",
       avatar_url: artist.avatar_url ?? "",
       slug: artist.slug,
+      translations: artist.translations ?? {},
     });
     setFeedback("");
   };
 
   const saveArtist = async () => {
     if (!artistDraft?.display_name.trim() || !artistDraft.country) {
-      setFeedback("Name and country are required.");
+      setFeedback(t("Name and country are required."));
       return;
     }
     setSavingArtist(true);
@@ -140,6 +147,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
       avatar_url: artistDraft.avatar_url.trim() || null,
       slug,
       managed_by: adminId,
+      translations: artistDraft.translations ?? {},
     };
 
     let error: { message: string } | null = null;
@@ -160,7 +168,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
       return;
     }
 
-    setFeedback(artistDraft.id ? "Artist profile updated." : "Artist profile created.");
+    setFeedback(artistDraft.id ? t("Artist profile updated.") : t("Artist profile created."));
     await load();
     await pingRevalidate("artworks");
     router.refresh();
@@ -173,7 +181,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
   const deleteArtist = async (artist: ManagedArtist) => {
     if (
       !confirm(
-        `Delete ${artist.display_name}? Their artworks will be unlinked from this profile (not deleted).`,
+        t("Delete {display_name}? Their artworks will be unlinked from this profile (not deleted).", { display_name: artist.display_name }),
       )
     ) {
       return;
@@ -188,7 +196,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
       setArtistDraft(null);
       setArtworkDraft(null);
     }
-    setFeedback("Artist profile deleted.");
+    setFeedback(t("Artist profile deleted."));
     await load();
     await pingRevalidate("artworks");
     router.refresh();
@@ -230,19 +238,19 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
 
   const saveArtwork = async () => {
     if (!artworkDraft || !selected) {
-      setFeedback("Select an artist before saving artwork.");
+      setFeedback(t("Select an artist before saving artwork."));
       return;
     }
     if (!artworkDraft.title?.trim()) {
-      setFeedback("Artwork title is required.");
+      setFeedback(t("Artwork title is required."));
       return;
     }
     if (!artworkDraft.image_url?.trim()) {
-      setFeedback("Upload an artwork image before saving.");
+      setFeedback(t("Upload an artwork image before saving."));
       return;
     }
     if (uploadingArtwork) {
-      setFeedback("Wait for the image upload to finish.");
+      setFeedback(t("Wait for the image upload to finish."));
       return;
     }
     setSavingArtwork(true);
@@ -267,21 +275,22 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
       country: selected.country,
       image_url: artworkDraft.image_url,
       status: (artworkDraft.status as Artwork["status"]) ?? "published",
+      translations: artworkDraft.translations ?? {},
     };
     try {
       const { originality } = await saveArtworkWithOriginality({ ...payload, id: artworkDraft.id });
       if (originality.decision === "blocked") originalityNote = originality.note;
-      else if (originality.decision === "review") originalityNote = "Possible match found — queued for originality review instead of publishing.";
+      else if (originality.decision === "review") originalityNote = t("Possible match found — queued for originality review instead of publishing.");
     } catch (error) {
       setSavingArtwork(false);
-      setFeedback(error instanceof Error ? error.message : "Could not save artwork.");
+      setFeedback(error instanceof Error ? t(error.message) : t("Could not save artwork."));
       return;
     }
     setSavingArtwork(false);
     setArtworkDraft(null);
     setFeedback(
       originalityNote ||
-        "Artwork saved.",
+        t("Artwork saved."),
     );
     await load();
     await pingRevalidate("artworks");
@@ -289,7 +298,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
   };
 
   const removeArtwork = async (id: string) => {
-    if (!confirm("Delete this artwork?")) return;
+    if (!confirm(t("Delete this artwork?"))) return;
     const { error } = await supabase.from("artworks").delete().eq("id", id);
     if (error) {
       setFeedback(error.message);
@@ -313,11 +322,11 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
         .from("artworks")
         .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
       if (signedUrlError || !signed?.signedUrl) {
-        throw new Error(signedUrlError?.message ?? "Could not create an image URL.");
+        throw new Error(signedUrlError?.message ?? t("Could not create an image URL."));
       }
       setArtworkDraft((d) => (d ? { ...d, image_url: signed.signedUrl } : d));
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : "Artwork image upload failed.");
+      setFeedback(error instanceof Error ? t(error.message) : t("Artwork image upload failed."));
     } finally {
       setUploadingArtwork(false);
     }
@@ -336,11 +345,10 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-widest text-secondary mb-2">
-            Represented artists — no account required
+            {t("Represented artists — no account required")}
           </p>
           <p className="text-sm text-on-surface-variant max-w-xl">
-            Create and fully manage artist profiles for makers who cannot use the platform themselves.
-            Fill in their information and upload artworks on their behalf.
+            {t("Create and fully manage artist profiles for makers who cannot use the platform themselves. Fill in their information and upload artworks on their behalf.")}
           </p>
         </div>
         <button
@@ -348,7 +356,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
           onClick={openCreateArtist}
           className="bg-primary text-on-primary px-4 py-2 text-xs uppercase tracking-widest"
         >
-          + New artist profile
+          {t("+ New artist profile")}
         </button>
       </div>
 
@@ -357,7 +365,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
       <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-8">
         <div className="border border-primary/10 divide-y divide-primary/5">
           {artists.length === 0 ? (
-            <p className="p-6 text-sm text-on-surface-variant">No represented artists yet.</p>
+            <p className="p-6 text-sm text-on-surface-variant">{t("No represented artists yet.")}</p>
           ) : (
             artists.map((artist) => {
               const count = artworksByArtist.get(artist.id)?.length ?? 0;
@@ -384,8 +392,8 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                   <div className="min-w-0 flex-1">
                     <p className="font-headline-sm text-sm text-primary truncate">{artist.display_name}</p>
                     <p className="text-[11px] uppercase tracking-widest text-on-surface-variant">
-                      {artist.country}
-                      {artist.city ? ` · ${artist.city}` : ""} · {count} work{count === 1 ? "" : "s"}
+                      {getCountryDisplayName(artist.country, language)}
+                      {artist.city ? ` · ${artist.city}` : ""} · {count === 1 ? t("1 work") : t("{count} works", { count })}
                     </p>
                   </div>
                 </button>
@@ -399,7 +407,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
             <div className="border border-primary/10 p-5 space-y-4">
               <div className="flex items-center justify-between gap-3">
                 <h3 className="font-headline-sm text-headline-sm">
-                  {artistDraft.id ? "Edit artist profile" : "New artist profile"}
+                  {artistDraft.id ? t("Edit artist profile") : t("New artist profile")}
                 </h3>
                 {selected && (
                   <Link
@@ -407,7 +415,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                     className="text-[10px] uppercase tracking-widest text-secondary hover:underline"
                     target="_blank"
                   >
-                    View public page →
+                    {t("View public page →")}
                   </Link>
                 )}
               </div>
@@ -419,7 +427,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                   ) : null}
                 </div>
                 <label className="text-xs uppercase tracking-widest text-secondary cursor-pointer">
-                  {uploadingAvatar ? "Uploading…" : "Upload portrait"}
+                  {uploadingAvatar ? t("Uploading…") : t("Upload portrait")}
                   <input
                     type="file"
                     accept="image/*"
@@ -435,43 +443,48 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <F
-                  label="Display name"
+                  label={t("Display name")}
                   value={artistDraft.display_name}
                   onChange={(v) => setArtistDraft({ ...artistDraft, display_name: v })}
                 />
                 <label className="block">
                   <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">
-                    Country
+                    {t("Country")}
                   </span>
                   <select
                     value={artistDraft.country}
                     onChange={(e) => setArtistDraft({ ...artistDraft, country: e.target.value })}
                     className="w-full bg-transparent border-b border-primary/30 py-2 text-primary"
                   >
-                    <option value="">Select country</option>
+                    <option value="">{t("Select country")}</option>
                     {AFRICAN_COUNTRIES.map((c) => (
                       <option key={c.slug} value={c.name}>
-                        {c.name}
+                        {getCountryDisplayName(c, language)}
                       </option>
                     ))}
                   </select>
                 </label>
                 <F
-                  label="City"
+                  label={t("City")}
                   value={artistDraft.city}
                   onChange={(v) => setArtistDraft({ ...artistDraft, city: v })}
                 />
                 <F
-                  label="Technique"
+                  label={t("Technique")}
                   value={artistDraft.technique}
                   onChange={(v) => setArtistDraft({ ...artistDraft, technique: v })}
                 />
               </div>
               <F
-                label="Bio"
+                label={t("Bio")}
                 value={artistDraft.bio}
                 onChange={(v) => setArtistDraft({ ...artistDraft, bio: v })}
                 textarea
+              />
+              <TranslationFields
+                fields={[{ name: "bio", label: "Bio", textarea: true }]}
+                value={artistDraft.translations}
+                onChange={(translations) => setArtistDraft({ ...artistDraft, translations })}
               />
 
               <div className="flex flex-wrap gap-3 pt-2">
@@ -481,7 +494,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                   disabled={savingArtist}
                   className="bg-primary text-on-primary px-4 py-2 text-xs uppercase tracking-widest disabled:opacity-50"
                 >
-                  {savingArtist ? "Saving…" : artistDraft.id ? "Save profile" : "Create profile"}
+                  {savingArtist ? t("Saving…") : artistDraft.id ? t("Save profile") : t("Create profile")}
                 </button>
                 {selected && (
                   <button
@@ -489,50 +502,50 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                     onClick={() => deleteArtist(selected)}
                     className="border border-secondary text-secondary px-4 py-2 text-xs uppercase tracking-widest"
                   >
-                    Delete profile
+                    {t("Delete profile")}
                   </button>
                 )}
               </div>
             </div>
           ) : (
             <p className="text-sm text-on-surface-variant border border-dashed border-primary/15 p-8 text-center">
-              Select an artist from the list, or create a new profile.
+              {t("Select an artist from the list, or create a new profile.")}
             </p>
           )}
 
           {selected && (
             <div className="border border-primary/10 p-5 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h3 className="font-headline-sm text-headline-sm">Artworks</h3>
+                <h3 className="font-headline-sm text-headline-sm">{t("Artworks")}</h3>
                 <button
                   type="button"
                   onClick={startNewArtwork}
                   className="text-xs uppercase tracking-widest text-secondary border border-secondary/40 px-3 py-1.5"
                 >
-                  + Add artwork
+                  {t("+ Add artwork")}
                 </button>
               </div>
 
               {artworkDraft && (
                 <div className="bg-surface-container-low p-4 space-y-3 border border-primary/10">
                   <p className="text-[10px] uppercase tracking-widest text-secondary">
-                    {artworkDraft.id ? "Edit artwork" : "New artwork"}
+                    {artworkDraft.id ? t("Edit artwork") : t("New artwork")}
                   </p>
                   <div className="grid sm:grid-cols-2 gap-3">
                     <F
-                      label="Title"
+                      label={t("Title")}
                       value={artworkDraft.title ?? ""}
                       onChange={(v) => setArtworkDraft({ ...artworkDraft, title: v })}
                     />
                     <F
-                      label="Year"
+                      label={t("Year")}
                       type="number"
                       value={String(artworkDraft.year ?? "")}
                       onChange={(v) => setArtworkDraft({ ...artworkDraft, year: Number(v) || null })}
                     />
                     <label className="block">
                       <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">
-                        Medium
+                        {t("Medium")}
                       </span>
                       <select
                         value={mediumSelectValue}
@@ -545,36 +558,36 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                         }
                         className="w-full bg-transparent border-b border-primary/30 py-2 text-primary text-sm"
                       >
-                        <option value="">Select</option>
+                        <option value="">{t("Select")}</option>
                         {RESERVED_MEDIA.map((m) => (
                           <option key={m} value={m}>
                             {m}
                           </option>
                         ))}
-                        <option value="Other">Other</option>
+                        <option value="Other">{t("Other")}</option>
                       </select>
                     </label>
                     {mediumSelectValue === "Other" && (
                       <F
-                        label="Custom medium"
+                        label={t("Custom medium")}
                         value={artworkDraft.customMedium ?? ""}
                         onChange={(v) => setArtworkDraft({ ...artworkDraft, customMedium: v })}
                       />
                     )}
                     <F
-                      label="Dimensions"
+                      label={t("Dimensions")}
                       value={artworkDraft.dimensions ?? ""}
                       onChange={(v) => setArtworkDraft({ ...artworkDraft, dimensions: v })}
                     />
                     <F
-                      label="Price (USD, internal)"
+                      label={t("Price (USD, internal)")}
                       type="number"
                       value={String(artworkDraft.price_usd ?? 0)}
                       onChange={(v) => setArtworkDraft({ ...artworkDraft, price_usd: Number(v) || 0 })}
                     />
                     <label className="block">
                       <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">
-                        Status
+                        {t("Status")}
                       </span>
                       <select
                         value={artworkDraft.status ?? "published"}
@@ -586,28 +599,36 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                         }
                         className="w-full bg-transparent border-b border-primary/30 py-2 text-primary text-sm"
                       >
-                        <option value="draft">draft</option>
-                        <option value="pending_review">pending review</option>
-                        <option value="blocked">blocked</option>
-                        <option value="published">published</option>
-                        <option value="sold">sold</option>
-                        <option value="archived">archived</option>
+                        <option value="draft">{t("Draft")}</option>
+                        <option value="pending_review">{t("Pending review")}</option>
+                        <option value="blocked">{t("Blocked")}</option>
+                        <option value="published">{t("Published")}</option>
+                        <option value="sold">{t("Sold")}</option>
+                        <option value="archived">{t("Archived")}</option>
                       </select>
                     </label>
                   </div>
                   <F
-                    label="Description"
+                    label={t("Description")}
                     value={artworkDraft.description ?? ""}
                     onChange={(v) => setArtworkDraft({ ...artworkDraft, description: v })}
                     textarea
                   />
+                  <TranslationFields
+                    fields={[
+                      { name: "title", label: "Title" },
+                      { name: "description", label: "Description", textarea: true },
+                    ]}
+                    value={artworkDraft.translations}
+                    onChange={(translations) => setArtworkDraft({ ...artworkDraft, translations })}
+                  />
                   <div className="flex flex-wrap items-center gap-4 border-2 border-dashed border-secondary/40 bg-surface p-4">
                     {artworkDraft.image_url ? (
                       <div className="relative w-24 h-24 shrink-0 bg-surface-container overflow-hidden">
-                        <Image src={artworkDraft.image_url} alt="Artwork preview" fill sizes="96px" className="object-cover" />
+                        <Image src={artworkDraft.image_url} alt={t("Artwork preview")} fill sizes="96px" className="object-cover" />
                       </div>
                     ) : (
-                      <p className="text-sm text-on-surface-variant">Artwork image required</p>
+                      <p className="text-sm text-on-surface-variant">{t("Artwork image required")}</p>
                     )}
                     <label
                       className={
@@ -615,7 +636,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                         (uploadingArtwork ? "pointer-events-none opacity-60" : "")
                       }
                     >
-                      {uploadingArtwork ? "Uploading image…" : artworkDraft.image_url ? "Replace artwork image" : "Choose artwork image"}
+                      {uploadingArtwork ? t("Uploading image…") : artworkDraft.image_url ? t("Replace artwork image") : t("Choose artwork image")}
                       <input
                         type="file"
                         accept="image/*"
@@ -628,7 +649,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                         }}
                       />
                     </label>
-                    <span className="text-xs text-on-surface-variant">JPEG, PNG, or WebP</span>
+                    <span className="text-xs text-on-surface-variant">{t("JPEG, PNG, or WebP")}</span>
                   </div>
                   <div className="flex gap-3">
                     <button
@@ -637,21 +658,21 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                       disabled={savingArtwork || uploadingArtwork}
                       className="bg-primary text-on-primary px-4 py-2 text-xs uppercase tracking-widest disabled:opacity-50"
                     >
-                      {savingArtwork ? "Saving…" : "Save artwork"}
+                      {savingArtwork ? t("Saving…") : t("Save artwork")}
                     </button>
                     <button
                       type="button"
                       onClick={() => setArtworkDraft(null)}
                       className="text-xs uppercase tracking-widest text-on-surface-variant"
                     >
-                      Cancel
+                      {t("Cancel")}
                     </button>
                   </div>
                 </div>
               )}
 
               {selectedWorks.length === 0 ? (
-                <p className="text-sm text-on-surface-variant">No artworks yet for this artist.</p>
+                <p className="text-sm text-on-surface-variant">{t("No artworks yet for this artist.")}</p>
               ) : (
                 <ul className="divide-y divide-primary/5">
                   {selectedWorks.map((work) => (
@@ -664,8 +685,8 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                       <div className="min-w-0 flex-1">
                         <p className="text-sm text-primary truncate">{work.title}</p>
                         <p className="text-[10px] uppercase tracking-widest text-on-surface-variant">
-                          {work.status}
-                          {work.medium ? ` · ${work.medium}` : ""}
+                          {t(ARTWORK_STATUS_LABELS[work.status] ?? work.status)}
+                          {work.medium ? ` · ${t(work.medium)}` : ""}
                           {work.year ? ` · ${work.year}` : ""}
                         </p>
                       </div>
@@ -684,14 +705,14 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                           }
                           className="text-[10px] uppercase tracking-widest border border-primary/20 px-2 py-1"
                         >
-                          Edit
+                          {t("Edit")}
                         </button>
                         <button
                           type="button"
                           onClick={() => removeArtwork(work.id)}
                           className="text-[10px] uppercase tracking-widest border border-secondary text-secondary px-2 py-1"
                         >
-                          Delete
+                          {t("Delete")}
                         </button>
                       </div>
                     </li>
