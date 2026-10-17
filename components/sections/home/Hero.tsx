@@ -46,7 +46,7 @@ export function Hero({ blocks, siteHero }: { blocks: PageBlocks; siteHero: SiteH
 
   return (
     <section className="relative isolate w-screen mx-[calc(50%-50vw)] mt-16 overflow-hidden bg-[var(--nua-white)] text-[var(--nua-charcoal)] dark:bg-[var(--nua-charcoal-deep)] dark:text-[var(--nua-white)]">
-      <div className="relative min-h-[min(calc(100svh-4rem),640px)] lg:min-h-[min(calc(100svh-4rem),720px)]">
+      <div className="relative min-h-[calc(100svh-4rem)]">
         {/* Portrait: right side on desktop, full background on mobile. */}
         <div className="absolute inset-0 lg:left-[42%]">
           {siteHero ? (
