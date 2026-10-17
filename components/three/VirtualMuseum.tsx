@@ -73,32 +73,31 @@ type Palette = {
 };
 
 const MUSEUM_PALETTE: Palette = {
-  // Smooth, pale mineral paint — closer to a finished contemporary gallery
-  // wall than raw grey plaster.
-  wall: "#F0F0EE",
-  wallPlaster: "#E9E8E4",
-  // Warm charcoal concrete with enough lift to read distinctly from black.
-  floor: "#706D67",
-  // Black ceiling preserved
-  ceiling: "#090A0B",
-  skylightEmissive: "#FFFDF9",
-  bg: "#161514",
+  // White-cube gallery: light walls, dark floor, neutral white light. No
+  // beige or warm tints anywhere (brand palette: white, charcoal, red).
+  wall: "#F5F5F3",
+  wallPlaster: "#F5F5F3",
+  floor: "#161616",
+  ceiling: "#111111",
+  skylightEmissive: "#FFFFFF",
+  bg: "#161616",
   ambientIntensity: 0.45,
-  hemiSky: "#FFFDF8",
-  hemiGround: "#5C564E",
+  hemiSky: "#FFFFFF",
+  hemiGround: "#5C5C5C",
   hemiIntensity: 0.65,
-  directionalColor: "#FFF8ED",
+  directionalColor: "#FFFFFF",
   directionalIntensity: 0.65,
-  spotColor: "#FFF6E8",
+  spotColor: "#FFFFFF",
   spotIntensity: 2.6,
-  frameColor: "#181615",
-  matteColor: "#FAF8F5",
-  plaqueBg: "#171514",
-  labelPrimary: "#F5F3EF",
-  labelSecondary: "#B8B5AF",
-  accent: "#9F0D12",
-  baseboard: "#242220",
-  trackColor: "#1C1A18",
+  frameColor: "#1F1F1F",
+  // Viewing panels behind each artwork stay white.
+  matteColor: "#FFFFFF",
+  plaqueBg: "#1F1F1F",
+  labelPrimary: "#FFFFFF",
+  labelSecondary: "#B8B8B8",
+  accent: "#D7141E",
+  baseboard: "#262626",
+  trackColor: "#1F1F1F",
 };
 
 // Module-level cached placeholder textures (NUA-ARTE red brush motif on ivory)
@@ -113,16 +112,16 @@ function makePlaceholder(label: string): THREE.CanvasTexture {
   c.width = 512;
   c.height = 512;
   const ctx = c.getContext("2d")!;
-  ctx.fillStyle = "#F5F2ED";
+  ctx.fillStyle = "#F5F5F3";
   ctx.fillRect(0, 0, 512, 512);
 
   const g = ctx.createLinearGradient(0, 0, 512, 512);
-  g.addColorStop(0, "rgba(212, 175, 120, 0.15)");
-  g.addColorStop(1, "rgba(159, 13, 18, 0.08)");
+  g.addColorStop(0, "rgba(255, 255, 255, 0)");
+  g.addColorStop(1, "rgba(31, 31, 31, 0.06)");
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, 512, 512);
 
-  ctx.strokeStyle = "#9F0D12";
+  ctx.strokeStyle = "#D7141E";
   ctx.lineCap = "round";
   ctx.globalAlpha = 0.85;
   ctx.lineWidth = 32;
@@ -139,7 +138,7 @@ function makePlaceholder(label: string): THREE.CanvasTexture {
   ctx.stroke();
 
   ctx.globalAlpha = 1;
-  ctx.fillStyle = "#1A1715";
+  ctx.fillStyle = "#1F1F1F";
   ctx.font = "600 20px system-ui, sans-serif";
   ctx.textAlign = "center";
   ctx.fillText(label, 256, 460);
@@ -217,7 +216,7 @@ function getPlasterColorTexture(): THREE.CanvasTexture {
   ctx.filter = "blur(18px)";
   for (let i = 0; i < 48; i++) {
     const tone = Math.random() > 0.5 ? 255 : 225;
-    ctx.fillStyle = `rgba(${tone}, ${tone}, ${tone - 1}, 0.24)`;
+    ctx.fillStyle = `rgba(${tone}, ${tone}, ${tone}, 0.24)`;
     ctx.beginPath();
     ctx.ellipse(
       Math.random() * size,
@@ -301,7 +300,7 @@ function createPlaqueTexture(title: string, subtitle: string, accentColor: strin
   const ctx = canvas.getContext("2d")!;
 
   // Smooth dark museum plaque background
-  ctx.fillStyle = "#161514";
+  ctx.fillStyle = "#1F1F1F";
   ctx.fillRect(0, 0, width, height);
 
   // Subtle border bevel
@@ -314,13 +313,13 @@ function createPlaqueTexture(title: string, subtitle: string, accentColor: strin
   ctx.fillRect(0, 0, 24, height);
 
   // Artwork Title
-  ctx.fillStyle = "#F5F3EF";
+  ctx.fillStyle = "#FFFFFF";
   ctx.font = "bold 44px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
   ctx.textBaseline = "middle";
   ctx.fillText(title.toUpperCase(), 56, 88, width - 80);
 
   // Artist & details subtitle
-  ctx.fillStyle = "#B8B5AF";
+  ctx.fillStyle = "#B8B8B8";
   ctx.font = "500 28px system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
   ctx.fillText(subtitle, 56, 168, width - 80);
 
@@ -378,7 +377,7 @@ function PottedPlant({ position }: { position: [number, number, number] }) {
     [],
   );
   const potMaterial = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: "#985136", roughness: 0.82 }),
+    () => new THREE.MeshStandardMaterial({ color: "#262626", roughness: 0.82 }),
     [],
   );
   const foliageMaterial = useMemo(
@@ -419,11 +418,11 @@ function PottedPlant({ position }: { position: [number, number, number] }) {
       </mesh>
       <mesh position={[0, 0.445, 0]}>
         <cylinderGeometry args={[0.33, 0.33, 0.025, 32]} />
-        <meshStandardMaterial color="#302820" roughness={1} />
+        <meshStandardMaterial color="#1F1F1F" roughness={1} />
       </mesh>
       <mesh position={[0, 0.5, 0]}>
         <torusGeometry args={[0.405, 0.028, 8, 32]} />
-        <meshStandardMaterial color="#B16B49" roughness={0.7} />
+        <meshStandardMaterial color="#333333" roughness={0.7} />
       </mesh>
       <mesh position={[0, 0.92, 0]} castShadow>
         <cylinderGeometry args={[0.018, 0.024, 0.9, 8]} />
@@ -518,13 +517,13 @@ function GalleryArchitecture({ p }: { p: Palette }) {
         {[-7.5, -5, -2.5, 0, 2.5, 5, 7.5].map((x) => (
           <mesh key={`floor-joint-x-${x}`} position={[x, 0, 0]}>
             <boxGeometry args={[0.018, 0.006, D]} />
-            <meshStandardMaterial color="#292724" roughness={0.32} metalness={0.15} />
+            <meshStandardMaterial color="#262626" roughness={0.32} metalness={0.15} />
           </mesh>
         ))}
         {[-9, -6, -3, 0, 3, 6, 9].map((z) => (
           <mesh key={`floor-joint-z-${z}`} position={[0, 0, z]}>
             <boxGeometry args={[W, 0.006, 0.018]} />
-            <meshStandardMaterial color="#292724" roughness={0.32} metalness={0.15} />
+            <meshStandardMaterial color="#262626" roughness={0.32} metalness={0.15} />
           </mesh>
         ))}
       </group>
@@ -542,7 +541,7 @@ function GalleryArchitecture({ p }: { p: Palette }) {
             <mesh rotation={[Math.PI / 2, 0, 0]}>
               <planeGeometry args={[4.1, 7.2]} />
               <meshStandardMaterial
-                color="#FFF9EF"
+                color="#FFFFFF"
                 emissive={p.skylightEmissive}
                 emissiveIntensity={0.75}
                 roughness={0.5}
@@ -841,10 +840,10 @@ function ArtworkFrame({
       <mesh position={[0, 0, 0.041]} receiveShadow>
         <planeGeometry args={[art.width + 0.04, art.height + 0.04]} />
         <meshStandardMaterial
-          color={hovered ? "#C96D6D" : palette.matteColor}
+          color={palette.matteColor}
           roughness={0.75}
-          emissive={hovered ? "#9F0D12" : "#000000"}
-          emissiveIntensity={hovered ? 0.25 : 0}
+          emissive={hovered ? "#FFFFFF" : "#000000"}
+          emissiveIntensity={hovered ? 0.08 : 0}
         />
       </mesh>
 
@@ -934,7 +933,7 @@ function WallGrazeLight({
         intensity={12}
         distance={10}
         decay={1.5}
-        color="#FFF4E5"
+        color="#FFFFFF"
       />
       <object3D ref={targetRef} position={target} />
     </>
@@ -1195,29 +1194,29 @@ export default function VirtualMuseum({
           className="absolute inset-0 flex items-center justify-center pointer-events-none"
           style={{
             background: isDark
-              ? "radial-gradient(circle at center, rgba(7,10,13,0.3), rgba(7,10,13,0.65))"
-              : "radial-gradient(circle at center, rgba(245,242,238,0.2), rgba(245,242,238,0.5))",
+              ? "radial-gradient(circle at center, rgba(22,22,22,0.3), rgba(22,22,22,0.65))"
+              : "radial-gradient(circle at center, rgba(255,255,255,0.2), rgba(255,255,255,0.5))",
           }}
         >
           <div
             className="px-6 py-5 text-center w-[min(360px,88%)] backdrop-blur-md shadow-2xl"
             style={{
-              background: isDark ? "rgba(7,10,13,0.8)" : "rgba(245,242,238,0.88)",
+              background: isDark ? "rgba(22,22,22,0.8)" : "rgba(255,255,255,0.88)",
               border: isDark
-                ? "1px solid rgba(245,242,238,0.14)"
-                : "1px solid rgba(17,17,17,0.12)",
-              borderLeft: "2px solid #9F0D12",
+                ? "1px solid rgba(255,255,255,0.14)"
+                : "1px solid rgba(31,31,31,0.12)",
+              borderLeft: "2px solid var(--nua-red)",
             }}
           >
             <p
               className="font-label-caps text-[10px] tracking-[0.35em] mb-2"
-              style={{ color: "#9F0D12" }}
+              style={{ color: "var(--nua-red)" }}
             >
               {t("IMMERSIVE MODE")}
             </p>
             <p
               className="font-headline-sm text-base md:text-lg uppercase tracking-wider mb-3"
-              style={{ color: isDark ? "#F5F2EE" : "#111111" }}
+              style={{ color: isDark ? "#FFFFFF" : "#1F1F1F" }}
             >
               {t("Click to enter the museum")}
             </p>
@@ -1227,9 +1226,9 @@ export default function VirtualMuseum({
                   key={ctrl}
                   className="px-2 py-1 border"
                   style={{
-                    color: isDark ? "#D9D2CC" : "#4B5560",
-                    borderColor: isDark ? "rgba(245,242,238,0.15)" : "rgba(17,17,17,0.15)",
-                    background: isDark ? "rgba(245,242,238,0.04)" : "rgba(17,17,17,0.03)",
+                    color: isDark ? "#B8B8B8" : "#5C5C5C",
+                    borderColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(31,31,31,0.15)",
+                    background: isDark ? "rgba(255,255,255,0.04)" : "rgba(31,31,31,0.03)",
                   }}
                 >
                   {t(ctrl)}

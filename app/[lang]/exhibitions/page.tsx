@@ -140,7 +140,7 @@ export default async function ExhibitionsPage({ params }: PageProps<"/[lang]/exh
                 bucket="exhibitions"
                 src={featureImg.src}
                 alt={featureImg.alt}
-                className="w-full aspect-[16/9] grayscale-[30%] group-hover:grayscale-0 transition-all duration-700"
+                className="w-full aspect-[16/9] transition-all duration-700"
               />
               <div className="absolute top-6 left-6 bg-secondary text-on-primary px-4 py-1 font-label-caps text-label-caps">
                 {t("LIVE NOW")}

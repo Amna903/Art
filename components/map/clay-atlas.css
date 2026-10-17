@@ -1,25 +1,25 @@
 .nu-atlas {
   /* Light Theme (default) */
-  --atlas-bg: var(--background, #FAF6F2);
-  --atlas-fg: var(--on-background, #141210);
-  --atlas-fg-muted: var(--on-surface-variant, rgba(20, 18, 16, 0.65));
-  --atlas-accent: var(--red-blood, #9F0D12);
-  --atlas-accent-light: var(--red-blood-light, #C96D6D);
-  --atlas-gold: #C2916B;
-  --atlas-border: var(--outline-variant, rgba(60, 40, 20, 0.14));
-  --atlas-border-strong: rgba(60, 40, 20, 0.28);
-  --atlas-hover: var(--surface-container-high, rgba(60, 40, 20, 0.05));
+  --atlas-bg: var(--background, #FFFFFF);
+  --atlas-fg: var(--on-background, #1F1F1F);
+  --atlas-fg-muted: var(--on-surface-variant, #5C5C5C);
+  --atlas-accent: var(--red-blood, #D7141E);
+  --atlas-accent-light: var(--red-blood-light, #FF4D57);
+  --atlas-gold: #8C8C8C;
+  --atlas-border: var(--outline-variant, #E6E6E6);
+  --atlas-border-strong: rgba(31, 31, 31, 0.28);
+  --atlas-hover: var(--surface-container-high, rgba(31, 31, 31, 0.05));
   --atlas-card-bg: rgba(255, 255, 255, 0.85);
   --atlas-card-bg-hover: rgba(255, 255, 255, 0.95);
-  --atlas-tooltip-bg: rgba(255, 253, 250, 0.97);
-  --atlas-canvas: var(--background, #FAF6F2);
-  --atlas-shadow-color: #28170c;
+  --atlas-tooltip-bg: rgba(255, 255, 255, 0.97);
+  --atlas-canvas: var(--background, #FFFFFF);
+  --atlas-shadow-color: #1F1F1F;
   --atlas-shadow-opacity-a: 0.22;
   --atlas-shadow-opacity-b: 0.35;
   --atlas-shadow-active-a: 0.32;
   --atlas-shadow-active-b: 0.45;
-  --atlas-glow-a: rgba(212, 175, 120, 0.06);
-  --atlas-glow-b: rgba(159, 13, 18, 0.02);
+  --atlas-glow-a: transparent;
+  --atlas-glow-b: rgba(215, 20, 30, 0.02);
   background-color: var(--atlas-bg);
   color: var(--atlas-fg);
   transition: background-color 240ms ease, color 240ms ease;
@@ -30,26 +30,26 @@
 :root.dark.nu-atlas,
 .dark.nu-atlas {
   /* Dark Theme */
-  --atlas-bg: var(--background, #15110E);
-  --atlas-fg: var(--on-background, #EDE5DC);
-  --atlas-fg-muted: var(--on-surface-variant, #B5ADA3);
-  --atlas-accent: var(--red-blood, #C8262C);
-  --atlas-accent-light: var(--red-blood-light, #E98A8A);
-  --atlas-gold: #D6A57B;
-  --atlas-border: var(--outline-variant, rgba(237, 229, 220, 0.14));
-  --atlas-border-strong: rgba(237, 229, 220, 0.28);
-  --atlas-hover: var(--surface-container-high, rgba(237, 229, 220, 0.06));
-  --atlas-card-bg: var(--surface-container, rgba(34, 29, 24, 0.85));
-  --atlas-card-bg-hover: var(--surface-container-high, rgba(42, 36, 30, 0.95));
-  --atlas-tooltip-bg: rgba(26, 22, 18, 0.97);
-  --atlas-canvas: var(--background, #15110E);
+  --atlas-bg: var(--background, #161616);
+  --atlas-fg: var(--on-background, #F5F5F5);
+  --atlas-fg-muted: var(--on-surface-variant, #B8B8B8);
+  --atlas-accent: var(--red-blood, #FF4D57);
+  --atlas-accent-light: var(--red-blood-light, #FF8A90);
+  --atlas-gold: #B8B8B8;
+  --atlas-border: var(--outline-variant, #333333);
+  --atlas-border-strong: rgba(245, 245, 245, 0.28);
+  --atlas-hover: var(--surface-container-high, rgba(245, 245, 245, 0.06));
+  --atlas-card-bg: var(--surface-container, rgba(31, 31, 31, 0.85));
+  --atlas-card-bg-hover: var(--surface-container-high, rgba(38, 38, 38, 0.95));
+  --atlas-tooltip-bg: rgba(26, 26, 26, 0.97);
+  --atlas-canvas: var(--background, #161616);
   --atlas-shadow-color: #000000;
   --atlas-shadow-opacity-a: 0.55;
   --atlas-shadow-opacity-b: 0.75;
   --atlas-shadow-active-a: 0.7;
   --atlas-shadow-active-b: 0.9;
-  --atlas-glow-a: rgba(212, 175, 120, 0.08);
-  --atlas-glow-b: rgba(200, 38, 44, 0.06);
+  --atlas-glow-a: transparent;
+  --atlas-glow-b: rgba(255, 77, 87, 0.06);
 }
 
 .nu-atlas-bg {
@@ -73,12 +73,12 @@
 }
 
 body:has(.nu-atlas-page) {
-  background-color: var(--background, #FAF6F2);
+  background-color: var(--background, #FFFFFF);
 }
 
 :root.dark body:has(.nu-atlas-page),
 .dark body:has(.nu-atlas-page) {
-  background-color: var(--background, #15110E);
+  background-color: var(--background, #161616);
 }
 
 .nu-atlas-page .nu-atlas-canvas {

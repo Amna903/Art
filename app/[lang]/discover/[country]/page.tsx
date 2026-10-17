@@ -255,17 +255,17 @@ export default async function CountryExperience({ params }: Props) {
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-background" />
         </div>
 
-        <div className="relative max-w-container-max mx-auto px-gutter-page pt-24 md:pt-32 pb-24 md:pb-40 text-[#F5F2EE]">
+        <div className="relative max-w-container-max mx-auto px-gutter-page pt-24 md:pt-32 pb-24 md:pb-40 text-[#FFFFFF]">
           <Link
             href="/#atlas"
-            className="inline-flex items-center gap-2 font-label-caps tracking-widest text-[#F5F2EE]/80 hover:text-[#F5F2EE] transition-colors"
+            className="inline-flex items-center gap-2 font-label-caps tracking-widest text-[#FFFFFF]/80 hover:text-[#FFFFFF] transition-colors"
           >
             {t("← BACK TO AFRICA MAP")}
           </Link>
 
           <div className="mt-10 flex items-center gap-4">
             <span className="text-5xl" aria-hidden>{country.flag}</span>
-            <span className="font-label-caps tracking-widest text-[#F5F2EE]/80">
+            <span className="font-label-caps tracking-widest text-[#FFFFFF]/80">
               {region.toUpperCase()} · {country.capital.toUpperCase()}
             </span>
           </div>
@@ -276,10 +276,10 @@ export default async function CountryExperience({ params }: Props) {
 
           <div className="mt-6 max-w-2xl">
             <div className="red-thread w-24 mb-6" />
-            <p className="font-body-lg text-lg md:text-xl leading-relaxed text-[#F5F2EE]/90">
+            <p className="font-body-lg text-lg md:text-xl leading-relaxed text-[#FFFFFF]/90">
               {t(country.blurb)}
             </p>
-            <p className="mt-4 text-[#F5F2EE]/70 font-body-md">
+            <p className="mt-4 text-[#FFFFFF]/70 font-body-md">
               {t(
                 "An editorial gateway into the artists, works, and stories that define {country}'s contribution to the contemporary African movement — assembled with curatorial care by NUA-ARTE.",
                 { country: name },
@@ -296,14 +296,14 @@ export default async function CountryExperience({ params }: Props) {
           <div className="mt-10 flex flex-wrap gap-3">
             <Link
               href={`/virtual-gallery?country=${country.slug}`}
-              className="bg-[#9F0D12] text-[#F5F2EE] px-7 py-3 font-label-caps tracking-widest hover:bg-[#7d0a0e] transition-colors"
+              className="bg-[#D7141E] text-[#FFFFFF] px-7 py-3 font-label-caps tracking-widest hover:bg-[#B0000E] transition-colors"
             >
               {t("ENTER VIRTUAL GALLERY →")}
             </Link>
 
             <Link
               href={`/artists?country=${country.slug}`}
-              className="border border-[#F5F2EE]/60 text-[#F5F2EE] px-7 py-3 font-label-caps tracking-widest hover:bg-[#F5F2EE] hover:text-[#111111] transition-colors"
+              className="border border-[#FFFFFF]/60 text-[#FFFFFF] px-7 py-3 font-label-caps tracking-widest hover:bg-[#FFFFFF] hover:text-[#111111] transition-colors"
             >
               {t("VIEW ARTISTS ({count})", { count: stats.artistsCount })}
             </Link>
@@ -492,12 +492,12 @@ export default async function CountryExperience({ params }: Props) {
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <div className="absolute bottom-4 left-4 right-4 text-[#F5F2EE]">
+                  <div className="absolute bottom-4 left-4 right-4 text-[#FFFFFF]">
                     <p className="font-label-caps tracking-widest text-xs opacity-80">
                       {e.dates}
                     </p>
                     <h3 className="font-display text-3xl mt-1">{e.title}</h3>
-                    <p className="italic text-[#F5F2EE]/90 mt-1">{e.venue}</p>
+                    <p className="italic text-[#FFFFFF]/90 mt-1">{e.venue}</p>
 
                   </div>
                 </div>

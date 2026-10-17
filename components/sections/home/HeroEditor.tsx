@@ -1,0 +1,207 @@
+"use client";
+
+import { useState } from "react";
+import { toast } from "sonner";
+import { useLanguage, useRouter } from "@/lib/i18n";
+import { LOCALE_NATIVE_NAMES } from "@/lib/i18n/config";
+import { supabase } from "@/lib/supabase/client";
+import { savePageBlock } from "@/lib/data/page-block-save";
+import { pingRevalidate } from "@/lib/utils/revalidate";
+import { F } from "@/components/dashboards/FormField";
+
+export type HeroContent = {
+  eyebrow: string;
+  titleLine1: string;
+  titleLine2: string;
+  titleColor: "white" | "red";
+  subLine1: string;
+  subLine2: string;
+  ctaLabel: string;
+  ctaHref: string;
+  imageSrc: string;
+  imageAlt: string;
+};
+
+export const HERO_DEFAULTS: HeroContent = {
+  eyebrow: "NUA-ARTE",
+  titleLine1: "UNSEEN.",
+  titleLine2: "UNHEARD.",
+  titleColor: "white",
+  subLine1: "An encounter with art.",
+  subLine2: "An introduction to a life.",
+  ctaLabel: "Discover the artists",
+  ctaHref: "/artists",
+  imageSrc: "/images/hero-unseen.jpg",
+  imageAlt: "Close-up portrait of a face layered with red, ochre and ivory impasto paint.",
+};
+
+/** Fields saved per language; everything else is shared by all languages
+ * (the title stays English everywhere, links and the image are the same). */
+const PER_LANGUAGE: (keyof HeroContent)[] = ["subLine1", "subLine2", "ctaLabel"];
+
+const blockKey = (field: keyof HeroContent) =>
+  `hero_v2_${field.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`)}`;
+
+export function HeroEditor({ initial, onClose }: { initial: HeroContent; onClose: () => void }) {
+  const { t, language } = useLanguage();
+  const router = useRouter();
+  // Translatable fields open showing what the page shows in this language.
+  const [draft, setDraft] = useState<HeroContent>(() => ({
+    ...initial,
+    subLine1: t(initial.subLine1),
+    subLine2: t(initial.subLine2),
+    ctaLabel: t(initial.ctaLabel),
+    imageAlt: t(initial.imageAlt),
+  }));
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const set = <K extends keyof HeroContent>(key: K, value: HeroContent[K]) => setDraft((d) => ({ ...d, [key]: value }));
+
+  const upload = async (file: File) => {
+    setUploading(true);
+    const path = `page-blocks/home-hero-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
+    const { error } = await supabase.storage.from("home").upload(path, file);
+    if (error) {
+      toast.error(t(error.message));
+    } else {
+      set("imageSrc", supabase.storage.from("home").getPublicUrl(path).data.publicUrl);
+    }
+    setUploading(false);
+  };
+
+  const save = async () => {
+    setSaving(true);
+    const textFields: (keyof HeroContent)[] = [
+      "eyebrow",
+      "titleLine1",
+      "titleLine2",
+      "titleColor",
+      "subLine1",
+      "subLine2",
+      "ctaLabel",
+      "ctaHref",
+    ];
+    const results = await Promise.all([
+      ...textFields
+        .filter((field) => draft[field] !== (PER_LANGUAGE.includes(field) ? t(initial[field]) : initial[field]))
+        .map((field) =>
+          savePageBlock({
+            page: "home",
+            blockKey: blockKey(field),
+            lang: PER_LANGUAGE.includes(field) ? language : "en",
+            value: draft[field].trim(),
+            englishFallback: { value: HERO_DEFAULTS[field] },
+          }),
+        ),
+      draft.imageSrc !== initial.imageSrc || draft.imageAlt !== t(initial.imageAlt)
+        ? savePageBlock({
+            page: "home",
+            blockKey: "hero_v2_image",
+            lang: language,
+            value: draft.imageSrc.trim(),
+            altText: draft.imageAlt.trim(),
+            englishFallback: { value: HERO_DEFAULTS.imageSrc, altText: HERO_DEFAULTS.imageAlt },
+          })
+        : null,
+    ]);
+    const failed = results.find((r) => r && "error" in r && r.error);
+    setSaving(false);
+    if (failed && failed.error) {
+      toast.error(t(failed.error.message));
+      return;
+    }
+    await pingRevalidate("page-blocks", { page: "home" });
+    toast.success(t("Hero saved."));
+    onClose();
+    router.refresh();
+  };
+
+  const languageNote =
+    language === "en" ? null : t("Subtitle, button text and image description are saved for {language} only.", {
+      language: LOCALE_NATIVE_NAMES[language],
+    });
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center overflow-auto bg-black/60 p-4">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-auto bg-background p-8 text-on-surface">
+        <div className="mb-6 flex items-center justify-between">
+          <h3 className="font-display text-2xl text-primary">{t("Edit hero")}</h3>
+          <button type="button" onClick={onClose} aria-label={t("Close")} className="text-on-surface-variant">
+            ✕
+          </button>
+        </div>
+
+        {languageNote && <p className="mb-5 text-xs text-on-surface-variant">{languageNote}</p>}
+
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <F label={t("Small label (top left)")} value={draft.eyebrow} onChange={(v) => set("eyebrow", v)} />
+          </div>
+          <F label={t("Title — line 1")} value={draft.titleLine1} onChange={(v) => set("titleLine1", v)} />
+          <F label={t("Title — line 2")} value={draft.titleLine2} onChange={(v) => set("titleLine2", v)} />
+          <label className="block sm:col-span-2">
+            <span className="mb-2 block font-label-caps text-label-caps uppercase text-on-surface-variant">
+              {t("Title colour")}
+            </span>
+            <select
+              value={draft.titleColor}
+              onChange={(e) => set("titleColor", e.target.value === "red" ? "red" : "white")}
+              className="w-full border-b border-primary/30 bg-transparent py-2 text-primary"
+            >
+              <option value="white">{t("White")}</option>
+              <option value="red">{t("Poster red")}</option>
+            </select>
+          </label>
+          <F label={t("Subtitle — line 1")} value={draft.subLine1} onChange={(v) => set("subLine1", v)} />
+          <F label={t("Subtitle — line 2")} value={draft.subLine2} onChange={(v) => set("subLine2", v)} />
+          <F label={t("Button text")} value={draft.ctaLabel} onChange={(v) => set("ctaLabel", v)} />
+          <F label={t("Button link")} value={draft.ctaHref} onChange={(v) => set("ctaHref", v)} />
+
+          <div className="sm:col-span-2">
+            <span className="mb-2 block font-label-caps text-label-caps uppercase text-on-surface-variant">
+              {t("Image")}
+            </span>
+            <div className="flex items-start gap-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={draft.imageSrc} alt="" className="h-24 w-24 shrink-0 object-cover" />
+              <div className="flex-1 space-y-3">
+                <label className="block cursor-pointer border border-dashed border-primary/25 p-3 text-xs uppercase tracking-widest text-primary hover:border-secondary">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])}
+                  />
+                  {uploading ? t("Uploading…") : t("Upload image")}
+                </label>
+                <input
+                  value={draft.imageSrc}
+                  onChange={(e) => set("imageSrc", e.target.value)}
+                  placeholder={t("…or paste an image URL")}
+                  className="w-full border-b border-primary/30 bg-transparent py-2 text-sm text-primary"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="sm:col-span-2">
+            <F label={t("Image description (alt text)")} value={draft.imageAlt} onChange={(v) => set("imageAlt", v)} />
+          </div>
+        </div>
+
+        <div className="mt-8 flex justify-end gap-3">
+          <button type="button" onClick={onClose} className="btn-secondary px-5 py-2 text-xs uppercase tracking-[0.2em]">
+            {t("Cancel")}
+          </button>
+          <button
+            type="button"
+            onClick={save}
+            disabled={saving || uploading}
+            className="btn-primary px-5 py-2 text-xs uppercase tracking-[0.2em] disabled:opacity-50"
+          >
+            {saving ? t("Saving…") : t("Save")}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

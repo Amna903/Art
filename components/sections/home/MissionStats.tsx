@@ -15,7 +15,7 @@ export function MissionStats() {
 
   return (
     <section className="px-gutter-page py-section-gap">
-      <div className="mx-auto grid max-w-container-max grid-cols-1 gap-8 bg-[#F2EFE9] px-5 py-7 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-12 lg:px-10 lg:py-8">
+      <div className="mx-auto grid max-w-container-max grid-cols-1 gap-8 bg-[#EFEFEF] px-5 py-7 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-12 lg:px-10 lg:py-8">
         <div>
           <span className="mb-3 block font-label-caps text-[8px] tracking-[0.24em] text-secondary">
             — {t("OUR MISSION IN DATA")}
@@ -41,7 +41,7 @@ export function MissionStats() {
             </div>
           ))}
           <svg aria-hidden="true" className="col-span-2 h-3 w-full" viewBox="0 0 360 12" preserveAspectRatio="none">
-            <path d="M2 8 C88 3 140 11 220 6 S320 8 358 4" fill="none" stroke="#9F0D12" strokeWidth="1.2" strokeLinecap="round" opacity="0.65" />
+            <path d="M2 8 C88 3 140 11 220 6 S320 8 358 4" fill="none" stroke="#D7141E" strokeWidth="1.2" strokeLinecap="round" opacity="0.65" />
           </svg>
         </div>
 

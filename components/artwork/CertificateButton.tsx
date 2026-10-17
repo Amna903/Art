@@ -75,24 +75,24 @@ function CertificateModal({
         }
       `}</style>
       <div
-        className="certificate-print w-full max-w-lg bg-[#f4efe6] text-[#141110] border-4 border-double border-[#38302c] shadow-2xl relative p-8 sm:p-12"
+        className="certificate-print w-full max-w-lg bg-[#EFEFEF] text-[#121212] border-4 border-double border-[#313131] shadow-2xl relative p-8 sm:p-12"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
           aria-label={t("Close modal")}
-          className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-[#141110]/5 hover:bg-[#141110]/10 flex items-center justify-center transition-all print:hidden"
+          className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-[#121212]/5 hover:bg-[#121212]/10 flex items-center justify-center transition-all print:hidden"
         >
           <span className="material-symbols-outlined text-lg">close</span>
         </button>
 
         <div className="text-center mb-8">
-          <span className="material-symbols-outlined text-3xl text-[#b85d38]">verified_user</span>
+          <span className="material-symbols-outlined text-3xl text-[#D7141E]">verified_user</span>
           <h3 className="font-serif text-2xl mt-2 mb-1 tracking-wide">{t("Certificate of Authenticity")}</h3>
-          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#665e57]">{t("NUA-ARTE Collective")}</p>
+          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#5F5F5F]">{t("NUA-ARTE Collective")}</p>
         </div>
 
-        <div className="border-t border-b border-[#38302c]/30 py-6 space-y-4 text-sm">
+        <div className="border-t border-b border-[#313131]/30 py-6 space-y-4 text-sm">
           <Row label={t("Title")} value={artworkTitle} emphasis />
           {artistName && <Row label={t("Artist")} value={artistName} />}
           {medium && <Row label={t("Medium")} value={medium} />}
@@ -102,13 +102,13 @@ function CertificateModal({
           <Row label={t("Issued")} value={issued} />
         </div>
 
-        <p className="text-xs text-[#665e57] leading-relaxed mt-6 text-center">
+        <p className="text-xs text-[#5F5F5F] leading-relaxed mt-6 text-center">
           {t("This certifies that the above work has been authenticated by NUA-ARTE's curatorial team and is sold with full provenance documentation.")}
         </p>
 
         <button
           onClick={() => window.print()}
-          className="w-full mt-8 bg-[#141110] text-[#f4efe6] font-mono text-xs uppercase tracking-widest py-3.5 px-6 font-semibold hover:bg-[#2a2421] transition-colors flex items-center justify-center gap-2 print:hidden"
+          className="w-full mt-8 bg-[#121212] text-[#EFEFEF] font-mono text-xs uppercase tracking-widest py-3.5 px-6 font-semibold hover:bg-[#252525] transition-colors flex items-center justify-center gap-2 print:hidden"
         >
           <span className="material-symbols-outlined text-sm">print</span>
           {t("Print / Save as PDF")}
@@ -123,7 +123,7 @@ function CertificateModal({
 function Row({ label, value, emphasis }: { label: string; value: string; emphasis?: boolean }) {
   return (
     <div className="flex items-baseline justify-between gap-4">
-      <span className="text-[10px] font-mono uppercase tracking-widest text-[#665e57] shrink-0">{label}</span>
+      <span className="text-[10px] font-mono uppercase tracking-widest text-[#5F5F5F] shrink-0">{label}</span>
       <span className={emphasis ? "font-serif text-base text-right" : "text-right"}>{value}</span>
     </div>
   );

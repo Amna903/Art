@@ -177,7 +177,7 @@ export function CollectionsView({ initialItems = [] }: { initialItems?: Supabase
                 <Image
                   fill
                   sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                  className="object-cover transition-all duration-700"
                   alt={c.imageAlt}
                   src={c.image}
                 />
@@ -221,7 +221,7 @@ export function CollectionsView({ initialItems = [] }: { initialItems?: Supabase
                   <Image
                     fill
                     sizes={i === 0 ? "(max-width: 768px) 100vw, 66vw" : "(max-width: 768px) 100vw, 33vw"}
-                    className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-100 group-hover:scale-105"
+                    className="object-cover transition-all duration-700 scale-100 group-hover:scale-105"
                     alt={c.imageAlt}
                     src={c.image}
                   />

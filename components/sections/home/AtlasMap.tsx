@@ -506,7 +506,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                   <path
                     d={shard.path}
                     fill={`url(#clay-grad-${shard.slug})`}
-                    stroke={isActive ? "var(--atlas-accent)" : "rgba(25, 15, 10, 0.75)"}
+                    stroke={isActive ? "var(--atlas-accent)" : "rgba(17, 17, 17, 0.75)"}
                     strokeWidth={isActive ? 2.2 : 1.2}
                     strokeLinejoin="round"
                     className="nu-clay-top"
@@ -533,10 +533,10 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
               if (!country) return null;
               const isActive = activeSlug === isle.slug;
               const palette = shardMap.get(isle.slug)?.palette || {
-                topLight: "#E8C59A",
-                topBase: "#DEB484",
-                topDark: "#C69966",
-                sideDark: "#342215",
+                topLight: "#C9C9C9",
+                topBase: "#B9B9B9",
+                topDark: "#9F9F9F",
+                sideDark: "#252525",
               };
 
               return (
@@ -565,7 +565,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                     cy={isle.y}
                     r={isActive ? 6 : 4.5}
                     fill={palette.topBase}
-                    stroke={isActive ? "var(--atlas-accent)" : "rgba(35, 22, 14, 0.75)"}
+                    stroke={isActive ? "var(--atlas-accent)" : "rgba(24, 24, 24, 0.75)"}
                     strokeWidth={isActive ? 1.4 : 1}
                   />
                   {/* Specular highlight */}
@@ -651,7 +651,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                           <path
                             d={shard.path}
                             fill={isActive ? "var(--atlas-accent)" : shard.palette.topBase}
-                            stroke="rgba(35, 22, 14, 0.65)"
+                            stroke="rgba(24, 24, 24, 0.65)"
                             strokeWidth={4}
                           />
                         </svg>

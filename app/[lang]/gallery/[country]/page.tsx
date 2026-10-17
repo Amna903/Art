@@ -203,15 +203,15 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
               className="relative h-full w-full flex-shrink-0 snap-start"
               style={{
                 background: isFeatured
-                  ? "linear-gradient(180deg, #1a1816 0%, #0a0908 70%, #050404 100%)"
-                  : "linear-gradient(180deg, #15140f 0%, #0a0908 70%, #050404 100%)",
+                  ? "linear-gradient(180deg, #181818 0%, #090909 70%, #040404 100%)"
+                  : "linear-gradient(180deg, #141414 0%, #090909 70%, #040404 100%)",
               }}
             >
               {/* Floor */}
               <div
                 className="absolute bottom-0 left-0 right-0 h-1/3"
                 style={{
-                  background: "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.6) 100%)",
+                  background: "linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.6) 100%)",
                   transform: "perspective(800px) rotateX(60deg)",
                   transformOrigin: "top",
                 }}
@@ -249,12 +249,12 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
                         <div
                           className="absolute -inset-12 pointer-events-none opacity-60 group-hover:opacity-100 transition-opacity"
                           style={{
-                            background: "radial-gradient(ellipse at center, rgba(228,219,213,0.25) 0%, transparent 70%)",
+                            background: "radial-gradient(ellipse at center, rgba(220, 220, 220, 0.25) 0%, transparent 70%)",
                           }}
                         />
                         {/* Frame */}
                         <div
-                          className="relative bg-beige border-[10px] border-[#1c1815] shadow-2xl"
+                          className="relative bg-beige border-[10px] border-[#191919] shadow-2xl"
                           style={{
                             width: isHero ? 280 : 200,
                             height: isHero ? 360 : 260,
@@ -263,7 +263,7 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
                           <div
                             className="w-full h-full flex items-end p-4"
                             style={{
-                              background: `linear-gradient(135deg, #${a.swatch} 0%, #1c1815 100%)`,
+                              background: `linear-gradient(135deg, #${a.swatch} 0%, #191919 100%)`,
                             }}
                           >
                             <span className="font-display-lg text-beige/90 text-xs uppercase tracking-wider leading-tight">{a.title}</span>
@@ -356,8 +356,8 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
               </p>
 
               <div
-                className="aspect-[3/4] w-full mb-6 flex items-end p-6 border-[8px] border-[#1c1815] shadow-xl"
-                style={{ background: `linear-gradient(135deg, #${active.swatch} 0%, #1c1815 100%)` }}
+                className="aspect-[3/4] w-full mb-6 flex items-end p-6 border-[8px] border-[#191919] shadow-xl"
+                style={{ background: `linear-gradient(135deg, #${active.swatch} 0%, #191919 100%)` }}
               >
                 <span className="font-display-lg text-beige/90 text-base uppercase tracking-wider">{active.title}</span>
               </div>

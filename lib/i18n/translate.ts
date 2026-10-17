@@ -11,7 +11,12 @@ export type Translator = (text: string, vars?: TranslateVars) => string;
  * Strings that stay in English in every language. They are never looked up,
  * and the DOM fallback in LanguageProvider skips them too.
  */
-export const UNTRANSLATED = new Set(["UNSEEN, UNHEARD", "Illuminating Unseen Voices"]);
+export const UNTRANSLATED = new Set([
+  "UNSEEN, UNHEARD",
+  "UNSEEN.",
+  "UNHEARD.",
+  "Illuminating Unseen Voices",
+]);
 
 function interpolate(text: string, vars?: TranslateVars): string {
   if (!vars) return text;

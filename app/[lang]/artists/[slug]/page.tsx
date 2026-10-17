@@ -320,7 +320,7 @@ export default async function ArtistProfilePage({ params }: Props) {
             <h4 className="text-label-caps text-on-surface-variant mb-2">{t("PROVENANCE")}</h4>
             <h2 className="text-headline-sm font-display italic">{t("Previously Collected")}</h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 grayscale hover:grayscale-0 transition-all duration-500 opacity-60">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 transition-all duration-500">
             {(works.slice(0, 4).length > 0 ? works.slice(0, 4) : []).map((work, i) => (
               <div key={i} className="relative aspect-square rounded bg-surface-container-highest overflow-hidden">
                 <Image

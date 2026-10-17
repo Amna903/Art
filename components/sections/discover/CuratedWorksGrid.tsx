@@ -78,7 +78,7 @@ export function CuratedWorksGrid({ works }: { works: CuratedWork[] }) {
                     alt={t("{title} by {artist}", { title: w.title, artist: w.artist })}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover mix-blend-multiply opacity-95 transition-transform duration-700 group-hover:scale-[1.04]"
+                    className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                   />
                   {w.price !== null && (
                     <span className="absolute top-4 left-4 bg-beige text-primary px-3 py-1 font-label-caps tracking-widest text-[10px]">

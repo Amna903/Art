@@ -146,7 +146,7 @@ export default function AccountPage() {
                     <Image
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-in-out"
+                      className="object-cover transition-all duration-700 ease-in-out"
                       alt={w.artwork_title}
                       src={w.artwork_image || `${A}/7ecf1ef0-f8b8-4e2b-ba7f-9abe7ac43151/afr-portrait-painting.jpg`}
                     />
@@ -191,7 +191,7 @@ export default function AccountPage() {
                     <Image
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-in-out"
+                      className="object-cover transition-all duration-700 ease-in-out"
                       alt={w.artwork_title}
                       src={w.artwork_image}
                     />
@@ -238,7 +238,7 @@ export default function AccountPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
               {followed.map((a) => (
                 <div key={a.id || a.artist_slug} className="flex flex-col items-center text-center p-6 border border-primary/10 rounded-2xl bg-surface-container-lowest">
-                  <div className="relative w-40 h-40 rounded-full overflow-hidden mb-6 grayscale hover:grayscale-0 transition-all duration-500">
+                  <div className="relative w-40 h-40 rounded-full overflow-hidden mb-6 transition-all duration-500">
                     <Image
                       fill
                       sizes="160px"
@@ -275,7 +275,7 @@ export default function AccountPage() {
           ) : !user ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
               <div className="flex flex-col items-center text-center p-6 border border-primary/10 rounded-2xl bg-surface-container-lowest">
-                <div className="relative w-40 h-40 rounded-full overflow-hidden mb-6 grayscale hover:grayscale-0 transition-all duration-500">
+                <div className="relative w-40 h-40 rounded-full overflow-hidden mb-6 transition-all duration-500">
                   <Image
                     fill
                     sizes="160px"

@@ -240,7 +240,7 @@ export default async function Page({ params }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
       <div className="group cursor-pointer">
       <div className="relative aspect-[16/9] mb-8 overflow-hidden">
-      <img className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105" alt={t("A curated collection of minimalist Nigerian artworks displayed in a high-end digital gallery setting. The works are mostly black and white with subtle red accents. The lighting is cool and professional. The overall aesthetic is one of precision, sophistication, and global appeal, focusing on the narrative of modern Nigeria.")} src="https://nu-artcollective.lovable.app/__l5e/assets-v1/3b671063-daed-4dec-a143-5219ad0ec512/afr-fabric-macro.jpg" />
+      <img className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105" alt={t("A curated collection of minimalist Nigerian artworks displayed in a high-end digital gallery setting. The works are mostly black and white with subtle red accents. The lighting is cool and professional. The overall aesthetic is one of precision, sophistication, and global appeal, focusing on the narrative of modern Nigeria.")} src="https://nu-artcollective.lovable.app/__l5e/assets-v1/3b671063-daed-4dec-a143-5219ad0ec512/afr-fabric-macro.jpg" />
       <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
       </div>
       <h3 className="font-headline-sm text-headline-sm mb-2">{t("The Eko Narrative")}</h3>
@@ -252,7 +252,7 @@ export default async function Page({ params }: Props) {
       </div>
       <div className="group cursor-pointer">
       <div className="relative aspect-[16/9] mb-8 overflow-hidden">
-      <img className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-105" alt={t("A collection of vibrant, abstract paintings by Nigerian artists, arranged on a paper-tinted background. The colors are bold and expressive, featuring rich yellows, deep reds, and forest greens. The lighting is bright and even, highlighting the textural quality of the paint. The atmosphere is energetic and celebratory.")} src="https://nu-artcollective.lovable.app/__l5e/assets-v1/7ecf1ef0-f8b8-4e2b-ba7f-9abe7ac43151/afr-portrait-painting.jpg" />
+      <img className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105" alt={t("A collection of vibrant, abstract paintings by Nigerian artists, arranged on a paper-tinted background. The colors are bold and expressive, featuring rich yellows, deep reds, and forest greens. The lighting is bright and even, highlighting the textural quality of the paint. The atmosphere is energetic and celebratory.")} src="https://nu-artcollective.lovable.app/__l5e/assets-v1/7ecf1ef0-f8b8-4e2b-ba7f-9abe7ac43151/afr-portrait-painting.jpg" />
       <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
       </div>
       <h3 className="font-headline-sm text-headline-sm mb-2">{t("Ancestral Echoes")}</h3>

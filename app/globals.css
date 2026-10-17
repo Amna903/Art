@@ -131,126 +131,141 @@
 }
 
 :root {
-  /* NUA-ARTE Collective — brand palette (locked) */
-  --brand-marfim: #F5F2EE;
-  --brand-preto: #111111;
-  --brand-vermelho: #9F0D12;
-  --brand-vermelho-suave: #C96D6D;
-  --brand-cinza: #D9D2CC;
+  /* NUA-ARTE — white, charcoal and red. No beige, cream, sand or brown. */
+  --nua-white: #FFFFFF;
+  --nua-paper: #F5F5F3;
+  --nua-charcoal: #1F1F1F;
+  --nua-charcoal-deep: #161616;
+  --nua-grey: #5C5C5C;
+  --nua-grey-light: #B8B8B8;
+  --nua-line: #E6E6E6;
+  --nua-line-dark: #333333;
+  --nua-red: #D7141E;
+  --nua-red-dark: #B0000E;
+  --nua-red-on-dark: #FF4D57;
+  /* Logo and very large titles only ("UNSEEN, UNHEARD"). */
+  --nua-red-poster: #FC0010;
 
-  --beige: var(--brand-marfim);
-  --red-blood: var(--brand-vermelho);
+  /* Brand aliases kept so existing classes keep working. */
+  --brand-marfim: #FFFFFF;
+  --brand-preto: #1F1F1F;
+  --brand-vermelho: #D7141E;
+  --brand-vermelho-suave: #FF4D57;
+  --brand-cinza: #E6E6E6;
+
+  --beige: #FFFFFF;
+  --red-blood: #D7141E;
   --red-blood-light: var(--brand-vermelho-suave);
 
-  --background: var(--brand-marfim);
-  --surface: var(--brand-marfim);
-  --surface-bright: #FAF8F5;
+  --background: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-bright: #FFFFFF;
   --surface-container-lowest: var(--brand-marfim);
-  --surface-container-low: #EFEAE3;
-  --surface-container: #EAE4DD;
-  --surface-container-high: #E4DED6;
-  --surface-container-highest: #DED7CF;
-  --surface-dim: #E8E2DB;
+  --surface-container-low: #F5F5F3;
+  --surface-container: #F0F0EE;
+  --surface-container-high: #EBEBEA;
+  --surface-container-highest: #E6E6E6;
+  --surface-dim: #EDEDED;
   --surface-variant: var(--brand-cinza);
 
   --on-background: var(--brand-preto);
   --on-surface: var(--brand-preto);
-  --on-surface-variant: #5A5550;
+  --on-surface-variant: #5C5C5C;
 
-  --inverse-surface: var(--brand-preto);
-  --inverse-on-surface: var(--brand-marfim);
+  --inverse-surface: var(--nua-charcoal-deep);
+  --inverse-on-surface: var(--nua-white);
 
-  --outline: #8A847E;
-  --outline-variant: var(--brand-cinza);
+  --outline: #8C8C8C;
+  --outline-variant: #E6E6E6;
   --surface-tint: var(--brand-vermelho);
 
-  --primary: var(--brand-preto);
-  --on-primary: var(--brand-marfim);
-  --primary-container: #1c1b1b;
-  --on-primary-container: var(--brand-marfim);
+  --primary: #1F1F1F;
+  --on-primary: var(--nua-white);
+  --primary-container: #1F1F1F;
+  --on-primary-container: var(--nua-white);
 
-  --secondary: var(--brand-vermelho);
-  --on-secondary: var(--brand-marfim);
+  --secondary: #D7141E;
+  --on-secondary: var(--nua-white);
   --secondary-container: var(--brand-vermelho-suave);
-  --on-secondary-container: var(--brand-marfim);
-  --secondary-fixed-dim: #E5B3B3;
+  --on-secondary-container: var(--nua-white);
+  --secondary-fixed-dim: #F2B8BB;
 
-  --tertiary: var(--brand-vermelho-suave);
-  --on-tertiary: var(--brand-marfim);
-  --tertiary-container: #F0DADA;
+  --tertiary: #FF4D57;
+  --on-tertiary: var(--nua-white);
+  --tertiary-container: #FBE3E4;
   --on-tertiary-container: var(--brand-preto);
 
-  --error: var(--brand-vermelho);
-  --on-error: var(--brand-marfim);
-  --error-container: #F8DEDE;
+  --error: #D7141E;
+  --on-error: var(--nua-white);
+  --error-container: #FBE3E4;
   --on-error-container: #3E0006;
 
-  --overlay-scrim: rgba(17, 17, 17, 0.62);
-  --overlay-scrim-strong: rgba(17, 17, 17, 0.82);
-  --on-overlay: #F5F2EE;
-  --on-overlay-muted: rgba(245, 242, 238, 0.72);
-  --label-bg: rgba(17, 17, 17, 0.78);
-  --label-fg: #F5F2EE;
+  --overlay-scrim: #1616169E;
+  --overlay-scrim-strong: #161616D1;
+  --on-overlay: #FFFFFF;
+  --on-overlay-muted: #FFFFFFB8;
+  --label-bg: #1F1F1FC7;
+  --label-fg: #FFFFFF;
 
   color-scheme: light;
 }
 
 :root.dark {
-  --brand-marfim: #15110e;
-  --brand-preto: #ede5dc;
-  --brand-cinza: #3a332d;
+  --brand-marfim: #161616;
+  --brand-preto: #F5F5F5;
+  --brand-cinza: #333333;
 
-  --beige: #1c1814;
-  --red-blood: #c8262c;
-  --red-blood-light: #e98a8a;
+  --beige: #1A1A1A;
+  --red-blood: #FF4D57;
+  --red-blood-light: #FF8A90;
 
-  --background: #15110e;
-  --surface: #15110e;
-  --surface-bright: #221d18;
-  --surface-container-lowest: #100d0a;
-  --surface-container-low: #1c1814;
-  --surface-container: #221d18;
-  --surface-container-high: #2a241e;
-  --surface-container-highest: #332c25;
-  --surface-dim: #15110e;
-  --surface-variant: #3a332d;
+  --background: #161616;
+  --surface: #161616;
+  --surface-bright: #1F1F1F;
+  --surface-container-lowest: #111111;
+  --surface-container-low: #1A1A1A;
+  --surface-container: #1F1F1F;
+  --surface-container-high: #262626;
+  --surface-container-highest: #2E2E2E;
+  --surface-dim: #161616;
+  --surface-variant: #333333;
 
-  --on-background: #ede5dc;
-  --on-surface: #ede5dc;
-  --on-surface-variant: #b5ada3;
+  --on-background: #F5F5F5;
+  --on-surface: #F5F5F5;
+  --on-surface-variant: #B8B8B8;
 
-  --inverse-surface: #ede5dc;
-  --inverse-on-surface: #15110e;
+  --inverse-surface: #F5F5F5;
+  --inverse-on-surface: #161616;
 
-  --outline: #6e655c;
-  --outline-variant: #3a332d;
+  --outline: #6B6B6B;
+  --outline-variant: #333333;
   --surface-tint: var(--red-blood);
 
-  --primary: #ede5dc;
-  --on-primary: #15110e;
-  --primary-container: #2a241e;
-  --on-primary-container: #ede5dc;
+  --primary: #F5F5F5;
+  --on-primary: #161616;
+  --primary-container: #262626;
+  --on-primary-container: #F5F5F5;
 
   --secondary: var(--red-blood);
-  --on-secondary: #ede5dc;
-  --secondary-container: #4a1416;
-  --on-secondary-container: #ede5dc;
-  --secondary-fixed-dim: #E5B3B3;
+  --on-secondary: #F5F5F5;
+  --secondary-container: #4A1013;
+  --on-secondary-container: #F5F5F5;
+  --secondary-fixed-dim: #F2B8BB;
 
   --tertiary: var(--red-blood-light);
-  --on-tertiary: #15110e;
+  --on-tertiary: #161616;
 
-  --error: #ff6b6b;
-  --on-error: #15110e;
-  --error-container: #4a1416;
-  --on-error-container: #ffd6d6;
+  --error: #FF4D57;
+  --on-error: #161616;
+  --error-container: #4A1013;
+  --on-error-container: #FFD6D8;
 
   --overlay-scrim: rgba(0, 0, 0, 0.72);
   --overlay-scrim-strong: rgba(0, 0, 0, 0.88);
-  --on-overlay: #f5ede2;
-  --on-overlay-muted: rgba(245, 237, 226, 0.72);
+  --on-overlay: #FFFFFF;
+  --on-overlay-muted: rgba(255, 255, 255, 0.72);
   --label-bg: rgba(0, 0, 0, 0.82);
-  --label-fg: #f5ede2;
+  --label-fg: #FFFFFF;
 
   color-scheme: dark;
 }
@@ -292,12 +307,20 @@
     font-family: var(--font-body);
   }
   body {
-    font-size: 15px;
+    font-size: 18px;
     line-height: 1.6;
     font-weight: 400;
     letter-spacing: 0.01em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+  /* Plain text links are red. Styled links (cards, nav, buttons) carry their
+     own classes and keep their own colour, so red stays selective. */
+  a:not([class]) {
+    color: var(--nua-red);
+  }
+  a:not([class]):hover {
+    color: var(--nua-red-dark);
   }
   .font-display {
     font-family: var(--font-display);
@@ -322,6 +345,31 @@
     direction: ltr;
     -webkit-font-smoothing: antialiased;
     font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 24;
+  }
+}
+
+/* Colour rules: red is selective (one red button per screen, links, small
+   details), never behind artworks, never body text. Charcoal sections at most
+   one or two per page. */
+@layer components {
+  .section-dark {
+    background: var(--nua-charcoal-deep);
+    color: var(--nua-white);
+  }
+  .section-dark a:not([class]) {
+    color: var(--nua-red-on-dark);
+  }
+  .btn-primary {
+    background: var(--nua-red);
+    color: var(--nua-white);
+  }
+  .btn-primary:hover {
+    background: var(--nua-red-dark);
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--nua-charcoal);
+    border: 1px solid var(--nua-charcoal);
   }
 }
 
@@ -400,9 +448,9 @@
    across hero, section transitions, cards, and CTAs.
    ===================================================================== */
 :root {
-  --nu-thread-h: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 14' preserveAspectRatio='none'><path d='M2 8 C 25 2 45 14 70 7 S 115 1 140 8 S 185 13 198 6' fill='none' stroke='%23c8262c' stroke-width='1.4' stroke-linecap='round'/></svg>");
-  --nu-thread-v: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 200' preserveAspectRatio='none'><path d='M8 2 C 2 25 14 45 7 70 S 1 115 8 140 S 13 185 6 198' fill='none' stroke='%23c8262c' stroke-width='1.4' stroke-linecap='round'/></svg>");
-  --nu-thread-ring: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 6 C 78 4 96 24 94 52 C 96 78 74 96 48 94 C 22 96 4 76 6 50 C 4 22 24 4 50 6 Z' fill='none' stroke='%23c8262c' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  --nu-thread-h: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 14' preserveAspectRatio='none'><path d='M2 8 C 25 2 45 14 70 7 S 115 1 140 8 S 185 13 198 6' fill='none' stroke='%23D7141E' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  --nu-thread-v: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 200' preserveAspectRatio='none'><path d='M8 2 C 2 25 14 45 7 70 S 1 115 8 140 S 13 185 6 198' fill='none' stroke='%23D7141E' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  --nu-thread-ring: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 6 C 78 4 96 24 94 52 C 96 78 74 96 48 94 C 22 96 4 76 6 50 C 4 22 24 4 50 6 Z' fill='none' stroke='%23D7141E' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/></svg>");
 }
 
 /* BAR MODE: plain <div className="red-thread" /> becomes an organic wave */
@@ -571,22 +619,18 @@
 
 /* === Homepage hero: atmospheric backdrop + orbiting logo ring === */
 .nu-hero {
-  --nu-halo: radial-gradient(circle, rgba(159, 13, 18, 0.14) 0%, rgba(212, 175, 120, 0.1) 45%, transparent 72%);
-  --nu-glow: radial-gradient(ellipse 70% 55% at 50% 45%, rgba(159, 13, 18, 0.1) 0%, rgba(159, 13, 18, 0.03) 35%, transparent 70%),
-    radial-gradient(circle at 15% 20%, rgba(212, 175, 120, 0.14) 0%, transparent 45%),
-    radial-gradient(circle at 85% 80%, rgba(159, 13, 18, 0.06) 0%, transparent 45%);
-  --nu-dot-color: rgba(17, 17, 17, 0.5);
+  --nu-halo: radial-gradient(circle, rgba(215, 20, 30, 0.08) 0%, transparent 70%);
+  --nu-glow: radial-gradient(ellipse 70% 55% at 50% 45%, rgba(215, 20, 30, 0.06) 0%, transparent 70%);
+  --nu-dot-color: rgba(31, 31, 31, 0.5);
   --nu-dot-opacity: 0.05;
-  --nu-logo-shadow: drop-shadow(0 12px 28px rgba(17, 17, 17, 0.18)) drop-shadow(0 0 24px rgba(159, 13, 18, 0.14));
+  --nu-logo-shadow: drop-shadow(0 12px 28px rgba(31, 31, 31, 0.18));
 }
 :root.dark .nu-hero {
-  --nu-halo: radial-gradient(circle, rgba(212, 175, 120, 0.14) 0%, rgba(159, 13, 18, 0.08) 45%, transparent 72%);
-  --nu-glow: radial-gradient(ellipse 70% 55% at 50% 45%, rgba(159, 13, 18, 0.16) 0%, rgba(159, 13, 18, 0.05) 35%, transparent 70%),
-    radial-gradient(circle at 15% 20%, rgba(212, 175, 120, 0.08) 0%, transparent 45%),
-    radial-gradient(circle at 85% 80%, rgba(212, 175, 120, 0.06) 0%, transparent 45%);
-  --nu-dot-color: rgba(245, 242, 238, 0.6);
+  --nu-halo: radial-gradient(circle, rgba(215, 20, 30, 0.1) 0%, transparent 70%);
+  --nu-glow: radial-gradient(ellipse 70% 55% at 50% 45%, rgba(215, 20, 30, 0.08) 0%, transparent 70%);
+  --nu-dot-color: rgba(255, 255, 255, 0.6);
   --nu-dot-opacity: 0.06;
-  --nu-logo-shadow: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 24px rgba(159, 13, 18, 0.18));
+  --nu-logo-shadow: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.6));
 }
 .nu-hero-glow {
   background: var(--nu-glow);
@@ -608,7 +652,6 @@
   object-position: center 35%;
   transform: scale(0.84);
   transform-origin: right center;
-  filter: saturate(0.85) contrast(1.02);
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.4) 18%, #000 32%, #000 100%),
     linear-gradient(180deg, #000 0%, #000 96%, transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.4) 18%, #000 32%, #000 100%),
@@ -623,9 +666,6 @@
     color-mix(in srgb, var(--background) 62%, transparent) 45%,
     transparent 100%
   );
-}
-:root.dark .hero-portrait-img > img {
-  filter: saturate(0.7) brightness(0.85);
 }
 @media (max-width: 1023px) {
   .hero-portrait-img > img {

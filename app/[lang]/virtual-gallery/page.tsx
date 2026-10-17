@@ -101,12 +101,12 @@ function VirtualGalleryContent() {
   const activeZoneData = ZONES.find((z) => z.id === activeZone)!;
 
   // Theme-aware panel style tokens
-  const panelBg = isDark ? "rgba(7,10,13,0.82)" : "rgba(245,242,238,0.88)";
-  const panelBgSoft = isDark ? "rgba(7,10,13,0.72)" : "rgba(245,242,238,0.85)";
-  const panelBorder = isDark ? "1px solid rgba(245,242,238,0.10)" : "1px solid rgba(17,17,17,0.10)";
-  const textPrimary = isDark ? "#F5F2EE" : "#111111";
-  const textSecondary = isDark ? "#D9D2CC" : "#4B5560";
-  const accent = "#9F0D12";
+  const panelBg = isDark ? "rgba(22,22,22,0.82)" : "rgba(255, 255, 255, 0.88)";
+  const panelBgSoft = isDark ? "rgba(22,22,22,0.72)" : "rgba(255, 255, 255, 0.85)";
+  const panelBorder = isDark ? "1px solid rgba(255, 255, 255, 0.10)" : "1px solid rgba(17, 17, 17, 0.10)";
+  const textPrimary = isDark ? "#FFFFFF" : "#111111";
+  const textSecondary = isDark ? "#D3D3D3" : "#545454";
+  const accent = "#D7141E";
 
 
   return (
@@ -243,9 +243,9 @@ function VirtualGalleryContent() {
                       className="px-4 py-2.5 font-label-caps text-[10px] text-left transition-all w-full md:w-60 shadow-lg flex items-center justify-between backdrop-blur-md focus:outline-none focus-visible:ring-2 tracking-[0.15em]"
                       style={{
                         background: active ? accent : panelBgSoft,
-                        color: active ? "#F5F2EE" : textPrimary,
+                        color: active ? "#FFFFFF" : textPrimary,
                         border: active ? "none" : panelBorder,
-                        borderLeft: `2px solid ${active ? "#F5F2EE" : "rgba(159,13,18,0.6)"}`,
+                        borderLeft: `2px solid ${active ? "#FFFFFF" : "rgba(215, 20, 30, 0.6)"}`,
                       }}
                     >
                       <span>{t(z.label)}</span>
@@ -270,9 +270,9 @@ function VirtualGalleryContent() {
                           key={k}
                           className="w-8 h-8 border flex items-center justify-center text-[10px] font-label-caps transition-colors"
                           style={{
-                            background: pressed ? accent : (isDark ? "rgba(245,242,238,0.06)" : "rgba(17,17,17,0.05)"),
-                            borderColor: pressed ? accent : (isDark ? "rgba(245,242,238,0.25)" : "rgba(17,17,17,0.2)"),
-                            color: pressed ? "#F5F2EE" : textPrimary,
+                            background: pressed ? accent : (isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(17, 17, 17, 0.05)"),
+                            borderColor: pressed ? accent : (isDark ? "rgba(255, 255, 255, 0.25)" : "rgba(17, 17, 17, 0.2)"),
+                            color: pressed ? "#FFFFFF" : textPrimary,
                           }}
                         >
                           {k.toUpperCase()}
@@ -288,7 +288,7 @@ function VirtualGalleryContent() {
                 >
                   <div
                     className="relative w-full h-full"
-                    style={{ border: isDark ? "1px solid rgba(245,242,238,0.15)" : "1px solid rgba(17,17,17,0.15)" }}
+                    style={{ border: isDark ? "1px solid rgba(255, 255, 255, 0.15)" : "1px solid rgba(17, 17, 17, 0.15)" }}
                   >
                     <div
                       className="absolute top-1.5 left-1.5 font-label-caps text-[8px] tracking-[0.2em]"
@@ -304,7 +304,7 @@ function VirtualGalleryContent() {
                         top: "45%",
                         width: "2px",
                         height: "38%",
-                        background: isDark ? "rgba(245,242,238,0.28)" : "rgba(17,17,17,0.22)",
+                        background: isDark ? "rgba(255, 255, 255, 0.28)" : "rgba(17, 17, 17, 0.22)",
                       }}
                     />
                     {ZONES.map((z) => {
@@ -351,7 +351,7 @@ function VirtualGalleryContent() {
               <div
                 className="absolute top-0 right-0 h-full w-full sm:w-80 backdrop-blur-md p-6 z-30 overflow-y-auto pointer-events-auto"
                 style={{
-                  background: isDark ? "rgba(7,10,13,0.92)" : "rgba(245,242,238,0.94)",
+                  background: isDark ? "rgba(22,22,22,0.92)" : "rgba(255, 255, 255, 0.94)",
                   border: panelBorder,
                   borderLeft: `2px solid ${accent}`,
                   color: textPrimary,
@@ -365,7 +365,7 @@ function VirtualGalleryContent() {
                 >
                   <span className="material-symbols-outlined">close</span>
                 </button>
-                <div className="relative w-full aspect-square mb-4" style={{ background: "#ede5db" }}>
+                <div className="relative w-full aspect-square mb-4" style={{ background: "#E6E6E6" }}>
                   <Image
                     src={selected.image}
                     alt={selected.title}

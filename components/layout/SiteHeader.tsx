@@ -33,8 +33,9 @@ export function SiteHeader() {
   const { t } = useLanguage();
   const router = useRouter();
   const scrolled = useScrolled();
-  const isHome = pathname === "/";
-  const transparent = isHome && !scrolled;
+  // The homepage hero is a dark full-bleed image, so the header stays solid
+  // white everywhere rather than turning translucent over it.
+  const transparent = false;
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");

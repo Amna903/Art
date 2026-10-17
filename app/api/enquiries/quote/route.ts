@@ -93,23 +93,23 @@ export async function POST(req: Request) {
           reply_to: adminEmail,
           subject: `Your quote for "${updated.artwork_title}" is ready`,
           html: `
-            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e5e5; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
-              <div style="background-color: #1a1615; color: #f4efe6; padding: 24px 32px; text-align: center;">
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #E5E5E5; border-radius: 8px; overflow: hidden; background-color: #FFFFFF;">
+              <div style="background-color: #171717; color: #EFEFEF; padding: 24px 32px; text-align: center;">
                 <h1 style="margin: 0; font-size: 20px; font-weight: 300; letter-spacing: 2px; text-transform: uppercase;">NUA-ARTE COLLECTIVE</h1>
                 <p style="margin: 4px 0 0; font-size: 11px; opacity: 0.7; letter-spacing: 1.5px; text-transform: uppercase;">Your Private Quote</p>
               </div>
               <div style="padding: 32px;">
-                <p style="font-size: 14px; color: #1a1615;">Hi ${updated.name},</p>
-                <p style="font-size: 14px; color: #444; line-height: 1.6;">
+                <p style="font-size: 14px; color: #171717;">Hi ${updated.name},</p>
+                <p style="font-size: 14px; color: #444444; line-height: 1.6;">
                   Thank you for your interest in <strong>${updated.artwork_title}</strong>. One of our curators has
                   prepared a private quote for you.
                 </p>
                 <div style="text-align: center; margin: 32px 0;">
-                  <a href="${quoteUrl}" style="background-color: #1a1615; color: #ffffff; padding: 14px 28px; text-decoration: none; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; border-radius: 4px; display: inline-block;">
+                  <a href="${quoteUrl}" style="background-color: #171717; color: #FFFFFF; padding: 14px 28px; text-decoration: none; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; border-radius: 4px; display: inline-block;">
                     View Your Quote
                   </a>
                 </div>
-                <p style="font-size: 12px; color: #999;">This private link expires in ${QUOTE_VALIDITY_DAYS} days.</p>
+                <p style="font-size: 12px; color: #999999;">This private link expires in ${QUOTE_VALIDITY_DAYS} days.</p>
               </div>
             </div>
           `,

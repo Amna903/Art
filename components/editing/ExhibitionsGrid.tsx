@@ -134,7 +134,7 @@ export function ExhibitionsGrid({
               <Image
                 fill
                 sizes="(max-width: 768px) 100vw, 33vw"
-                className="object-cover filter grayscale group-hover:grayscale-0 transition-all duration-500"
+                className="object-cover transition-all duration-500"
                 alt={t(ev.alt)}
                 src={ev.img}
               />

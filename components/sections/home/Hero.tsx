@@ -1,143 +1,117 @@
 "use client";
 
+import { useState } from "react";
+import Image from "next/image";
 import Link from "@/components/i18n/Link";
+import { useAuth } from "@/lib/auth";
 import { useLanguage } from "@/lib/i18n";
-import { EditableText } from "@/components/editing/EditableText";
-import { EditableImage } from "@/components/editing/EditableImage";
-import { blockText, blockImage, type PageBlocks } from "@/lib/data/pageBlocks";
+import { blockImage, blockText, type PageBlocks } from "@/lib/data/pageBlocks";
+import { HeroEditor, HERO_DEFAULTS, type HeroContent } from "./HeroEditor";
 
-const HERO_IMAGE = "/images/hero-portrait.jpg";
+/** Reads the hero's page blocks, falling back to the built-in defaults. */
+function readHero(blocks: PageBlocks): HeroContent {
+  const image = blockImage(blocks, "hero_v2_image", {
+    src: HERO_DEFAULTS.imageSrc,
+    alt: HERO_DEFAULTS.imageAlt,
+  });
+  const text = (key: keyof HeroContent) =>
+    blockText(blocks, `hero_v2_${key.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`)}`, HERO_DEFAULTS[key]);
+  return {
+    eyebrow: text("eyebrow"),
+    titleLine1: text("titleLine1"),
+    titleLine2: text("titleLine2"),
+    titleColor: text("titleColor") === "red" ? "red" : "white",
+    subLine1: text("subLine1"),
+    subLine2: text("subLine2"),
+    ctaLabel: text("ctaLabel"),
+    ctaHref: text("ctaHref"),
+    imageSrc: image.src,
+    imageAlt: image.alt,
+  };
+}
 
+/**
+ * Homepage hero: "UNSEEN. UNHEARD." over a full-bleed portrait on charcoal.
+ * Every piece (eyebrow, title, subtitle, button, link, image, alt text, title
+ * colour) is editable by admins through HeroEditor. Text edited on a
+ * translated page is saved for that language only; the title always stays as
+ * entered (it is English in every language).
+ */
 export function Hero({ blocks }: { blocks: PageBlocks }) {
   const { t } = useLanguage();
-  const image = blockImage(blocks, "hero_portrait", {
-    src: HERO_IMAGE,
-    alt: "Artist in a contemporary studio",
-  });
+  const { role } = useAuth();
+  const [editing, setEditing] = useState(false);
+  const hero = readHero(blocks);
 
   return (
-    <section className="relative isolate w-screen mx-[calc(50%-50vw)] overflow-hidden bg-background text-on-background">
-      <div className="relative mt-20 h-[38vh] min-h-[280px] max-h-[420px] w-full shrink-0 lg:absolute lg:inset-0 lg:right-0 lg:-inset-y-[10%] lg:left-auto lg:mt-0 lg:h-auto lg:max-h-none lg:w-[55%]">
-        <EditableImage
-          page="home"
-          blockKey="hero_portrait"
-          bucket="home"
-          src={image.src}
-          alt={image.alt}
-          fit="cover"
-          className="hero-portrait-img h-full w-full"
-        />
-      </div>
-      <div
-        aria-hidden="true"
-        className="hero-fade-left pointer-events-none absolute inset-0 hidden bg-gradient-to-r from-background from-[34%] via-background/35 via-[59%] to-transparent to-[78%] lg:block"
-      />
-      <div
-        aria-hidden="true"
-        className="hero-fade-corner pointer-events-none absolute inset-0 hidden lg:block"
-      />
-      <div
-        aria-hidden="true"
-        className="hero-fade-bottom pointer-events-none absolute inset-x-0 top-20 h-[38vh] min-h-[280px] max-h-[420px] bg-gradient-to-b from-transparent via-background/15 to-background/30 lg:hidden"
-      />
-
-      <div className="relative z-10 mx-auto flex w-full max-w-container-max items-start px-6 pb-12 pt-10 sm:px-8 sm:pb-14 sm:pt-12 lg:-translate-x-8 lg:min-h-[min(900px,68vw)] lg:items-center lg:py-24 lg:px-8">
-        <div className="w-full max-w-[760px] lg:w-[58%]">
-          <div className="mb-5 flex items-center gap-3">
-            <span aria-hidden="true" className="h-px w-5 bg-secondary" />
-            <EditableText
-              page="home"
-              blockKey="hero_eyebrow"
-              value={blockText(blocks, "hero_eyebrow", "ESTABLISHED 2024")}
-              as="span"
-              className="font-label-caps text-[9px] tracking-[0.28em] uppercase text-secondary"
-              multiline={false}
-            />
-          </div>
-
-          <h1 className="mb-6 font-display text-[clamp(2.25rem,8vw,3.5rem)] font-medium leading-[0.94] tracking-[-0.025em] text-on-background md:text-[clamp(2.75rem,5vw,5rem)] lg:text-[clamp(3.5rem,7vw,6rem)]">
-            <EditableText
-              page="home"
-              blockKey="hero_editorial_line1"
-              value={blockText(blocks, "hero_editorial_line1", "Join the Circle of")}
-              as="span"
-              className="lg:whitespace-nowrap"
-              multiline={false}
-            />
-            <span className="block italic font-medium">
-              <EditableText
-                page="home"
-                blockKey="hero_editorial_line2"
-                value={blockText(blocks, "hero_editorial_line2", "African Art")}
-                as="span"
-                multiline={false}
-              />
-            </span>
-            <span className="block italic font-medium">
-              <span className="relative inline-block">
-                <EditableText
-                  page="home"
-                  blockKey="hero_editorial_line3"
-                  value={blockText(blocks, "hero_editorial_line3", "Discovery.")}
-                  as="span"
-                  multiline={false}
-                />
-                <svg
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -bottom-1 left-0 h-2 w-[88%] overflow-visible"
-                  viewBox="0 0 140 8"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M1 5.5 C35 4.8 90 5.9 139 4.5"
-                    fill="none"
-                    stroke="#9F0D12"
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </span>
-            </span>
-          </h1>
-
-          <EditableText
-            page="home"
-            blockKey="hero_subhead"
-            value={blockText(
-              blocks,
-              "hero_subhead",
-              "Discover unknown local artists across Africa, collect meaningful works and support cultural visibility. A movement dedicated to the unseen and the profound.",
-            )}
-            as="p"
-            className="max-w-[440px] text-[15px] leading-[1.65] text-on-surface-variant"
+    <section className="relative isolate w-screen mx-[calc(50%-50vw)] mt-16 overflow-hidden bg-[var(--nua-charcoal-deep)] text-[var(--nua-white)]">
+      <div className="relative min-h-[calc(100svh-4rem)] lg:min-h-[min(calc(100svh-4rem),920px)]">
+        {/* Portrait: right side on desktop, full background on mobile. */}
+        <div className="absolute inset-0 lg:left-[38%]">
+          <Image
+            src={hero.imageSrc}
+            alt={t(hero.imageAlt)}
+            fill
+            priority
+            sizes="(max-width: 1023px) 100vw, 62vw"
+            className="object-cover object-[60%_center]"
           />
+        </div>
+        {/* Charcoal fades so the text sits on a dark field, as in the poster. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 hidden lg:block bg-gradient-to-r from-[var(--nua-charcoal-deep)] from-[38%] via-[var(--nua-charcoal-deep)]/70 via-[48%] to-transparent to-[62%]"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 lg:hidden bg-gradient-to-t from-[var(--nua-charcoal-deep)] from-[30%] via-[var(--nua-charcoal-deep)]/75 via-[55%] to-[var(--nua-charcoal-deep)]/20"
+        />
 
-          <div className="relative mt-7 inline-block">
-            <svg
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 -m-3 h-[calc(100%+1.5rem)] w-[calc(100%+1.5rem)]"
-              viewBox="0 0 140 80"
-              preserveAspectRatio="none"
+        <div className="relative z-10 mx-auto flex min-h-[inherit] w-full max-w-container-max flex-col px-6 pb-14 pt-8 sm:px-10 lg:px-12 lg:pb-20 lg:pt-10">
+          <p translate="no" className="font-display text-[15px] uppercase tracking-[0.32em] text-[var(--nua-white)]/90">
+            {hero.eyebrow}
+          </p>
+
+          <div className="mt-auto max-w-[760px] lg:my-auto">
+            <h1
+              translate="no"
+              className={`font-display font-normal uppercase leading-[0.92] tracking-[0.01em] text-[clamp(3.5rem,11vw,9.5rem)] ${
+                hero.titleColor === "red" ? "text-[var(--nua-red-poster)]" : "text-[var(--nua-white)]"
+              }`}
             >
-              <path
-                d="M70,7 C92,7 116,16 124,36 C129,48 119,65 98,72 C80,77 52,76 36,68 C20,60 12,44 18,29 C24,14 47,5 70,7 Z"
-                fill="none"
-                stroke="#9F0D12"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                opacity="0.75"
-              />
-            </svg>
+              <span className="block">{hero.titleLine1}</span>
+              <span className="block">{hero.titleLine2}</span>
+            </h1>
+
+            <p className="mt-7 font-display text-[clamp(1.35rem,2.1vw,1.9rem)] leading-[1.3] text-[var(--nua-white)]/95">
+              <span className="block">{t(hero.subLine1)}</span>
+              <span className="block">{t(hero.subLine2)}</span>
+            </p>
+
             <Link
-              href="/artists"
-              className="relative inline-flex min-w-[176px] items-center justify-center bg-primary px-9 py-4 text-[10px] font-label-caps tracking-[0.22em] uppercase text-on-primary transition-colors hover:bg-secondary hover:text-on-secondary"
+              href={hero.ctaHref || "/artists"}
+              className="mt-10 inline-flex items-center justify-center border border-[var(--nua-white)]/85 px-10 py-3.5 font-display text-[clamp(1.05rem,1.4vw,1.25rem)] text-[var(--nua-white)] transition-colors hover:bg-[var(--nua-white)] hover:text-[var(--nua-charcoal)]"
             >
-              {t("Explore artists")}
+              {t(hero.ctaLabel)}
             </Link>
           </div>
         </div>
+
+        {role === "admin" && (
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            className="absolute right-4 top-4 z-20 flex items-center gap-2 bg-[var(--nua-white)] px-4 py-2 text-xs uppercase tracking-widest text-[var(--nua-charcoal)] shadow-lg hover:bg-[var(--nua-paper)]"
+          >
+            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+              edit
+            </span>
+            {t("Edit hero")}
+          </button>
+        )}
       </div>
+
+      {editing && <HeroEditor initial={hero} onClose={() => setEditing(false)} />}
     </section>
   );
 }
