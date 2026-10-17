@@ -114,11 +114,13 @@ export function JournalGrid({
     router.refresh();
   };
 
-  const setAsMainStory = async (id: string) => {
-    // Unset whichever post currently holds the pinned slot before claiming it, so the
-    // "at most one pinned post" partial unique index never sees two true rows at once.
+  const toggleMainStory = async (id: string, pinned: boolean) => {
+    // Clicking the filled star unpins the post, so the journal falls back to its
+    // built-in main story (the Luanda account). Otherwise unset whichever post
+    // holds the pinned slot before claiming it, so the "at most one pinned post"
+    // partial unique index never sees two true rows at once.
     await supabase.from("journal_posts").update({ is_pinned: false }).eq("is_pinned", true);
-    const { error } = await supabase.from("journal_posts").update({ is_pinned: true }).eq("id", id);
+    const { error } = pinned ? { error: null } : await supabase.from("journal_posts").update({ is_pinned: true }).eq("id", id);
     if (error) alert(error.message);
     reload();
     await pingRevalidate("journal-posts");
@@ -163,9 +165,10 @@ export function JournalGrid({
                 <div className="absolute top-2 right-2 z-10 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   {realItem && (
                     <button
-                      onClick={() => setAsMainStory(realItem.id)}
+                      onClick={() => toggleMainStory(realItem.id, realItem.is_pinned)}
                       className={`w-8 h-8 flex items-center justify-center text-sm rounded-full shadow-lg ${realItem.is_pinned ? "bg-secondary text-on-primary" : "bg-background text-primary"}`}
-                      title={realItem.is_pinned ? t("Currently the main story on /journal") : t("Set as main story on /journal")}
+                      title={realItem.is_pinned ? t("Main story on /journal. Click to unpin") : t("Set as main story on /journal")}
+                      aria-pressed={realItem.is_pinned}
                     >
                       {realItem.is_pinned ? "★" : "☆"}
                     </button>

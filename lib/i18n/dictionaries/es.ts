@@ -1205,6 +1205,7 @@ const es: Record<string, string> = {
   "NUA-ARTE Contemporary African Art Exhibition": "NUA-ARTE — Exposición de Arte Africano Contemporáneo",
   "Curated by {curator}": "Comisariada por {curator}",
   "Africa Liaison & Partner: {partner}": "Enlace con África y socio: {partner}",
+  "Main story on /journal. Click to unpin": "Historia principal de /journal. Haz clic para desfijar",
 };
 
 export default es;
