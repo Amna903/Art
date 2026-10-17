@@ -2,7 +2,7 @@
  * Portuguese (European, pt-PT). Keys are the English source strings (see lib/i18n/translate.ts);
  * anything missing here renders in English.
  *
- * Machine-drafted — awaiting Nilton's review. Not public until REVIEWED.pt is set to true in lib/i18n/config.ts.
+ * Reviewed and public.
  */
 const pt: Record<string, string> = {
   "Acrylic and gold leaf": "Acrílico e folha de ouro",

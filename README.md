@@ -37,12 +37,10 @@ others have their own prefix (`/fr/artists`, `/pt/artists`, `/es/artists`,
   blank fields fall back to English. Inline page copy (EditableText /
   EditableImage alt text) is saved in whichever language the admin is viewing.
   Run the migration against Supabase before deploying.
-- **Review gate**: Portuguese (Nilton), Spanish and Italian (native speakers)
-  are machine-drafted and must be reviewed before launch. Until
-  `REVIEWED.<lang>` is set to `true` in `lib/i18n/config.ts`, a language is
-  only served in `next dev` or on deployments built with
-  `NEXT_PUBLIC_PREVIEW_LOCALES=pt,es,it` (served `noindex`). Elsewhere it is
-  hidden from the switcher and its URLs redirect to English.
+- **Review gate**: all five languages are reviewed and public. A new
+  language added later starts with `REVIEWED.<lang> = false` in
+  `lib/i18n/config.ts`; it is then only served in `next dev` or on deployments
+  built with `NEXT_PUBLIC_PREVIEW_LOCALES` (noindex) until it is signed off.
 
 ## Pricing: Price Upon Request
 

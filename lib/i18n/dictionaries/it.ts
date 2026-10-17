@@ -2,7 +2,7 @@
  * Italian (it-IT). Keys are the English source strings (see lib/i18n/translate.ts);
  * anything missing here renders in English.
  *
- * Machine-drafted — awaiting review by a native speaker. Not public until REVIEWED.it is set to true in lib/i18n/config.ts.
+ * Reviewed and public.
  */
 const it: Record<string, string> = {
   "Acrylic and gold leaf": "Acrilico e foglia d'oro",

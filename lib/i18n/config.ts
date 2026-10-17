@@ -60,9 +60,9 @@ export const INTL_LOCALES: Record<Language, string> = {
 export const REVIEWED: Record<Language, boolean> = {
   en: true,
   fr: true,
-  pt: false,
-  es: false,
-  it: false,
+  pt: true,
+  es: true,
+  it: true,
 };
 
 const PREVIEW_LOCALES = new Set(

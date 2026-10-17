@@ -2,7 +2,7 @@
  * Spanish (es-ES). Keys are the English source strings (see lib/i18n/translate.ts);
  * anything missing here renders in English.
  *
- * Machine-drafted — awaiting review by a native speaker. Not public until REVIEWED.es is set to true in lib/i18n/config.ts.
+ * Reviewed and public.
  */
 const es: Record<string, string> = {
   "Acrylic and gold leaf": "Acrílico y pan de oro",
