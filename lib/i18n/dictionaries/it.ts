@@ -1086,6 +1086,7 @@ const it: Record<string, string> = {
   "Title — line 1": "Titolo — riga 1",
   "Title — line 2": "Titolo — riga 2",
   "Title colour": "Colore del titolo",
+  "Charcoal (light mode) / white (dark mode)": "Antracite (modalità chiara) / bianco (modalità scura)",
   "White": "Bianco",
   "Poster red": "Rosso manifesto",
   "Subtitle — line 1": "Sottotitolo — riga 1",

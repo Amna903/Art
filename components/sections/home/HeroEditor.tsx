@@ -10,7 +10,6 @@ import { pingRevalidate } from "@/lib/utils/revalidate";
 import { F } from "@/components/dashboards/FormField";
 
 export type HeroContent = {
-  eyebrow: string;
   titleLine1: string;
   titleLine2: string;
   titleColor: "white" | "red";
@@ -23,7 +22,6 @@ export type HeroContent = {
 };
 
 export const HERO_DEFAULTS: HeroContent = {
-  eyebrow: "NUA-ARTE",
   titleLine1: "UNSEEN.",
   titleLine2: "UNHEARD.",
   titleColor: "white",
@@ -72,7 +70,6 @@ export function HeroEditor({ initial, onClose }: { initial: HeroContent; onClose
   const save = async () => {
     setSaving(true);
     const textFields: (keyof HeroContent)[] = [
-      "eyebrow",
       "titleLine1",
       "titleLine2",
       "titleColor",
@@ -134,9 +131,6 @@ export function HeroEditor({ initial, onClose }: { initial: HeroContent; onClose
         {languageNote && <p className="mb-5 text-xs text-on-surface-variant">{languageNote}</p>}
 
         <div className="grid gap-5 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <F label={t("Small label (top left)")} value={draft.eyebrow} onChange={(v) => set("eyebrow", v)} />
-          </div>
           <F label={t("Title — line 1")} value={draft.titleLine1} onChange={(v) => set("titleLine1", v)} />
           <F label={t("Title — line 2")} value={draft.titleLine2} onChange={(v) => set("titleLine2", v)} />
           <label className="block sm:col-span-2">
@@ -148,7 +142,7 @@ export function HeroEditor({ initial, onClose }: { initial: HeroContent; onClose
               onChange={(e) => set("titleColor", e.target.value === "red" ? "red" : "white")}
               className="w-full border-b border-primary/30 bg-transparent py-2 text-primary"
             >
-              <option value="white">{t("White")}</option>
+              <option value="white">{t("Charcoal (light mode) / white (dark mode)")}</option>
               <option value="red">{t("Poster red")}</option>
             </select>
           </label>

@@ -454,7 +454,7 @@ export function ClayAtlasMap() {
                   <path
                     d={shard.path}
                     fill={`url(#detail-grad-${shard.slug})`}
-                    stroke={isHovered ? "var(--atlas-accent)" : "rgba(17, 17, 17, 0.75)"}
+                    stroke={isHovered ? "var(--atlas-accent)" : "rgba(25, 15, 10, 0.75)"}
                     strokeWidth={isHovered ? 2.2 : 1.2}
                     strokeLinejoin="round"
                     className="nu-clay-top"
@@ -482,10 +482,10 @@ export function ClayAtlasMap() {
               const isHovered = hover === isle.slug;
               const dimmed = isDimmed(isle.slug);
               const palette = shardMap.get(isle.slug)?.palette || {
-                topLight: "#C9C9C9",
-                topBase: "#B9B9B9",
-                topDark: "#9F9F9F",
-                sideDark: "#252525",
+                topLight: "#E8C59A",
+                topBase: "#DEB484",
+                topDark: "#C69966",
+                sideDark: "#342215",
               };
 
               return (
@@ -519,7 +519,7 @@ export function ClayAtlasMap() {
                     cy={isle.y}
                     r={isHovered ? 6 : 4.5}
                     fill={palette.topBase}
-                    stroke={isHovered ? "var(--atlas-accent)" : "rgba(24, 24, 24, 0.75)"}
+                    stroke={isHovered ? "var(--atlas-accent)" : "rgba(35, 22, 14, 0.75)"}
                     strokeWidth={isHovered ? 1.4 : 1}
                   />
                   <circle

@@ -1251,6 +1251,7 @@ const fr: Record<string, string> = {
   "Title — line 1": "Titre — ligne 1",
   "Title — line 2": "Titre — ligne 2",
   "Title colour": "Couleur du titre",
+  "Charcoal (light mode) / white (dark mode)": "Anthracite (mode clair) / blanc (mode sombre)",
   "White": "Blanc",
   "Poster red": "Rouge affiche",
   "Subtitle — line 1": "Sous-titre — ligne 1",

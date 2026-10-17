@@ -91,8 +91,8 @@ export function ClayAfricaMap({
     >
       <defs>
         <filter id="heroShardShadow" x="-30%" y="-30%" width="160%" height="160%">
-          <feDropShadow dx="0.6" dy="1.4" stdDeviation="1" floodColor="#000000" floodOpacity="0.55" />
-          <feDropShadow dx="1.4" dy="3.5" stdDeviation="4" floodColor="#000000" floodOpacity="0.35" />
+          <feDropShadow dx="0.6" dy="1.4" stdDeviation="1" floodColor="#000" floodOpacity="0.55" />
+          <feDropShadow dx="1.4" dy="3.5" stdDeviation="4" floodColor="#000" floodOpacity="0.35" />
         </filter>
         <filter id="heroShardErode" x="-10%" y="-10%" width="120%" height="120%">
           <feMorphology in="SourceGraphic" operator="erode" radius="2" />
@@ -106,7 +106,7 @@ export function ClayAfricaMap({
             surfaceScale="3"
             specularConstant="0.55"
             specularExponent="18"
-            lightingColor="#FFFFFF"
+            lightingColor="#fff2dc"
             result="spec"
           >
             <feDistantLight azimuth="135" elevation="55" />
@@ -170,11 +170,11 @@ export function ClayAfricaMap({
               }
             }}
           >
-            <path d={shard.path} fill="#000000" opacity={0.55} filter="url(#heroShardShadow)" pointerEvents="none" />
+            <path d={shard.path} fill="#000" opacity={0.55} filter="url(#heroShardShadow)" pointerEvents="none" />
             <path
               d={shard.path}
               fill={`url(#hero-fill-${shard.slug})`}
-              stroke="rgba(0, 0, 0, 0.6)"
+              stroke="rgba(0,0,0,0.6)"
               strokeWidth={0.4}
               strokeLinejoin="round"
               filter="url(#heroClayErode)"
@@ -198,8 +198,8 @@ export function ClayAfricaMap({
             cx={isle.x}
             cy={isle.y}
             r={isHover ? 6 : 4.5}
-            fill="#7B7B7B"
-            stroke="#000000"
+            fill="#8a7a5a"
+            stroke="#000"
             strokeOpacity={0.4}
             strokeWidth={0.5}
             style={{ cursor: "pointer", transition: "r 0.2s ease" }}

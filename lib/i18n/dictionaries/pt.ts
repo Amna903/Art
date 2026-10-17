@@ -1086,6 +1086,7 @@ const pt: Record<string, string> = {
   "Title — line 1": "Título — linha 1",
   "Title — line 2": "Título — linha 2",
   "Title colour": "Cor do título",
+  "Charcoal (light mode) / white (dark mode)": "Carvão (modo claro) / branco (modo escuro)",
   "White": "Branco",
   "Poster red": "Vermelho cartaz",
   "Subtitle — line 1": "Subtítulo — linha 1",
