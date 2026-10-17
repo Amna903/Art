@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "@/components/i18n/Link";
+import { useBrokenImage } from "@/lib/utils/use-broken-image";
 import { useLanguage } from "@/lib/i18n";
 import { getCountryDisplayName } from "@/lib/data/africa";
 
@@ -76,9 +77,14 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
   return (
     <>
       <div className="flex justify-between items-end mb-10 sm:mb-16 gap-4">
-        <div>
-          <span className="font-label-caps text-label-caps text-secondary block mb-2">{t("AFRICAN ARTISTS")}</span>
-          <h2 className="font-headline-md text-headline-md">{t("African Arts")}</h2>
+        <div className="max-w-2xl">
+          <h2 className="font-headline-md text-headline-md">{t("Meet the artists")}</h2>
+          <p className="mt-4 text-lg leading-[1.6] text-on-surface-variant">
+            {t("Behind every work is someone with a way of seeing that belongs to them. Meet the makers, explore their materials and spend time with the details that make each voice distinct.")}
+          </p>
+          <Link href="/artists" className="mt-5 inline-block border-b border-[var(--nua-charcoal)] pb-1 text-base hover:border-[var(--nua-red)] hover:text-[var(--nua-red)]">
+            {t("Meet the artists")}
+          </Link>
         </div>
         <div className="flex space-x-4">
           <button
@@ -139,7 +145,7 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
 /** The artist's photo, or their initials on --nua-paper when it is missing
  * or fails to load (change brief §8: never an empty box). */
 function CardPhoto({ name, src }: { name: string; src: string }) {
-  const [broken, setBroken] = useState(false);
+  const { broken, ref, onError } = useBrokenImage();
   if (!src?.trim() || broken) {
     return (
       <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center bg-[var(--nua-paper)] font-display text-6xl text-[var(--nua-grey)]">
@@ -159,7 +165,8 @@ function CardPhoto({ name, src }: { name: string; src: string }) {
       className="object-cover transition-transform duration-700 group-hover:scale-105"
       alt={name}
       src={src}
-      onError={() => setBroken(true)}
+      ref={ref}
+      onError={onError}
     />
   );
 }

@@ -99,6 +99,8 @@ function playCountryCue(slug: string, ctx: AudioContext, master: GainNode) {
 type AtlasStats = {
   artists: number;
   artworks: number;
+  /** Recorded site visits (VisitCounter); 0 hides the stat. */
+  visits: number;
   countries: number;
 };
 
@@ -589,25 +591,16 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
           {/* Header */}
           <div>
             {/* Kicker */}
-            <div className="mb-2">
-              <span className="text-[9px] tracking-[0.38em] uppercase font-mono block font-bold" style={{ color: "var(--atlas-accent)" }}>
-                {t("ONE CONTINENT.")}
-              </span>
-              <span className="text-[9px] tracking-[0.38em] uppercase font-mono block mt-0.5 font-bold" style={{ color: "var(--atlas-accent)" }}>
-                {t("INFINITE VOICES.")}
-              </span>
-              <hr className="border-t w-8 mt-2" style={{ borderColor: "var(--atlas-accent)" }} />
-            </div>
+            <hr className="border-t w-8 mb-3" style={{ borderColor: "var(--atlas-accent)" }} />
 
             {/* Title */}
-            <h1 className="font-serif text-3xl lg:text-4xl leading-[1.15] font-light mt-3" style={{ color: "var(--atlas-fg)" }}>
-              {t("Explore Africa.")} <br />
-              <span className="italic font-normal">{t("Discover Art.")}</span>
-            </h1>
+            <h2 className="font-serif text-3xl lg:text-4xl leading-[1.15] font-light" style={{ color: "var(--atlas-fg)" }}>
+              {t("Explore through place")}
+            </h2>
 
             {/* Paragraph */}
-            <p className="text-xs leading-relaxed mt-3 max-w-xs font-light" style={{ color: "var(--atlas-fg-muted)" }}>
-              {t("A curated platform dedicated to contemporary African artists. Each country, each culture, each story.")}
+            <p className="text-base leading-[1.6] mt-3 max-w-sm" style={{ color: "var(--atlas-fg-muted)" }}>
+              {t("Follow your curiosity across Africa. Discover the artists connected to each place, their work and the stories that bring you closer. Our journey is growing, with a vision of reaching all 54 African countries.")}
             </p>
           </div>
 
@@ -700,7 +693,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
 
       {/* BOTTOM DIVIDED STATS BAR */}
       <div
-        className={`mt-14 pt-8 border-t max-w-[1440px] mx-auto px-6 md:px-12 grid grid-cols-2 ${stats.artworks > 0 ? "md:grid-cols-4" : "md:grid-cols-3"} gap-6 text-center md:text-left`}
+        className={`mt-14 pt-8 border-t max-w-[1440px] mx-auto px-6 md:px-12 grid grid-cols-2 ${["md:grid-cols-2", "md:grid-cols-3", "md:grid-cols-4", "md:grid-cols-5"][Number(stats.artworks > 0) + Number(stats.visits > 0) + 1]} gap-6 text-center md:text-left`}
         style={{ borderColor: "var(--atlas-border)" }}
       >
         {/* Stat 1 */}
@@ -758,6 +751,27 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
             </div>
           </div>
         </div>
+
+        {/* Visits worldwide: stands in for "Collectors worldwide" until that
+            figure is large enough to show. Hidden until visits are recorded. */}
+        {stats.visits > 0 && (
+          <div className="flex flex-col md:flex-row items-center gap-3.5 md:px-4 md:border-r" style={{ borderColor: "var(--atlas-border)" }}>
+            <div
+              className="w-10 h-10 rounded-full border flex items-center justify-center shrink-0 shadow-xs"
+              style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-accent)", backgroundColor: "var(--atlas-card-bg)" }}
+            >
+              <span className="material-symbols-outlined text-[20px]">public</span>
+            </div>
+            <div>
+              <div className="font-mono text-[9px] tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
+                {t("VISITS WORLDWIDE")}
+              </div>
+              <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
+                {formatNumber(stats.visits, stats.visits >= 10000 ? { notation: "compact" } : undefined)}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Stat 5: Scroll Indicator */}
         <div className="flex items-center justify-center md:justify-end gap-3 col-span-2 md:col-span-1">

@@ -5,8 +5,8 @@ import { useLanguage } from "@/lib/i18n";
 const STEPS = [
   { n: "01", title: "Discover", body: "Browse a curated selection of contemporary artists from Angola and the Congo." },
   { n: "02", title: "Save", body: "Follow your favorite artists and build a digital portfolio of works that resonate with you." },
-  { n: "03", title: "Collect", body: "Enquire about an original work and our team will guide you through the acquisition." },
-  { n: "04", title: "Support", body: "Artists are paid at acquisition and earn a commission on every sale." },
+  { n: "03", title: "Collect", body: "Ask us about the piece that draws you in. We can help you understand its materials, dimensions and presentation." },
+  { n: "04", title: "Support", body: "NUA-ARTE purchases selected works directly from artists, paying them at acquisition. When a work is sold, its creator also receives an additional commission." },
 ];
 
 export function ProcessSteps() {
@@ -38,13 +38,10 @@ export function Newsletter() {
     <section className="py-section-gap px-gutter-page">
       <div className="max-w-3xl mx-auto text-center">
         <div className="mb-12">
-          <div className="inline-block relative">
-            <span className="font-label-caps text-secondary mb-4 block">{t("BE THE FIRST")}</span>
-            <div className="red-thread w-full bottom-0 left-0" />
-          </div>
-          <h2 className="font-headline-md text-headline-md mt-6">
-            {t("Receive new artists before the world sees them.")}
-          </h2>
+          <h2 className="font-headline-md text-headline-md">{t("Stay connected")}</h2>
+          <p className="mx-auto mt-4 max-w-xl text-lg leading-[1.6] text-on-surface-variant">
+            {t("Let the discovery continue. Receive artists’ stories, new collection arrivals and invitations to experience NUA-ARTE in person.")}
+          </p>
         </div>
         <form className="flex flex-col md:flex-row gap-4 items-end">
           <div className="flex-grow w-full">
@@ -59,12 +56,9 @@ export function Newsletter() {
             />
           </div>
           <button className="bg-primary text-on-primary px-12 py-4 font-navigation text-navigation uppercase tracking-widest hover:bg-secondary transition-colors w-full md:w-auto">
-            {t("Subscribe")}
+            {t("Keep me connected")}
           </button>
         </form>
-        <p className="text-xs text-on-surface-variant mt-6 uppercase tracking-widest">
-          {t("NO SPAM. JUST PURE ART DIRECT TO YOUR INBOX.")}
-        </p>
       </div>
     </section>
   );

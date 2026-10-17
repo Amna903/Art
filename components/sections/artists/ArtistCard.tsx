@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useBrokenImage } from "@/lib/utils/use-broken-image";
 import Image from "next/image";
 import Link from "@/components/i18n/Link";
 import type { Artist } from "@/lib/data/artists";
@@ -24,7 +24,7 @@ function initials(name: string) {
  */
 export function ArtistCard({ artist, index }: { artist: Artist; index: number }) {
   const { t, language } = useLanguage();
-  const [broken, setBroken] = useState(false);
+  const { broken, ref, onError } = useBrokenImage();
   const country = getCountryBySlug(artist.countrySlug)
     ? getCountryDisplayName(artist.countrySlug, language)
     : artist.countryName;
@@ -43,7 +43,8 @@ export function ArtistCard({ artist, index }: { artist: Artist; index: number })
             sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 300px"
             loading={index < 4 ? "eager" : "lazy"}
             className="object-cover object-[50%_30%] transition-transform duration-500 group-hover:scale-[1.03]"
-            onError={() => setBroken(true)}
+            ref={ref}
+            onError={onError}
           />
         ) : (
           <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center font-display text-5xl text-[var(--nua-grey)]">

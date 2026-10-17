@@ -27,10 +27,13 @@ export function CollectorPicks({ picks }: CollectorPicksProps) {
     <section className="py-section-gap px-gutter-page">
       <div className="max-w-container-max mx-auto">
         <div className="text-center mb-20">
-          <h2 className="font-headline-md text-headline-md mb-4">{t("Collector Picks")}</h2>
-          <p className="font-body-md text-on-surface-variant max-w-xl mx-auto">
-            {t("The most sought-after acquisitions from our global circle of discerning collectors.")}
+          <h2 className="font-headline-md text-headline-md mb-4">{t("A work to live with")}</h2>
+          <p className="text-lg leading-[1.6] text-on-surface-variant max-w-xl mx-auto">
+            {t("Some works stay with you long after the first encounter. Explore available pieces and find the one you want to return to, day after day.")}
           </p>
+          <Link href="/collections" className="mt-5 inline-block border-b border-[var(--nua-charcoal)] pb-1 text-base hover:border-[var(--nua-red)] hover:text-[var(--nua-red)]">
+            {t("View available works")}
+          </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
           {picks.map((pick) => (

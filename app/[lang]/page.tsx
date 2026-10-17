@@ -1,4 +1,7 @@
 import { Hero } from "@/components/sections/home/Hero";
+import { HomeIntro } from "@/components/sections/home/HomeIntro";
+import { QuoteBlock } from "@/components/sections/QuoteBlock";
+import { quoteFor } from "@/lib/data/quotes";
 import { AfricaMapSection } from "@/components/sections/home/AtlasMap";
 import { FeaturedArtists } from "@/components/sections/home/FeaturedArtists";
 import { CollectorPicks, type CollectorPick } from "@/components/sections/home/CollectorPicks";
@@ -10,6 +13,7 @@ import { getMostRequestedArtworks } from "@/lib/data/supabase-artists-cached";
 import { getPublishedArtworks, type SupabaseArtwork } from "@/lib/data/supabase-artists";
 import { getPageBlocks } from "@/lib/data/pageBlocks";
 import { getSiteHero } from "@/lib/data/site-heroes";
+import { getSiteVisits } from "@/lib/data/site-stats";
 import { resolveLang } from "@/lib/i18n/server";
 
 export const revalidate = 60;
@@ -28,13 +32,14 @@ function ThreadDivider() {
 
 export default async function HomePage({ params }: PageProps<"/[lang]">) {
   const lang = resolveLang((await params).lang);
-  const [mostRequested, publishedArtworks, directoryArtists, blocks, siteHero] =
+  const [mostRequested, publishedArtworks, directoryArtists, blocks, siteHero, visits] =
     await Promise.all([
       getMostRequestedArtworks(6, lang),
       getPublishedArtworks(lang),
       getDirectoryArtists(lang),
       getPageBlocks("home", lang),
       getSiteHero("home", lang),
+      getSiteVisits(),
     ]);
 
   // Countries represent the distinct nations the artists are associated with
@@ -58,6 +63,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
     ),
     artworks: publishedArtworks.length,
     countries: uniqueCountries.size,
+    visits,
   };
 
   // Collector Picks: real published works only, most requested first, then
@@ -68,13 +74,16 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
     ...publishedArtworks.filter((a) => !requestedIds.has(a.id)).map((artwork) => ({ ...toPick(artwork), collection: "CURATORIAL SELECTION" })),
   ].slice(0, 3);
 
+  const placeQuote = quoteFor("explore-by-country");
+
   return (
     <>
       <Hero blocks={blocks} siteHero={siteHero} />
+      <HomeIntro />
+      <FeaturedArtists />
       <ThreadDivider />
       <AfricaMapSection stats={atlasStats} />
-      <ThreadDivider />
-      <FeaturedArtists />
+      {placeQuote && <QuoteBlock quote={placeQuote} />}
       {picks.length > 0 && <CollectorPicks picks={picks} />}
       <DiscoverOrigin />
       <ThreadDivider />

@@ -121,11 +121,19 @@ export function ArtistDirectory({ artists }: { artists: Artist[] }) {
   return (
     <main className="px-gutter-page py-16 md:py-24 max-w-[1320px] mx-auto">
       <header className="mb-12 md:mb-16">
-        <span className="font-label-caps text-secondary tracking-widest">{t("The Movement")}</span>
-        <h1 className="font-display text-primary text-5xl md:text-7xl mt-3 mb-4">{t("Artists")}</h1>
-        <p className="font-body-lg text-on-surface-variant max-w-2xl">
-          {intro}
-        </p>
+        <span className="font-label-caps text-secondary tracking-widest">{t("Artists")}</span>
+        <h1 className="font-display text-primary text-4xl md:text-6xl mt-3 mb-6 max-w-3xl leading-[1.05]">
+          {t("Meet the people behind the work")}
+        </h1>
+        <div className="max-w-2xl space-y-4 text-lg leading-[1.6] text-on-surface">
+          <p>
+            {t("A painting may draw you in before you know its maker. Here, that first connection has room to deepen. Explore the artists, the materials they work with and the details of their lives they have shared with us.")}
+          </p>
+          <p className="text-on-surface-variant">
+            {t("Some tell their stories in words. Others offer only a few details, leaving the work itself as the place to begin.")}
+          </p>
+        </div>
+        <p className="mt-6 text-sm uppercase tracking-widest text-on-surface-variant">{intro}</p>
         <div className="red-thread mt-8" />
       </header>
 

@@ -7,6 +7,8 @@ import type { Artwork } from "@/components/three/VirtualMuseum";
 import { EnquiryModal } from "@/components/enquiry/EnquiryModal";
 import { HeroCredit, HeroPicture } from "@/components/sections/HeroPicture";
 import { MusicControl } from "@/components/gallery/MusicControl";
+import { QuoteBlock } from "@/components/sections/QuoteBlock";
+import { quoteFor } from "@/lib/data/quotes";
 import { RoomTitlesEditor } from "@/components/gallery/RoomTitlesEditor";
 import { MAX_ARTWORKS } from "@/lib/data/museum-layout";
 import type { SiteHero } from "@/lib/data/site-heroes";
@@ -66,6 +68,7 @@ export function VirtualGallery({
   hero: SiteHero | null;
   countryLabel: string | null;
 }) {
+  const quote = quoteFor("virtual-gallery");
   const { t } = useLanguage();
   const { role } = useAuth();
   const music = useMusic();
@@ -188,7 +191,7 @@ export function VirtualGallery({
             </h1>
             <p className="mt-5 max-w-[520px] text-lg leading-[1.6] text-[var(--nua-white)]/90">
               {total > 0
-                ? t("A guided tour of the NUA-ARTE collection, one artwork at a time, with music.")
+                ? t("Step into the collection and follow what catches your eye. Look closer at a texture, return to a color, discover the artist behind a gesture. Each work opens a different encounter.")
                 : t("The works are being hung. Please come back soon.")}
             </p>
 
@@ -241,14 +244,7 @@ export function VirtualGallery({
         )}
       </section>
 
-      <section className="px-gutter-page py-section-gap text-center">
-        <div className="mx-auto max-w-2xl">
-          <h2 className="font-headline-sm text-headline-sm mb-6 uppercase tracking-widest">{t("Connect with the Curators")}</h2>
-          <p className="text-on-surface-variant">
-            {t("Our curators are available for virtual consultations regarding any of the featured works in the Virtual Museum collection.")}
-          </p>
-        </div>
-      </section>
+      {quote && <QuoteBlock quote={quote} />}
 
       {/* ---------- The visit: tour, grid, free exploration, end ---------- */}
       {inExperience && (

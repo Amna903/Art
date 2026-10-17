@@ -502,6 +502,12 @@ export type Database = {
         }
         Relationships: []
       }
+      site_stats: {
+        Row: { key: string; value: number; updated_at: string }
+        Insert: { key: string; value?: number; updated_at?: string }
+        Update: { key?: string; value?: number; updated_at?: string }
+        Relationships: []
+      }
       page_blocks: {
         Row: {
           translations: Json
@@ -729,6 +735,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      record_site_visit: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       get_top_requested_artwork_slugs: {
         Args: { limit_count?: number }
         Returns: {

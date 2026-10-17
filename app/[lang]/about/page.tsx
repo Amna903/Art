@@ -4,6 +4,7 @@ import { getSiteHero } from "@/lib/data/site-heroes";
 import { getRealArtists } from "@/lib/data/supabase-artists-cached";
 import { ARTIST_COUNT, COUNTRY_COUNT } from "@/lib/data/artists";
 import { getI18n } from "@/lib/i18n/server";
+import { quoteFor } from "@/lib/data/quotes";
 
 export const revalidate = 60;
 
@@ -16,7 +17,7 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
   return (
     <>
       <SiteHeroBand hero={hero} creditLabel={hero?.credit ? t("Artwork: {credit}", { credit: hero.credit }) : ""} />
-      <AboutContent artists={artists} countries={countries} />
+      <AboutContent artists={artists} countries={countries} founderQuote={quoteFor("about")} />
     </>
   );
 }

@@ -1,93 +1,106 @@
 "use client";
 
 import Link from "@/components/i18n/Link";
-import Image from "next/image";
 import { useLanguage } from "@/lib/i18n";
+import { QuoteBlock } from "@/components/sections/QuoteBlock";
+import type { Quote } from "@/lib/data/quotes";
 
-const A = "https://nu-artcollective.lovable.app/__l5e/assets-v1";
-
-export function AboutContent({ artists, countries }: { artists: number; countries: number }) {
+/** About page copy from "NUA ARTE website copy and editorial direction"
+ * (9 Oct 2026). Figures are the real counts passed in by the page. */
+export function AboutContent({
+  artists,
+  countries,
+  founderQuote,
+}: {
+  artists: number;
+  countries: number;
+  founderQuote?: Quote;
+}) {
   const { t } = useLanguage();
 
   return (
     <main>
-      <section className="max-w-container-max mx-auto px-gutter-page pt-16 pb-24 md:pt-24">
-        <span className="font-label-caps text-label-caps text-secondary uppercase block mb-4">
-          {t("Our Mission")}
-        </span>
-        <h1 className="font-display-lg text-display-lg max-w-2xl mb-8">
-          {t("Every country, a voice.")} <br />
-          <span className="italic">{t("Every artist, a legacy.")}</span>
+      <section className="max-w-container-max mx-auto px-gutter-page pt-16 pb-20 md:pt-24">
+        <h1 className="font-display text-[clamp(2.5rem,5.5vw,4.5rem)] leading-[1.05] max-w-3xl">
+          {t("A work of art. A moment of connection. A beginning.")}
         </h1>
-        <p className="text-body-lg text-on-surface-variant max-w-2xl leading-relaxed">
-          {t(
-            "NUA-ARTE exists to close the distance between contemporary African artists and the collectors, curators, and institutions who should already know their work. We built a curated, country-by-country platform — not an algorithmic marketplace — because discovery should feel like travel, not scrolling."
-          )}
+        <p className="mt-8 max-w-2xl text-lg leading-[1.6] text-on-surface-variant">
+          {t("NUA-ARTE grew from the feeling of encountering something beautiful, then discovering a life and a creative voice behind it.")}
         </p>
       </section>
 
-      <section className="max-w-container-max mx-auto px-gutter-page pb-24 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-        <div className="relative aspect-[4/5] overflow-hidden">
-          <Image
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover"
-            alt={t("A curator in a sunlit gallery space examining a contemporary African painting up close.")}
-            src={`${A}/8170e7d1-3e87-4dfd-984d-5c50a5625187/afr-gallery-room.jpg`}
-          />
-        </div>
-        <div>
-          <span className="font-label-caps text-label-caps text-secondary uppercase block mb-4">
-            {t("The Vision")}
-          </span>
-          <h2 className="font-headline-md text-headline-md mb-6">{t("Sustainable, direct, artist-first.")}</h2>
-          <p className="text-on-surface-variant leading-relaxed mb-6">
-            {t(
-              "Artists are paid when their work is acquired and earn a commission when it sells. Our first collection was made in Luanda, and the circle is growing from Angola and the Congo."
-            )}
-          </p>
-          <p className="text-on-surface-variant leading-relaxed">
-            {t("Today NUA-ARTE represents {count} artists.", { count: artists })}
-          </p>
-        </div>
-      </section>
-
-      <section className="bg-primary text-on-primary py-24">
-        <div className="max-w-container-max mx-auto px-gutter-page grid grid-cols-1 sm:grid-cols-3 gap-10 text-center">
-          {[
-            { value: String(artists), label: "Artists" },
-            { value: String(countries), label: "Countries represented" },
-            { value: "2026", label: "Founded" },
-          ].map((s) => (
-            <div key={s.label}>
-              <p className="font-display text-3xl md:text-4xl mb-2">{s.value}</p>
-              <p className="font-label-caps text-[10px] uppercase tracking-widest opacity-70">
-                {t(s.label)}
+      <section className="bg-[var(--nua-paper)]">
+        <div className={`max-w-container-max mx-auto px-gutter-page py-20 grid gap-12 ${founderQuote ? "lg:grid-cols-[1.2fr_1fr] lg:items-center" : ""}`}>
+          <div className="max-w-2xl">
+            <h2 className="font-display text-3xl md:text-4xl mb-8">{t("A note from Anané")}</h2>
+            <div className="space-y-5 text-lg leading-[1.6] text-on-surface">
+              <p>
+                {t("When I travel for music, I often look for art to bring home. During a visit to Luanda, I asked to be taken to the art market. I went to collect, drawn by the works that made me stop and feel something.")}
+              </p>
+              <p>
+                {t("I purchased twenty pieces, imagining them in my homes, living with them and moving them from one space to another. I had no idea they would become the beginning of a platform.")}
+              </p>
+              <p>
+                {t("After I returned home, Nilton approached me about a collaboration. We began learning more about the people behind the work. Some of the paintings I had felt most connected to carried stories I had not known when I chose them. That discovery deepened everything.")}
+              </p>
+              <p>
+                {t("I wanted to share that feeling: the first spark of connection, followed by the curiosity to know more. NUA-ARTE is the space we are building for it.")}
               </p>
             </div>
-          ))}
+            <p className="mt-8">
+              <span className="block font-semibold" translate="no">Anané Vega</span>
+              <span className="block text-sm text-on-surface-variant">{t("Founder and Curator")}</span>
+            </p>
+          </div>
+          {founderQuote && <QuoteBlock quote={founderQuote} className="lg:py-0" />}
         </div>
       </section>
 
-      <section className="max-w-container-max mx-auto px-gutter-page py-24 text-center">
-        <h2 className="font-headline-md text-headline-md mb-6">{t("Join the Circle.")}</h2>
-        <p className="text-on-surface-variant max-w-xl mx-auto mb-10">
-          {t(
-            "Whether you're collecting your first piece or your fiftieth, every acquisition through NUA-ARTE directly supports an artist's practice and a nation's cultural visibility."
-          )}
+      <section className="max-w-container-max mx-auto px-gutter-page py-20 grid gap-10 md:grid-cols-[1fr_1.4fr]">
+        <h2 className="font-display text-3xl md:text-4xl">{t("Building the platform together")}</h2>
+        <p className="max-w-2xl text-lg leading-[1.6] text-on-surface">
+          {t("Anané brings her curatorial eye and her experience of creating spaces for artists through Nulu Music. Nilton Viana, Africa Liaison and Partner, builds relationships with artists and helps spearhead the technology behind the platform. Their collaboration connects discovery on the ground with a continuing digital home for the work.")}
         </p>
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <Link
-            href="/artists"
-            className="bg-primary text-on-primary px-8 py-4 font-navigation text-navigation uppercase tracking-widest hover:bg-secondary transition-colors"
-          >
-            {t("Explore Artists")}
+      </section>
+
+      <section className="bg-[var(--nua-charcoal-deep)] text-[var(--nua-white)]">
+        <div className="max-w-container-max mx-auto px-gutter-page py-20 grid gap-10 md:grid-cols-[1fr_1.4fr]">
+          <div>
+            <p className="text-sm uppercase tracking-[0.3em] text-[var(--nua-grey-light)]">{t("Our mission")}</p>
+            <h2 translate="no" className="mt-3 font-display text-3xl md:text-4xl">
+              Illuminating Unseen Voices
+            </h2>
+          </div>
+          <div className="max-w-2xl space-y-5 text-lg leading-[1.6] text-[var(--nua-white)]/90">
+            <p>
+              {t("We create opportunities for unseen and underrepresented African artists to be discovered, valued and supported. Through artwork, the stories artists choose to tell and music from the countries represented, we invite people into a closer encounter with individual creative worlds.")}
+            </p>
+            <p>
+              {t("Our long-term vision reaches across all 54 African countries, honoring the different cultures, histories and perspectives each artist brings.")}
+            </p>
+            <dl className="grid grid-cols-3 gap-6 border-t border-[var(--nua-line-dark)] pt-8">
+              {[
+                { value: String(artists), label: "Artists" },
+                { value: String(countries), label: "Countries represented" },
+                { value: "2026", label: "Founded" },
+              ].map((s) => (
+                <div key={s.label}>
+                  <dd className="font-display text-3xl">{s.value}</dd>
+                  <dt className="mt-1 text-xs uppercase tracking-widest text-[var(--nua-grey-light)]">{t(s.label)}</dt>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      <section className="max-w-container-max mx-auto px-gutter-page py-20 text-center">
+        <div className="flex flex-col sm:flex-row justify-center gap-3">
+          <Link href="/artists" className="btn-primary inline-flex min-h-[48px] items-center justify-center px-8 text-base font-semibold">
+            {t("Meet the artists")}
           </Link>
-          <Link
-            href="/faq"
-            className="border border-primary/20 px-8 py-4 font-navigation text-navigation uppercase tracking-widest hover:border-secondary hover:text-secondary transition-colors"
-          >
-            {t("Read the FAQ")}
+          <Link href="/collections" className="btn-secondary inline-flex min-h-[48px] items-center justify-center px-8 text-base">
+            {t("Explore the collection")}
           </Link>
         </div>
       </section>

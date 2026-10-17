@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
-import { getPageBlocks, blockText, blockImage } from "@/lib/data/pageBlocks";
+import { getPageBlocks, blockText } from "@/lib/data/pageBlocks";
 import { getPublishedJournalPosts } from "@/lib/data/journal";
 import { toJournalArticleData } from "@/lib/data/journal-article";
 import { EditableText } from "@/components/editing/EditableText";
-import { EditableImage } from "@/components/editing/EditableImage";
 import { LatestFromJournal } from "@/components/sections/journal/LatestFromJournal";
 import { ShareLinks } from "@/components/journal/ShareLinks";
 import { JournalArticle } from "@/components/journal/JournalArticle";
 import { getI18n } from "@/lib/i18n/server";
+import { QuoteBlock } from "@/components/sections/QuoteBlock";
+import { quoteFor } from "@/lib/data/quotes";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/journal">): Promise<Metadata> {
   const { t } = await getI18n(params);
@@ -17,7 +18,6 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/journal">)
 // Matches the 60s window the underlying Supabase/Sanity reads are cached at.
 export const revalidate = 60;
 
-const A = "https://nu-artcollective.lovable.app/__l5e/assets-v1";
 
 export default async function JournalPage({ params }: PageProps<"/[lang]/journal">) {
   const { lang, t } = await getI18n(params);
@@ -27,49 +27,38 @@ export default async function JournalPage({ params }: PageProps<"/[lang]/journal
   // just a single admin-chosen slot instead of an auto-ranked or slot-filled list.
   const pinnedPost = posts.find((p) => p.is_pinned);
 
-  const image1 = blockImage(blocks, "image_1", {
-    src: `${A}/0622c489-71d0-4a78-a45d-29fb5bb45e68/afr-charcoal.jpg`,
-    alt: "A detailed close-up shot of hand-woven African fabric with deep black threads and bright red accents, lit by warm, low-angle studio lighting.",
-  });
-  const image2 = blockImage(blocks, "image_2", {
-    src: `${A}/dc981581-67cc-4c92-881e-bbb825d6b9c6/afr-street-lagos.jpg`,
-    alt: "A minimalist photograph of a weaver's hands working on a traditional wooden loom, with a single striking red thread pulled through the warp.",
-  });
-  const pullQuote = blockText(
-    blocks,
-    "pull_quote",
-    "“We are not just weaving threads; we are weaving the historical consciousness of a continent.”",
-  );
+  const quote = quoteFor("journal");
 
   return (
     <main>
+      <header className="px-gutter-page max-w-container-max mx-auto pt-16 md:pt-24">
+        <span className="font-label-caps tracking-widest text-secondary">{t("Journal")}</span>
+        <h1 className="mt-3 font-display text-4xl leading-[1.05] md:text-6xl">{t("Closer to the story")}</h1>
+        <p className="mt-6 max-w-2xl text-lg leading-[1.6] text-on-surface">
+          {t("Spend time with the people, places and encounters behind NUA-ARTE. Here we share artists’ words, moments from our travels and the details that deepen a connection to the work.")}
+        </p>
+        <a href="#stories" className="mt-5 inline-block border-b border-[var(--nua-charcoal)] pb-1 text-base hover:border-[var(--nua-red)] hover:text-[var(--nua-red)]">
+          {t("Read the stories")}
+        </a>
+      </header>
+      {quote && <QuoteBlock quote={quote} />}
+      <div id="stories" />
       {pinnedPost ? (
         <JournalArticle post={toJournalArticleData(pinnedPost, lang, t)} showBackLink={false} lang={lang} />
       ) : (
       <article className="px-gutter-page max-w-container-max mx-auto grid grid-cols-1 md:grid-cols-12 gap-gutter mb-section-gap pt-16">
+        {/* First-person account of the Luanda art market (client direction):
+            Anané's own words from the website copy document. New block keys,
+            so edits of the earlier template article do not override it. */}
         <aside className="hidden md:block md:col-span-2">
           <div className="sticky top-32 space-y-12">
             <div>
               <h4 className="font-label-caps text-label-caps uppercase text-secondary mb-4">{t("Read Time")}</h4>
-              <EditableText
-                page="journal"
-                blockKey="sidebar_read_time"
-                value={blockText(blocks, "sidebar_read_time", "12 Minutes")}
-                as="p"
-                className="font-body-md text-body-md"
-                multiline={false}
-              />
+              <EditableText page="journal" blockKey="luanda_read_time" value={blockText(blocks, "luanda_read_time", "3 Minutes")} as="p" className="font-body-md text-body-md" multiline={false} />
             </div>
             <div>
               <h4 className="font-label-caps text-label-caps uppercase text-secondary mb-4">{t("Topic")}</h4>
-              <EditableText
-                page="journal"
-                blockKey="sidebar_topic"
-                value={blockText(blocks, "sidebar_topic", "Textile & Identity")}
-                as="p"
-                className="font-body-md text-body-md"
-                multiline={false}
-              />
+              <EditableText page="journal" blockKey="luanda_topic" value={blockText(blocks, "luanda_topic", "The beginning")} as="p" className="font-body-md text-body-md" multiline={false} />
             </div>
             <div>
               <h4 className="font-label-caps text-label-caps uppercase text-secondary mb-4">{t("Share")}</h4>
@@ -78,88 +67,61 @@ export default async function JournalPage({ params }: PageProps<"/[lang]/journal
           </div>
         </aside>
 
-        <div className="md:col-span-7 space-y-12">
-          <EditableText
-            page="journal"
-            blockKey="hero_lead"
-            value={blockText(
-              blocks,
-              "hero_lead",
-              "The conversation around contemporary African art has shifted. No longer confined to the periphery of global discourse, it now dictates the tempo. In this deep dive, we explore how textile artists are reclaiming ancient weaving techniques to narrate stories of migration, digital identity, and ancestral memory.",
-            )}
-            as="div"
-            className="font-serif text-xl md:text-2xl leading-relaxed text-on-surface drop-cap"
-          />
-          <EditableText
-            page="journal"
-            blockKey="body_1"
-            value={blockText(
-              blocks,
-              "body_1",
-              "Traditionally, weaving was a communal act — a rhythmic dialogue between the weaver and the loom. Today, that rhythm is being reinterpreted through the lens of modern software and political activism. Artists like El Anatsui paved the way, but a new generation is taking the mantle, using everything from discarded copper wire to recycled digital cables to create tapestries that function as both art and archive.",
-            )}
-            as="p"
-            className="font-serif text-lg md:text-xl leading-relaxed text-on-surface-variant"
-          />
-          <div className="md:hidden border-l-2 border-secondary pl-6 my-12 italic text-2xl font-serif">
-            <EditableText page="journal" blockKey="pull_quote" value={pullQuote} as="span" />
+        <div className="md:col-span-7 space-y-8">
+          <div>
+            <p className="text-sm uppercase tracking-[0.3em] text-on-surface-variant">{t("A first-hand account")}</p>
+            <EditableText
+              page="journal"
+              blockKey="luanda_title"
+              value={blockText(blocks, "luanda_title", "Twenty works from the art market in Luanda")}
+              as="h2"
+              className="mt-3 font-display text-4xl md:text-5xl leading-[1.08]"
+              multiline={false}
+            />
+            <p className="mt-4 text-base text-on-surface-variant">
+              <span translate="no">Anané Vega</span> · {t("Founder and Curator")}
+            </p>
           </div>
           <EditableText
             page="journal"
-            blockKey="body_2"
-            value={blockText(
-              blocks,
-              "body_2",
-              "Sustainability is not a buzzword here; it is an inheritance. The materials chosen by these artists often reflect the environmental realities of their locales. From the e-waste graveyards of Accra to the bustling textile markets of Lagos, the raw matter of their work is infused with the weight of the present moment.",
-            )}
+            blockKey="luanda_body_1"
+            value={blockText(blocks, "luanda_body_1", "When I travel for music, I often look for art to bring home. During a visit to Luanda, I asked to be taken to the art market. I went to collect, drawn by the works that made me stop and feel something.")}
             as="p"
-            className="font-serif text-lg md:text-xl leading-relaxed text-on-surface-variant"
+            className="text-lg md:text-xl leading-[1.6] text-on-surface"
           />
-          <div className="grid grid-cols-2 gap-4 py-8">
-            <EditableImage
-              page="journal"
-              blockKey="image_1"
-              bucket="journal"
-              src={image1.src}
-              alt={image1.alt}
-              className="aspect-[3/4] overflow-hidden"
-            />
-            <EditableImage
-              page="journal"
-              blockKey="image_2"
-              bucket="journal"
-              src={image2.src}
-              alt={image2.alt}
-              className="aspect-[3/4] overflow-hidden mt-12"
-            />
-          </div>
           <EditableText
             page="journal"
-            blockKey="body_3"
-            value={blockText(
-              blocks,
-              "body_3",
-              "In our exclusive interview with the collective behind 'The Loom Project', they discuss the tension between preservation and evolution. \"The challenge,\" says lead artist Kofi Mensah, \"is to respect the geometry of the past while building the abstractions of the future.\"",
-            )}
+            blockKey="luanda_body_2"
+            value={blockText(blocks, "luanda_body_2", "I purchased twenty pieces, imagining them in my homes, living with them and moving them from one space to another. I had no idea they would become the beginning of a platform.")}
             as="p"
-            className="font-serif text-lg md:text-xl leading-relaxed text-on-surface-variant"
+            className="text-lg md:text-xl leading-[1.6] text-on-surface"
+          />
+          <EditableText
+            page="journal"
+            blockKey="luanda_body_3"
+            value={blockText(blocks, "luanda_body_3", "After I returned home, Nilton approached me about a collaboration. We began learning more about the people behind the work. Some of the paintings I had felt most connected to carried stories I had not known when I chose them. That discovery deepened everything.")}
+            as="p"
+            className="text-lg md:text-xl leading-[1.6] text-on-surface"
+          />
+          <EditableText
+            page="journal"
+            blockKey="luanda_body_4"
+            value={blockText(blocks, "luanda_body_4", "I wanted to share that feeling: the first spark of connection, followed by the curiosity to know more. NUA-ARTE is the space we are building for it.")}
+            as="p"
+            className="text-lg md:text-xl leading-[1.6] text-on-surface"
           />
         </div>
 
         <aside className="hidden md:block md:col-span-3">
-          <div className="sticky top-1/3">
-            <div className="border-l border-secondary pl-8">
-              <span className="material-symbols-outlined text-secondary text-5xl mb-6">format_quote</span>
-              <EditableText page="journal" blockKey="pull_quote" value={pullQuote} as="blockquote" className="font-serif text-3xl leading-tight mb-6" />
-              <EditableText
-                page="journal"
-                blockKey="pull_quote_cite"
-                value={blockText(blocks, "pull_quote_cite", "— Kofi Mensah")}
-                as="cite"
-                className="font-label-caps text-label-caps uppercase text-on-surface-variant not-italic block"
-                multiline={false}
-              />
-            </div>
+          <div className="sticky top-1/3 border-l border-secondary pl-8">
+            <EditableText
+              page="journal"
+              blockKey="luanda_pull_quote"
+              value={blockText(blocks, "luanda_pull_quote", "I went to collect, drawn by the works that made me stop and feel something.")}
+              as="blockquote"
+              className="font-display text-3xl leading-tight mb-6"
+            />
+            <p className="text-sm uppercase tracking-widest text-on-surface-variant" translate="no">Anané Vega</p>
           </div>
         </aside>
       </article>

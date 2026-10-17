@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "../globals.css";
 import { Providers } from "./providers";
+import { VisitCounter } from "@/components/layout/VisitCounter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { themeInitScript } from "@/lib/theme";
@@ -53,6 +54,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
           <SiteHeader />
           <main className="flex-1">{children}</main>
           <SiteFooter />
+          <VisitCounter />
         </Providers>
       </body>
     </html>

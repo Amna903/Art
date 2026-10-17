@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useBrokenImage } from "@/lib/utils/use-broken-image";
 import Image from "next/image";
 
 /** Fills its (relative) parent with an artist's photo, or their initials on
@@ -19,7 +19,7 @@ export function ArtistPhoto({
   sizes: string;
   className?: string;
 }) {
-  const [broken, setBroken] = useState(false);
+  const { broken, ref, onError } = useBrokenImage();
   if (!src?.trim() || broken) {
     const initials = name
       .split(/\s+/)
@@ -37,5 +37,5 @@ export function ArtistPhoto({
       </span>
     );
   }
-  return <Image src={src} alt={alt} fill sizes={sizes} className={className} onError={() => setBroken(true)} />;
+  return <Image ref={ref} src={src} alt={alt} fill sizes={sizes} className={className} onError={onError} />;
 }

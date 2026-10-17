@@ -209,8 +209,10 @@ export default async function ArtistProfilePage({ params }: Props) {
               ) : null}
             </h1>
             <div className="h-1 w-24 bg-tertiary mb-8" />
-            <p className="text-body-lg text-on-surface-variant max-w-md leading-relaxed mb-8 italic">
-              “{artist.bio || t("A contemporary practice rooted in {place}.", { place: getCountryDisplayName(country ?? artist.countryName, lang) || t("Africa") })}”
+            {/* The bio is curatorial copy, not the artist's words: no quotation
+                marks. Only its opening paragraph appears here. */}
+            <p className="text-body-lg text-on-surface-variant max-w-md leading-relaxed mb-8">
+              {artist.bio?.split(/\n\s*\n/)[0] || t("A contemporary practice rooted in {place}.", { place: getCountryDisplayName(country ?? artist.countryName, lang) || t("Africa") })}
             </p>
             <p className="text-body-md font-semibold text-tertiary uppercase tracking-widest">
               {t("Featured work:")}{" "}{featuredWork}
@@ -247,7 +249,7 @@ export default async function ArtistProfilePage({ params }: Props) {
         </div>
         <div className="col-span-12 lg:col-span-8">
           <div className="prose prose-lg text-body-lg text-on-surface-variant leading-relaxed columns-1 md:columns-2 gap-12">
-            <p className="mb-6 first-letter:text-5xl first-letter:font-display first-letter:float-left first-letter:mr-3 first-letter:text-secondary-container">
+            <p className="mb-6 whitespace-pre-line first-letter:text-5xl first-letter:font-display first-letter:float-left first-letter:mr-3 first-letter:text-secondary-container">
               {artist.bio || t("{name} works across contemporary African visual culture.", { name: artist.name })}
             </p>
             <p className="mb-6">

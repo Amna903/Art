@@ -105,6 +105,22 @@ export function CollectionsView({ initialItems = [] }: { initialItems?: Supabase
 
   return (
     <main className="max-w-container-max mx-auto px-gutter-page">
+      <header className="pt-16 pb-12 md:pt-24">
+        <span className="font-label-caps tracking-widest text-secondary">{t("Collections")}</span>
+        <h1 className="mt-3 max-w-3xl font-display text-4xl leading-[1.05] md:text-6xl">
+          {t("Works brought together through connection")}
+        </h1>
+        <p className="mt-6 max-w-2xl text-lg leading-[1.6] text-on-surface">
+          {t("Each collection begins with a curatorial encounter: work that holds attention and invites a closer look. Explore the pieces together, then spend time with the individual artists and the worlds they bring to the canvas.")}
+        </p>
+        <div className="mt-10 max-w-2xl border-l-2 border-[var(--nua-red)] pl-6">
+          <h2 className="font-display text-2xl">{t("The first collection")}</h2>
+          <p className="mt-3 text-lg leading-[1.6] text-on-surface-variant">
+            {t("The first collection began in an art market in Luanda, where Anané chose twenty works for her homes. Learning about their makers brought a new depth to those first encounters. These pieces became the foundation of NUA-ARTE, carrying the feeling that continues to guide its curation.")}
+          </p>
+        </div>
+      </header>
+
       <section className="mb-12 border-b border-primary/10 pb-8">
         <div className="flex flex-wrap items-center justify-between gap-6">
           <div ref={filterRef} className="flex items-center gap-12">
@@ -263,6 +279,18 @@ export function CollectionsView({ initialItems = [] }: { initialItems?: Supabase
           })}
         </section>
       )}
+
+      <section className="mb-section-gap grid gap-10 border-t border-primary/10 pt-16 md:grid-cols-[1fr_1.4fr]">
+        <h2 className="font-display text-3xl md:text-4xl">{t("Choose a work that stays with you")}</h2>
+        <div className="max-w-2xl space-y-5 text-lg leading-[1.6] text-on-surface">
+          <p>
+            {t("Explore available artworks and ask us about the piece that draws you in. We can help you understand its materials, dimensions and presentation, and discuss the next steps in bringing it into your space.")}
+          </p>
+          <p className="text-on-surface-variant">
+            {t("NUA-ARTE purchases selected works directly from artists, paying them at acquisition. When a work is sold, its creator also receives an additional commission. Collecting helps sustain this cycle of discovery, support and wider visibility.")}
+          </p>
+        </div>
+      </section>
 
       <section className="bg-surface-container-low p-margin-desktop mb-section-gap relative overflow-hidden">
         <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">

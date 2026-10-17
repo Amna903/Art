@@ -1366,6 +1366,10 @@ const fr: Record<string, string> = {
   "Photos must be 5 MB or smaller.": "Les photos ne doivent pas dépasser 5 Mo.",
   "Could not process the image.": "Impossible de traiter l'image.",
   "The image is still too large after compression. Try a smaller image.": "L'image reste trop lourde après compression. Essayez une image plus petite.",
+  "VISITS WORLDWIDE": "VISITES DANS LE MONDE",
+  "NUA-ARTE Contemporary African Art Exhibition": "NUA-ARTE — Exposition d'art africain contemporain",
+  "Curated by {curator}": "Commissaire : {curator}",
+  "Africa Liaison & Partner: {partner}": "Liaison Afrique et partenaire : {partner}",
 };
 
 export default fr;
