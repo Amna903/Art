@@ -41,7 +41,8 @@ export function generateStaticParams() {
 
 export const revalidate = 60;
 
-const SWATCH_PALETTE = ["b8703a", "c9a24a", "a37542", "d6b078", "8a5a2c", "7a4a2a", "8a8248", "96806a"];
+// Placeholder tiles behind images: the brief's light neutrals (no beige or brown).
+const SWATCH_PALETTE = ["F5F5F3", "F0F0EE", "EBEBEA", "E6E6E6"];
 function hashStr(s: string): number {
   let h = 2166136261;
   for (let i = 0; i < s.length; i++) {

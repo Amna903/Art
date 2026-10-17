@@ -278,7 +278,7 @@ export async function getCountryGalleryBySlug(countrySlug: string): Promise<Coun
       : [],
   ]);
 
-  const palette = ["b8703a", "c9a24a", "a37542", "d6b078", "8a5a2c", "7a4a2a", "8a8248", "96806a"];
+  const palette = ["F5F5F3", "F0F0EE", "EBEBEA", "E6E6E6"]; // brief's light neutrals
   const hashStr = (s: string) => {
     let h = 2166136261;
     for (let i = 0; i < s.length; i++) {

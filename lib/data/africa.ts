@@ -154,7 +154,8 @@ function rng(seed: number) {
   };
 }
 
-const PALETTES = ["EB5E28", "B9100B", "1B1C1B", "E4DBD5", "C2410C", "7C2D12", "0F172A", "57534E"];
+// Placeholder swatches: the brief's neutrals only (no orange, brown or beige).
+const PALETTES = ["F5F5F3", "F0F0EE", "EBEBEA", "E6E6E6", "B8B8B8", "5C5C5C", "333333", "1F1F1F"];
 const TECHNIQUES = [
   "Mixed media on canvas",
   "Oil and indigo on linen",

@@ -94,7 +94,7 @@ export function EnquiryModal({
       onClick={handleClose}
     >
       <div
-        className="w-full max-w-lg bg-[#121212] text-[#EFEFEF] border border-[#313131] shadow-2xl relative overflow-hidden rounded-none my-auto transition-transform duration-200"
+        className="w-full max-w-lg bg-[#111111] text-[#F0F0EE] border border-[#333333] shadow-2xl relative overflow-hidden rounded-none my-auto transition-transform duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Subtle decorative top bar */}
@@ -104,7 +104,7 @@ export function EnquiryModal({
         <button
           onClick={handleClose}
           aria-label={t("Close modal")}
-          className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-[#191919] text-[#AAAAAA] hover:text-[#EFEFEF] hover:bg-[#252525] border border-[#313131] flex items-center justify-center transition-all"
+          className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-[#1A1A1A] text-[#B8B8B8] hover:text-[#F0F0EE] hover:bg-[#262626] border border-[#333333] flex items-center justify-center transition-all"
         >
           <span className="material-symbols-outlined text-lg">close</span>
         </button>
@@ -112,28 +112,28 @@ export function EnquiryModal({
         <div className="p-6 sm:p-8">
           {sent ? (
             <div className="py-8 text-center animate-in zoom-in-95 duration-300">
-              <div className="w-16 h-16 bg-[#1E1E1E] border border-[#323232] text-[#FF4D57] rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+              <div className="w-16 h-16 bg-[#1F1F1F] border border-[#333333] text-[#FF4D57] rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
                 <span className="material-symbols-outlined text-3xl">check_circle</span>
               </div>
               <span className="text-[10px] font-mono tracking-widest text-[#FF4D57] uppercase block mb-2">
                 {t("Inquiry Dispatched")}
               </span>
-              <h3 className="font-serif text-2xl mb-3 text-[#EFEFEF]">{t("Curatorial Request Sent")}</h3>
-              <p className="text-[#AAAAAA] text-sm leading-relaxed max-w-md mx-auto mb-8">
+              <h3 className="font-serif text-2xl mb-3 text-[#F0F0EE]">{t("Curatorial Request Sent")}</h3>
+              <p className="text-[#B8B8B8] text-sm leading-relaxed max-w-md mx-auto mb-8">
                 {richText(
                   t(
                     "Thank you, {name}. A member of our Senior Curatorial Team has received your inquiry for “{title}” and will respond directly to {email} within 24 business hours with pricing, provenance, and private acquisition details.",
                   ),
                   {
-                    name: <strong className="text-[#EFEFEF] font-medium">{name}</strong>,
-                    title: <span className="italic text-[#EFEFEF]">{artworkTitle}</span>,
+                    name: <strong className="text-[#F0F0EE] font-medium">{name}</strong>,
+                    title: <span className="italic text-[#F0F0EE]">{artworkTitle}</span>,
                     email: <span className="text-[#FF4D57] underline">{email}</span>,
                   },
                 )}
               </p>
               <button
                 onClick={handleClose}
-                className="w-full bg-[#FF4D57] text-[#121212] font-mono text-xs uppercase tracking-widest py-3.5 px-6 font-semibold hover:bg-[#EFEFEF] transition-colors"
+                className="w-full bg-[#FF4D57] text-[#111111] font-mono text-xs uppercase tracking-widest py-3.5 px-6 font-semibold hover:bg-[#F0F0EE] transition-colors"
               >
                 {t("Return to Gallery")}
               </button>
@@ -141,25 +141,25 @@ export function EnquiryModal({
           ) : (
             <>
               {/* Clean Single Modal Header */}
-              <div className="mb-6 border-b border-[#252525] pb-5">
+              <div className="mb-6 border-b border-[#262626] pb-5">
                 <span className="text-[9px] font-mono tracking-widest text-[#FF4D57] uppercase font-semibold block mb-1">
                   {t("Private Curatorial Advisory")}
                 </span>
-                <h3 className="font-serif text-2xl font-medium text-[#EFEFEF] leading-tight mb-1">
+                <h3 className="font-serif text-2xl font-medium text-[#F0F0EE] leading-tight mb-1">
                   {artworkTitle}
                 </h3>
                 {artistName && (
-                  <p className="text-xs text-[#AAAAAA] italic">
+                  <p className="text-xs text-[#B8B8B8] italic">
                     {t("By")} {artistName}
                   </p>
                 )}
               </div>
 
               <div className="mb-6">
-                <h4 className="text-sm font-medium text-[#EFEFEF] mb-1">
+                <h4 className="text-sm font-medium text-[#F0F0EE] mb-1">
                   {t("Request Pricing & Provenance")}
                 </h4>
-                <p className="text-xs text-[#AAAAAA] leading-relaxed">
+                <p className="text-xs text-[#B8B8B8] leading-relaxed">
                   {t("Provide your contact details below to receive current availability, pricing guide, and shipping options.")}
                 </p>
               </div>
@@ -167,7 +167,7 @@ export function EnquiryModal({
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-mono uppercase tracking-widest text-[#AAAAAA] mb-1.5">
+                    <label className="block text-[10px] font-mono uppercase tracking-widest text-[#B8B8B8] mb-1.5">
                       {t("Full Name")} <span className="text-[#FF4D57]">*</span>
                     </label>
                     <input
@@ -176,12 +176,12 @@ export function EnquiryModal({
                       placeholder={t("e.g. Eleanor Vance")}
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-[#191919] border border-[#313131] px-3.5 py-2.5 text-sm text-[#EFEFEF] placeholder-[#5F5F5F] focus:outline-none focus:border-[#FF4D57] transition-colors"
+                      className="w-full bg-[#1A1A1A] border border-[#333333] px-3.5 py-2.5 text-sm text-[#F0F0EE] placeholder-[#5C5C5C] focus:outline-none focus:border-[#FF4D57] transition-colors"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-mono uppercase tracking-widest text-[#AAAAAA] mb-1.5">
+                    <label className="block text-[10px] font-mono uppercase tracking-widest text-[#B8B8B8] mb-1.5">
                       {t("Email Address")} <span className="text-[#FF4D57]">*</span>
                     </label>
                     <input
@@ -190,39 +190,39 @@ export function EnquiryModal({
                       placeholder={t("e.g. collector@domain.com")}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-[#191919] border border-[#313131] px-3.5 py-2.5 text-sm text-[#EFEFEF] placeholder-[#5F5F5F] focus:outline-none focus:border-[#FF4D57] transition-colors"
+                      className="w-full bg-[#1A1A1A] border border-[#333333] px-3.5 py-2.5 text-sm text-[#F0F0EE] placeholder-[#5C5C5C] focus:outline-none focus:border-[#FF4D57] transition-colors"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-widest text-[#AAAAAA] mb-1.5">
-                    {t("Phone / WhatsApp")} <span className="text-[#5F5F5F]">{t("(Optional)")}</span>
+                  <label className="block text-[10px] font-mono uppercase tracking-widest text-[#B8B8B8] mb-1.5">
+                    {t("Phone / WhatsApp")} <span className="text-[#5C5C5C]">{t("(Optional)")}</span>
                   </label>
                   <input
                     type="tel"
                     placeholder="+1 (555) 000-0000"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full bg-[#191919] border border-[#313131] px-3.5 py-2.5 text-sm text-[#EFEFEF] placeholder-[#5F5F5F] focus:outline-none focus:border-[#FF4D57] transition-colors"
+                    className="w-full bg-[#1A1A1A] border border-[#333333] px-3.5 py-2.5 text-sm text-[#F0F0EE] placeholder-[#5C5C5C] focus:outline-none focus:border-[#FF4D57] transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-widest text-[#AAAAAA] mb-1.5">
-                    {t("Message / Special Requirements")} <span className="text-[#5F5F5F]">{t("(Optional)")}</span>
+                  <label className="block text-[10px] font-mono uppercase tracking-widest text-[#B8B8B8] mb-1.5">
+                    {t("Message / Special Requirements")} <span className="text-[#5C5C5C]">{t("(Optional)")}</span>
                   </label>
                   <textarea
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     rows={3}
                     placeholder={t("Mention any specific questions regarding framing, global insured transport, or presentation...")}
-                    className="w-full bg-[#191919] border border-[#313131] px-3.5 py-2.5 text-sm text-[#EFEFEF] placeholder-[#5F5F5F] focus:outline-none focus:border-[#FF4D57] transition-colors resize-none"
+                    className="w-full bg-[#1A1A1A] border border-[#333333] px-3.5 py-2.5 text-sm text-[#F0F0EE] placeholder-[#5C5C5C] focus:outline-none focus:border-[#FF4D57] transition-colors resize-none"
                   />
                 </div>
 
                 {error && (
-                  <div className="p-3 bg-[#191919] border border-[#B0000E] text-[#FF4D57] text-xs flex items-center gap-2">
+                  <div className="p-3 bg-[#1A1A1A] border border-[#B0000E] text-[#FF4D57] text-xs flex items-center gap-2">
                     <span className="material-symbols-outlined text-sm">error</span>
                     <span>{error}</span>
                   </div>
@@ -231,11 +231,11 @@ export function EnquiryModal({
                 <button
                   disabled={busy}
                   type="submit"
-                  className="w-full bg-[#FF4D57] text-[#121212] font-mono text-xs uppercase tracking-widest py-3.5 px-6 font-semibold hover:bg-[#EFEFEF] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                  className="w-full bg-[#FF4D57] text-[#111111] font-mono text-xs uppercase tracking-widest py-3.5 px-6 font-semibold hover:bg-[#F0F0EE] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
                 >
                   {busy ? (
                     <>
-                      <span className="w-4 h-4 border-2 border-[#121212] border-t-transparent rounded-full animate-spin" />
+                      <span className="w-4 h-4 border-2 border-[#111111] border-t-transparent rounded-full animate-spin" />
                       <span>{t("Dispatching Request...")}</span>
                     </>
                   ) : (
@@ -246,7 +246,7 @@ export function EnquiryModal({
                   )}
                 </button>
 
-                <div className="pt-2 flex items-center justify-center gap-2 text-[10px] text-[#848484]">
+                <div className="pt-2 flex items-center justify-center gap-2 text-[10px] text-[#8C8C8C]">
                   <span className="material-symbols-outlined text-xs text-[#FF4D57]">lock</span>
                   <span>{t("Direct & Private Communication • Guaranteed Response within 24h")}</span>
                 </div>

@@ -92,14 +92,14 @@ function ShareModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm bg-[#121212] text-[#EFEFEF] border border-[#313131] shadow-2xl relative overflow-hidden"
+        className="w-full max-w-sm bg-[#111111] text-[#F0F0EE] border border-[#333333] shadow-2xl relative overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="h-1 w-full bg-gradient-to-r from-[#D7141E] via-[#FF4D57] to-[#D7141E]" />
         <button
           onClick={onClose}
           aria-label={t("Close modal")}
-          className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-[#191919] text-[#AAAAAA] hover:text-[#EFEFEF] hover:bg-[#252525] border border-[#313131] flex items-center justify-center transition-all"
+          className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-[#1A1A1A] text-[#B8B8B8] hover:text-[#F0F0EE] hover:bg-[#262626] border border-[#333333] flex items-center justify-center transition-all"
         >
           <span className="material-symbols-outlined text-lg">close</span>
         </button>
@@ -108,11 +108,11 @@ function ShareModal({
           <span className="text-[9px] font-mono tracking-widest text-[#FF4D57] uppercase font-semibold block mb-1">
             {t("Share")}
           </span>
-          <h3 className="font-serif text-xl font-medium text-[#EFEFEF] leading-tight mb-6">{artworkTitle}</h3>
+          <h3 className="font-serif text-xl font-medium text-[#F0F0EE] leading-tight mb-6">{artworkTitle}</h3>
 
           <button
             onClick={copyLink}
-            className="w-full flex items-center gap-3 px-4 py-3 mb-2 bg-[#191919] border border-[#313131] hover:border-[#FF4D57] transition-colors text-sm"
+            className="w-full flex items-center gap-3 px-4 py-3 mb-2 bg-[#1A1A1A] border border-[#333333] hover:border-[#FF4D57] transition-colors text-sm"
           >
             <span className="material-symbols-outlined text-[#FF4D57] text-lg">link</span>
             {t("Copy link")}
@@ -121,7 +121,7 @@ function ShareModal({
           {typeof navigator !== "undefined" && "share" in navigator && (
             <button
               onClick={nativeShare}
-              className="w-full flex items-center gap-3 px-4 py-3 mb-2 bg-[#191919] border border-[#313131] hover:border-[#FF4D57] transition-colors text-sm"
+              className="w-full flex items-center gap-3 px-4 py-3 mb-2 bg-[#1A1A1A] border border-[#333333] hover:border-[#FF4D57] transition-colors text-sm"
             >
               <span className="material-symbols-outlined text-[#FF4D57] text-lg">ios_share</span>
               {t("More options")}
@@ -135,7 +135,7 @@ function ShareModal({
                 href={l.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-3 bg-[#191919] border border-[#313131] hover:border-[#FF4D57] transition-colors text-xs"
+                className="flex items-center gap-2 px-4 py-3 bg-[#1A1A1A] border border-[#333333] hover:border-[#FF4D57] transition-colors text-xs"
               >
                 <span className="material-symbols-outlined text-[#FF4D57] text-base">{l.icon}</span>
                 {l.label}

@@ -198,7 +198,7 @@
   --error: #D7141E;
   --on-error: var(--nua-white);
   --error-container: #FBE3E4;
-  --on-error-container: #3E0006;
+  --on-error-container: #B0000E;
 
   --overlay-scrim: #1616169E;
   --overlay-scrim-strong: #161616D1;
@@ -258,7 +258,7 @@
   --error: #FF4D57;
   --on-error: #161616;
   --error-container: #4A1013;
-  --on-error-container: #FFD6D8;
+  --on-error-container: #FF8A90;
 
   --overlay-scrim: rgba(0, 0, 0, 0.72);
   --overlay-scrim-strong: rgba(0, 0, 0, 0.88);

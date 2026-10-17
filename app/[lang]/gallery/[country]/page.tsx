@@ -203,8 +203,8 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
               className="relative h-full w-full flex-shrink-0 snap-start"
               style={{
                 background: isFeatured
-                  ? "linear-gradient(180deg, #181818 0%, #090909 70%, #040404 100%)"
-                  : "linear-gradient(180deg, #141414 0%, #090909 70%, #040404 100%)",
+                  ? "linear-gradient(180deg, #1A1A1A 0%, #111111 70%, #111111 100%)"
+                  : "linear-gradient(180deg, #161616 0%, #111111 70%, #111111 100%)",
               }}
             >
               {/* Floor */}
@@ -254,7 +254,7 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
                         />
                         {/* Frame */}
                         <div
-                          className="relative bg-beige border-[10px] border-[#191919] shadow-2xl"
+                          className="relative bg-beige border-[10px] border-[#1A1A1A] shadow-2xl"
                           style={{
                             width: isHero ? 280 : 200,
                             height: isHero ? 360 : 260,
@@ -263,7 +263,7 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
                           <div
                             className="w-full h-full flex items-end p-4"
                             style={{
-                              background: `linear-gradient(135deg, #${a.swatch} 0%, #191919 100%)`,
+                              background: `linear-gradient(135deg, #${a.swatch} 0%, #1A1A1A 100%)`,
                             }}
                           >
                             <span className="font-display-lg text-beige/90 text-xs uppercase tracking-wider leading-tight">{a.title}</span>
@@ -356,8 +356,8 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
               </p>
 
               <div
-                className="aspect-[3/4] w-full mb-6 flex items-end p-6 border-[8px] border-[#191919] shadow-xl"
-                style={{ background: `linear-gradient(135deg, #${active.swatch} 0%, #191919 100%)` }}
+                className="aspect-[3/4] w-full mb-6 flex items-end p-6 border-[8px] border-[#1A1A1A] shadow-xl"
+                style={{ background: `linear-gradient(135deg, #${active.swatch} 0%, #1A1A1A 100%)` }}
               >
                 <span className="font-display-lg text-beige/90 text-base uppercase tracking-wider">{active.title}</span>
               </div>

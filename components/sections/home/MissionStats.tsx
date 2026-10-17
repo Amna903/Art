@@ -15,7 +15,7 @@ export function MissionStats() {
 
   return (
     <section className="px-gutter-page py-section-gap">
-      <div className="mx-auto grid max-w-container-max grid-cols-1 gap-8 bg-[#EFEFEF] px-5 py-7 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-12 lg:px-10 lg:py-8">
+      <div className="mx-auto grid max-w-container-max grid-cols-1 gap-8 bg-[#F0F0EE] px-5 py-7 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-12 lg:px-10 lg:py-8">
         <div>
           <span className="mb-3 block font-label-caps text-[8px] tracking-[0.24em] text-secondary">
             — {t("OUR MISSION IN DATA")}

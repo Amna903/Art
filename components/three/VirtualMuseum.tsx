@@ -173,7 +173,7 @@ function getPlasterTexture(): THREE.CanvasTexture {
   c.width = size;
   c.height = size;
   const ctx = c.getContext("2d")!;
-  ctx.fillStyle = "#808080";
+  ctx.fillStyle = "#8C8C8C";
   ctx.fillRect(0, 0, size, size);
   const img = ctx.getImageData(0, 0, size, size);
   for (let i = 0; i < img.data.length; i += 4) {
@@ -252,7 +252,7 @@ function getFloorTexture(): THREE.CanvasTexture {
   c.width = size;
   c.height = size;
   const ctx = c.getContext("2d")!;
-  ctx.fillStyle = "#808080";
+  ctx.fillStyle = "#8C8C8C";
   ctx.fillRect(0, 0, size, size);
 
   // Fine aggregate gives the slab its close-up concrete character.
@@ -714,7 +714,7 @@ function TrackLightFixture({
       <group ref={headRef} position={[0, 0, 0]}>
         <mesh rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.045, 0.06, 0.16, 16]} />
-          <meshStandardMaterial color="#181818" roughness={0.35} metalness={0.65} />
+          <meshStandardMaterial color="#1A1A1A" roughness={0.35} metalness={0.65} />
         </mesh>
         {/* Warm LED lens glow */}
         <mesh position={[0, 0, 0.082]}>
