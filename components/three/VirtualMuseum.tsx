@@ -1039,22 +1039,32 @@ function Player({
     };
     const onMove = (e: PointerEvent) => {
       if (!last || e.pointerType !== "touch") return;
+      // A swipe across the full screen width turns about 200 degrees, so a
+      // short flick is enough to look around on a phone.
+      const speed = (Math.PI * 1.1) / Math.max(el.clientWidth, 320);
       euler.setFromQuaternion(camera.quaternion);
-      euler.y += (e.clientX - last.x) * 0.005;
-      euler.x = THREE.MathUtils.clamp(euler.x + (e.clientY - last.y) * 0.003, -0.6, 0.6);
+      euler.y += (e.clientX - last.x) * speed;
+      euler.x = THREE.MathUtils.clamp(euler.x + (e.clientY - last.y) * speed * 0.6, -0.6, 0.6);
       camera.quaternion.setFromEuler(euler);
       last = { x: e.clientX, y: e.clientY };
     };
     const onUp = () => {
       last = null;
     };
+    // Without touch-action: none the browser claims the swipe for scrolling
+    // and cancels the pointer, so the turn lags or stops halfway.
+    const previousTouchAction = el.style.touchAction;
+    el.style.touchAction = "none";
     el.addEventListener("pointerdown", onDown);
     el.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
     return () => {
+      el.style.touchAction = previousTouchAction;
       el.removeEventListener("pointerdown", onDown);
       el.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
     };
   }, [mode, gl, camera]);
 
