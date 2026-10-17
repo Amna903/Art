@@ -209,3 +209,14 @@ render signed-out instead of crashing.
 - No CSS Modules, styled-components, or extra stylesheets anywhere — every
   visual comes from Tailwind utility classes, plus the token/animation
   definitions centralized in `app/globals.css`.
+
+## Virtual gallery, music and hero images (change brief, 9 Oct 2026)
+
+Run `supabase/migrations/20261018000000_gallery_music_and_site_heroes.sql` before deploying. It adds:
+
+- `gallery_tracks` + public bucket `gallery-music`: the playlist for the single app-wide music player (`lib/music`). Manage it in Dashboard → Gallery music. With no tracks, the gallery shows no music control.
+- `site_heroes` + public bucket `heroes`: hero images for the homepage, virtual gallery, exhibitions, about and country pages. Manage them in Dashboard → Hero images; uploads are resized to the brief's sizes in the browser.
+
+Room titles for the guided tour are page blocks (`virtual-gallery` / `room_title_1`…`4`), edited from the "Edit room titles" button on /virtual-gallery.
+
+The gallery and collections show only real, published content in production; sample artworks and collections appear in `next dev` only.
