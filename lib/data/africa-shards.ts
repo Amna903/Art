@@ -1,8 +1,7 @@
-// 3D sculptural atlas geometry & palette system for NUA-ARTE.
-// Porcelain pieces in the brand's white / charcoal / red (change brief §1:
-// no beige, sand or brown). Countries with NUA-ARTE artists are red, so the
-// map shows where the artists are. The colours are CSS variables, defined for
-// light and dark mode in components/map/clay-atlas.css.
+// 3D sculptural clay atlas geometry & palette system for NUA-ARTE.
+// Red clay tones (blush, rose, brick, oxblood) so the map keeps its sculpted,
+// earthy feel within the white / charcoal / red identity (change brief §1),
+// with countries that have NUA-ARTE artists in the brand red.
 
 import { Delaunay } from "d3-delaunay";
 
@@ -16,95 +15,154 @@ export type ClayPalette = {
   bevelHighlight: string; // Crisp reflective rim bevel
 };
 
-// Four porcelain tones for variety, plus red for countries with artists.
-const porcelain = (tone: string): ClayPalette => ({
-  name: tone,
-  topLight: `var(--clay-${tone}-top-light)`,
-  topBase: `var(--clay-${tone}-top)`,
-  topDark: `var(--clay-${tone}-top-dark)`,
-  sideDark: `var(--clay-${tone}-side-dark)`,
-  sideMid: `var(--clay-${tone}-side)`,
-  bevelHighlight: "var(--clay-bevel)",
-});
-
 export const CLAY_PALETTES: Record<string, ClayPalette> = {
-  a: porcelain("a"),
-  b: porcelain("b"),
-  c: porcelain("c"),
-  d: porcelain("d"),
-  artist: porcelain("artist"),
+  // Countries with NUA-ARTE artists: the brand red, so the map shows where
+  // the artists are.
+  artist: {
+    name: "NUA-ARTE Red",
+    topLight: "#FF4D57",
+    topBase: "#D7141E",
+    topDark: "#B0000E",
+    sideDark: "#4A1013",
+    sideMid: "#7A0A10",
+    bevelHighlight: "rgba(255, 235, 236, 0.45)",
+  },
+  terracotta: {
+    name: "Brick Clay",
+    topLight: "#C98A80",
+    topBase: "#B87268",
+    topDark: "#9C5A51",
+    sideDark: "#3A1A16",
+    sideMid: "#5A2A24",
+    bevelHighlight: "rgba(255, 240, 238, 0.4)",
+  },
+  ochre_tan: {
+    name: "Rose Clay",
+    topLight: "#E3B9B0",
+    topBase: "#D6A49A",
+    topDark: "#BE887E",
+    sideDark: "#3E201B",
+    sideMid: "#5E342D",
+    bevelHighlight: "rgba(255, 245, 243, 0.45)",
+  },
+  honey_sand: {
+    name: "Blush Clay",
+    topLight: "#EED3CC",
+    topBase: "#E4C0B7",
+    topDark: "#CDA298",
+    sideDark: "#40241F",
+    sideMid: "#603A33",
+    bevelHighlight: "rgba(255, 248, 246, 0.45)",
+  },
+  caramel: {
+    name: "Coral Clay",
+    topLight: "#D99A8C",
+    topBase: "#C9837A",
+    topDark: "#AD6A60",
+    sideDark: "#3A1C17",
+    sideMid: "#58302A",
+    bevelHighlight: "rgba(255, 242, 240, 0.4)",
+  },
+  olive_sage: {
+    name: "Ash Rose",
+    topLight: "#CDB8B4",
+    topBase: "#BBA39F",
+    topDark: "#9F8783",
+    sideDark: "#2C2220",
+    sideMid: "#463634",
+    bevelHighlight: "rgba(252, 246, 245, 0.4)",
+  },
+  cocoa_mauve: {
+    name: "Oxblood Clay",
+    topLight: "#A86A66",
+    topBase: "#955754",
+    topDark: "#7A4341",
+    sideDark: "#2A1312",
+    sideMid: "#44201E",
+    bevelHighlight: "rgba(252, 238, 236, 0.35)",
+  },
+  taupe_stone: {
+    name: "Stone Rose",
+    topLight: "#D8C6C2",
+    topBase: "#C8B3AE",
+    topDark: "#AE9893",
+    sideDark: "#2E2523",
+    sideMid: "#4A3B38",
+    bevelHighlight: "rgba(252, 249, 248, 0.4)",
+  },
 };
 
-// Neighbouring countries get different porcelain tones.
+// Hand-tuned mapping for all 54 African countries matching the reference photo color distribution
 export const COUNTRY_PALETTE_MAP: Record<string, string> = {
   // North Africa
-  "algeria": "a",
-  "morocco": "d",
-  "tunisia": "c",
-  "libya": "c",
-  "egypt": "c",
-  "sudan": "a",
-  "south-sudan": "b",
+  "algeria": "terracotta",
+  "morocco": "caramel",
+  "tunisia": "honey_sand",
+  "libya": "honey_sand",
+  "egypt": "honey_sand",
+  "sudan": "terracotta",
+  "south-sudan": "olive_sage",
 
   // West Africa
-  "mauritania": "d",
-  "mali": "b",
-  "senegal": "c",
-  "gambia": "a",
-  "guinea-bissau": "d",
-  "guinea": "d",
-  "sierra-leone": "b",
-  "liberia": "d",
-  "ivory-coast": "a",
-  "ghana": "b",
-  "togo": "b",
-  "benin": "d",
-  "niger": "b",
-  "nigeria": "c",
-  "burkina-faso": "b",
-  "cabo-verde": "b",
+  "mauritania": "taupe_stone",
+  "mali": "ochre_tan",
+  "senegal": "honey_sand",
+  "gambia": "terracotta",
+  "guinea-bissau": "taupe_stone",
+  "guinea": "taupe_stone",
+  "sierra-leone": "olive_sage",
+  "liberia": "taupe_stone",
+  "ivory-coast": "terracotta",
+  "ghana": "ochre_tan",
+  "togo": "olive_sage",
+  "benin": "taupe_stone",
+  "niger": "olive_sage",
+  "nigeria": "cocoa_mauve",
+  "burkina-faso": "olive_sage",
+  "cabo-verde": "ochre_tan",
 
   // Central Africa
-  "chad": "d",
-  "cameroon": "d",
-  "central-african-republic": "b",
-  "gabon": "b",
-  "congo": "b",
-  "drc": "a",
-  "equatorial-guinea": "d",
-  "sao-tome": "c",
+  "chad": "taupe_stone",
+  "cameroon": "caramel",
+  "central-african-republic": "olive_sage",
+  "gabon": "olive_sage",
+  "congo": "olive_sage",
+  "drc": "terracotta",
+  "equatorial-guinea": "caramel",
+  "sao-tome": "cocoa_mauve",
 
   // East Africa
-  "eritrea": "d",
-  "ethiopia": "a",
-  "djibouti": "d",
-  "somalia": "d",
-  "uganda": "b",
-  "kenya": "d",
-  "rwanda": "a",
-  "burundi": "b",
-  "tanzania": "d",
-  "seychelles": "c",
-  "comoros": "b",
-  "mauritius": "b",
+  "eritrea": "taupe_stone",
+  "ethiopia": "terracotta",
+  "djibouti": "caramel",
+  "somalia": "caramel",
+  "uganda": "olive_sage",
+  "kenya": "taupe_stone",
+  "rwanda": "terracotta",
+  "burundi": "olive_sage",
+  "tanzania": "taupe_stone",
+  "seychelles": "honey_sand",
+  "comoros": "olive_sage",
+  "mauritius": "ochre_tan",
 
   // Southern Africa
-  "angola": "b",
-  "zambia": "c",
-  "malawi": "a",
-  "mozambique": "c",
-  "zimbabwe": "d",
-  "botswana": "b",
-  "namibia": "a",
-  "south-africa": "b",
-  "lesotho": "c",
-  "eswatini": "a",
-  "madagascar": "d",
+  "angola": "ochre_tan",
+  "zambia": "cocoa_mauve",
+  "malawi": "terracotta",
+  "mozambique": "honey_sand",
+  "zimbabwe": "taupe_stone",
+  "botswana": "olive_sage",
+  "namibia": "terracotta",
+  "south-africa": "ochre_tan",
+  "lesotho": "cocoa_mauve",
+  "eswatini": "terracotta",
+  "madagascar": "caramel",
 };
 
 export function getClayPalette(slug: string, hasArtists = false): ClayPalette {
   if (hasArtists) return CLAY_PALETTES.artist;
-  return CLAY_PALETTES[COUNTRY_PALETTE_MAP[slug] ?? "a"];
+  const key = COUNTRY_PALETTE_MAP[slug] ?? "ochre_tan";
+  return CLAY_PALETTES[key] ?? CLAY_PALETTES.ochre_tan;
 }
 
 export type Shard = {

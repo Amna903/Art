@@ -458,7 +458,7 @@ export function ClayAtlasMap() {
                   <path
                     d={shard.path}
                     fill={`url(#detail-grad-${shard.slug})`}
-                    stroke={isHovered ? "var(--atlas-accent)" : "var(--clay-outline)"}
+                    stroke={isHovered ? "var(--atlas-accent)" : "rgba(42, 14, 12, 0.75)"}
                     strokeWidth={isHovered ? 2.2 : 1.2}
                     strokeLinejoin="round"
                     className="nu-clay-top"
@@ -518,7 +518,7 @@ export function ClayAtlasMap() {
                     cy={isle.y}
                     r={isHovered ? 6 : 4.5}
                     fill={palette.topBase}
-                    stroke={isHovered ? "var(--atlas-accent)" : "var(--clay-outline)"}
+                    stroke={isHovered ? "var(--atlas-accent)" : "rgba(42, 14, 12, 0.75)"}
                     strokeWidth={isHovered ? 1.4 : 1}
                   />
                   <circle

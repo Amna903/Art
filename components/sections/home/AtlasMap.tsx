@@ -514,7 +514,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                   <path
                     d={shard.path}
                     fill={`url(#clay-grad-${shard.slug})`}
-                    stroke={isActive ? "var(--atlas-accent)" : "var(--clay-outline)"}
+                    stroke={isActive ? "var(--atlas-accent)" : "rgba(42, 14, 12, 0.75)"}
                     strokeWidth={isActive ? 2.2 : 1.2}
                     strokeLinejoin="round"
                     className="nu-clay-top"
@@ -568,7 +568,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                     cy={isle.y}
                     r={isActive ? 6 : 4.5}
                     fill={palette.topBase}
-                    stroke={isActive ? "var(--atlas-accent)" : "var(--clay-outline)"}
+                    stroke={isActive ? "var(--atlas-accent)" : "rgba(42, 14, 12, 0.75)"}
                     strokeWidth={isActive ? 1.4 : 1}
                   />
                   {/* Specular highlight */}
@@ -645,7 +645,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                           <path
                             d={shard.path}
                             fill={isActive ? "var(--atlas-accent)" : shard.palette.topBase}
-                            stroke="var(--clay-outline)"
+                            stroke="rgba(42, 14, 12, 0.65)"
                             strokeWidth={4}
                           />
                         </svg>
