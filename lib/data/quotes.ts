@@ -4,8 +4,8 @@
  * the record. These are distinct from the featured artists' own words, which
  * are added as approved interviews arrive.
  *
- * Quotations are shown in their original English in every language: they
- * are someone's exact words.
+ * `text` is the original English; translations live in the dictionaries
+ * under that text, and QuoteBlock keeps the original in the markup.
  */
 export type Quote = {
   id: string;

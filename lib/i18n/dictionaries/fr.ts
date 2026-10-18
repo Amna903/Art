@@ -1439,6 +1439,11 @@ const fr: Record<string, string> = {
   "Founder & Curator, NUA-ARTE": "Fondatrice et curatrice, NUA-ARTE",
   "Ghanaian artist": "Artiste ghanéen",
   "Nigerian writer": "Écrivaine nigériane",
+  // Quotes, translated from the original English
+  "I chose the art before I knew the stories. When I discovered the people behind it, my connection became a purpose.": "J'ai choisi l'art avant de connaître les histoires. Quand j'ai découvert les personnes qui se trouvaient derrière, mon lien est devenu une raison d'être.",
+  "If there is something that I think art does, I think it awakens the spiritual.": "S'il y a une chose que l'art fait, je crois, c'est qu'il éveille le spirituel.",
+  "Ideas and creativity are not restricted to any one place.": "Les idées et la créativité ne se limitent à aucun lieu.",
+  "Stories matter. Many stories matter.": "Les histoires comptent. Beaucoup d'histoires comptent.",
 };
 
 export default fr;
