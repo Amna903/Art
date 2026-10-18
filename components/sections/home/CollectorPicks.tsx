@@ -31,7 +31,7 @@ export function CollectorPicks({ picks }: CollectorPicksProps) {
           <p className="text-lg leading-[1.6] text-on-surface-variant max-w-xl mx-auto">
             {t("Some works stay with you long after the first encounter. Explore available pieces and find the one you want to return to, day after day.")}
           </p>
-          <Link href="/collections" className="mt-5 inline-block border-b border-[var(--nua-charcoal)] pb-1 text-base hover:border-[var(--nua-red)] hover:text-[var(--nua-red)]">
+          <Link href="/collections" className="mt-5 inline-block border-b border-current pb-1 text-base hover:border-[var(--nua-red)] hover:text-[var(--nua-red)]">
             {t("View available works")}
           </Link>
         </div>

@@ -82,7 +82,7 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
           <p className="mt-4 text-lg leading-[1.6] text-on-surface-variant">
             {t("Behind every work is someone with a way of seeing that belongs to them. Meet the makers, explore their materials and spend time with the details that make each voice distinct.")}
           </p>
-          <Link href="/artists" className="mt-5 inline-block border-b border-[var(--nua-charcoal)] pb-1 text-base hover:border-[var(--nua-red)] hover:text-[var(--nua-red)]">
+          <Link href="/artists" className="mt-5 inline-block border-b border-current pb-1 text-base hover:border-[var(--nua-red)] hover:text-[var(--nua-red)]">
             {t("Meet the artists")}
           </Link>
         </div>
@@ -148,7 +148,7 @@ function CardPhoto({ name, src }: { name: string; src: string }) {
   const { broken, ref, onError } = useBrokenImage();
   if (!src?.trim() || broken) {
     return (
-      <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center bg-[var(--nua-paper)] font-display text-6xl text-[var(--nua-grey)]">
+      <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center bg-surface-container-low font-display text-6xl text-[var(--nua-grey)]">
         {name
           .split(/\s+/)
           .slice(0, 2)

@@ -28,14 +28,14 @@ export function HomeIntro() {
           </p>
           <Link
             href="/collections"
-            className="mt-8 inline-block border-b border-[var(--nua-charcoal)] pb-1 text-base hover:border-[var(--nua-red)] hover:text-[var(--nua-red)]"
+            className="mt-8 inline-block border-b border-current pb-1 text-base hover:border-[var(--nua-red)] hover:text-[var(--nua-red)]"
           >
             {t("Explore the collection")}
           </Link>
         </div>
       </section>
 
-      <section className="bg-[var(--nua-paper)] px-gutter-page py-section-gap">
+      <section className="bg-surface-container-low px-gutter-page py-section-gap">
         <div className="mx-auto grid max-w-container-max gap-10 md:grid-cols-[1fr_1.4fr] md:items-start">
           <h2 className="font-display text-[clamp(2rem,3.5vw,3rem)] leading-[1.1]">{t("The beginning")}</h2>
           <div className="max-w-2xl space-y-5 text-lg leading-[1.6] text-on-surface">
@@ -45,7 +45,7 @@ export function HomeIntro() {
             <p>
               {t("Founded by Anané Vega in collaboration with Nilton Viana, NUA-ARTE creates space for unseen and underrepresented African artists to reach new audiences.")}
             </p>
-            <Link href="/about" className="inline-block border-b border-[var(--nua-charcoal)] pb-1 text-base hover:border-[var(--nua-red)] hover:text-[var(--nua-red)]">
+            <Link href="/about" className="inline-block border-b border-current pb-1 text-base hover:border-[var(--nua-red)] hover:text-[var(--nua-red)]">
               {t("Discover our story")}
             </Link>
           </div>

@@ -37,7 +37,7 @@ export default async function JournalPage({ params }: PageProps<"/[lang]/journal
         <p className="mt-6 max-w-2xl text-lg leading-[1.6] text-on-surface">
           {t("Spend time with the people, places and encounters behind NUA-ARTE. Here we share artists’ words, moments from our travels and the details that deepen a connection to the work.")}
         </p>
-        <a href="#stories" className="mt-5 inline-block border-b border-[var(--nua-charcoal)] pb-1 text-base hover:border-[var(--nua-red)] hover:text-[var(--nua-red)]">
+        <a href="#stories" className="mt-5 inline-block border-b border-current pb-1 text-base hover:border-[var(--nua-red)] hover:text-[var(--nua-red)]">
           {t("Read the stories")}
         </a>
       </header>

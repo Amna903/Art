@@ -31,7 +31,7 @@ export function ArtistPhoto({
       <span
         role="img"
         aria-label={alt}
-        className="absolute inset-0 flex items-center justify-center bg-[var(--nua-paper)] font-display text-7xl text-[var(--nua-grey)]"
+        className="absolute inset-0 flex items-center justify-center bg-surface-container-low font-display text-7xl text-[var(--nua-grey)]"
       >
         {initials}
       </span>

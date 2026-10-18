@@ -29,7 +29,7 @@ export function AboutContent({
         </p>
       </section>
 
-      <section className="bg-[var(--nua-paper)]">
+      <section className="bg-surface-container-low">
         <div className={`max-w-container-max mx-auto px-gutter-page py-20 grid gap-12 ${founderQuote ? "lg:grid-cols-[1.2fr_1fr] lg:items-center" : ""}`}>
           <div className="max-w-2xl">
             <h2 className="font-display text-3xl md:text-4xl mb-8">{t("A note from Anané")}</h2>

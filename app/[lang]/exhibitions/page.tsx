@@ -173,7 +173,7 @@ export default async function ExhibitionsPage({ params }: PageProps<"/[lang]/exh
         <ExhibitionsGrid initialItems={supaExhibitions} fallbackItems={fallbackItems} />
       </section>
 
-      <section className="mb-section-gap bg-[var(--nua-paper)] px-6 py-16 text-center md:px-16">
+      <section className="mb-section-gap bg-surface-container-low px-6 py-16 text-center md:px-16">
         <h2 className="font-display text-3xl md:text-4xl">{t("Invitation")}</h2>
         <p className="mx-auto mt-5 max-w-2xl text-lg leading-[1.6] text-on-surface">
           {t("Come with curiosity. Take your time. Let a work hold your attention, and meet the person whose imagination brought it into being.")}

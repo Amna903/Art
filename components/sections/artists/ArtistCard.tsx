@@ -34,7 +34,7 @@ export function ArtistCard({ artist, index }: { artist: Artist; index: number })
 
   return (
     <Link href={`/artists/${artist.slug}`} className="group flex flex-col">
-      <div className="relative mb-3 aspect-square overflow-hidden bg-[var(--nua-paper)]">
+      <div className="relative mb-3 aspect-square overflow-hidden bg-surface-container-low">
         {showPhoto ? (
           <Image
             src={artist.image}
