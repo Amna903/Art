@@ -1,6 +1,21 @@
 .nu-atlas {
   /* Light Theme (default) */
-  --atlas-bg: var(--background, #FFFFFF);
+  /* Porcelain map pieces (change brief §1): four near-white tones, charcoal
+     sides, red for countries with NUA-ARTE artists. Paper behind so the
+     white pieces stand out. */
+  --atlas-bg: var(--nua-paper, #F5F5F3);
+  --clay-a-top-light: #FFFFFF; --clay-a-top: #FFFFFF; --clay-a-top-dark: #EBEBEA;
+  --clay-b-top-light: #FFFFFF; --clay-b-top: #F5F5F3; --clay-b-top-dark: #E6E6E6;
+  --clay-c-top-light: #FFFFFF; --clay-c-top: #F0F0EE; --clay-c-top-dark: #E6E6E6;
+  --clay-d-top-light: #F5F5F3; --clay-d-top: #EBEBEA; --clay-d-top-dark: #E6E6E6;
+  --clay-a-side: #5C5C5C; --clay-a-side-dark: #333333;
+  --clay-b-side: #5C5C5C; --clay-b-side-dark: #333333;
+  --clay-c-side: #5C5C5C; --clay-c-side-dark: #333333;
+  --clay-d-side: #5C5C5C; --clay-d-side-dark: #333333;
+  --clay-artist-top-light: #FF4D57; --clay-artist-top: #D7141E; --clay-artist-top-dark: #B0000E;
+  --clay-artist-side: #B0000E; --clay-artist-side-dark: #4A1013;
+  --clay-bevel: rgba(255, 255, 255, 0.7);
+  --clay-outline: rgba(31, 31, 31, 0.35);
   --atlas-fg: var(--on-background, #1F1F1F);
   --atlas-fg-muted: var(--on-surface-variant, #5C5C5C);
   --atlas-accent: var(--red-blood, #D7141E);
@@ -30,6 +45,19 @@
 :root.dark.nu-atlas,
 .dark.nu-atlas {
   /* Dark Theme */
+  /* Ebony pieces in dark mode, same red for countries with artists. */
+  --clay-a-top-light: #333333; --clay-a-top: #2E2E2E; --clay-a-top-dark: #262626;
+  --clay-b-top-light: #2E2E2E; --clay-b-top: #262626; --clay-b-top-dark: #1F1F1F;
+  --clay-c-top-light: #333333; --clay-c-top: #262626; --clay-c-top-dark: #1F1F1F;
+  --clay-d-top-light: #2E2E2E; --clay-d-top: #1F1F1F; --clay-d-top-dark: #1A1A1A;
+  --clay-a-side: #1A1A1A; --clay-a-side-dark: #111111;
+  --clay-b-side: #1A1A1A; --clay-b-side-dark: #111111;
+  --clay-c-side: #1A1A1A; --clay-c-side-dark: #111111;
+  --clay-d-side: #1A1A1A; --clay-d-side-dark: #111111;
+  --clay-artist-top-light: #FF8A90; --clay-artist-top: #FF4D57; --clay-artist-top-dark: #D7141E;
+  --clay-artist-side: #B0000E; --clay-artist-side-dark: #4A1013;
+  --clay-bevel: rgba(255, 255, 255, 0.12);
+  --clay-outline: rgba(0, 0, 0, 0.6);
   --atlas-bg: var(--background, #161616);
   --atlas-fg: var(--on-background, #F5F5F5);
   --atlas-fg-muted: var(--on-surface-variant, #B8B8B8);

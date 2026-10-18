@@ -63,6 +63,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
     ),
     artworks: publishedArtworks.length,
     countries: uniqueCountries.size,
+    countrySlugs: [...uniqueCountries],
     visits,
   };
 

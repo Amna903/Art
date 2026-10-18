@@ -5,7 +5,7 @@ import { geoConicEqualArea, geoPath } from "d3-geo";
 import africaGeo from "@/lib/data/africa-geo.json";
 import { ISLAND_PINS, getCountryByGeoName, getCountryBySlug, getCountryDisplayName } from "@/lib/data/africa";
 import { getStats } from "@/lib/data/africa-map";
-import { buildCountryShards, type CountryInput, type Shard } from "@/lib/data/africa-shards";
+import { buildCountryShards, getClayPalette, type CountryInput, type Shard } from "@/lib/data/africa-shards";
 import { useCountrySoundUrls } from "@/lib/data/country-sounds";
 import { ARTISTS, TECHNIQUES, type Technique } from "@/lib/data/artists";
 import { useLanguage, useRouter } from "@/lib/i18n";
@@ -79,6 +79,9 @@ function playCountryCue(slug: string, ctx: AudioContext, master: GainNode) {
   osc1.stop(now + dur + 0.05);
   osc2.stop(now + dur + 0.05);
 }
+
+/** This page still uses the sample artists, so no country is marked red. */
+const artistCountries: ReadonlySet<string> = new Set();
 
 export function ClayAtlasMap() {
   const router = useRouter();
@@ -378,7 +381,8 @@ export function ClayAtlasMap() {
             {/* 3D Country Puzzle Blocks */}
             {shards.map((shard) => {
               const country = getCountryBySlug(shard.slug);
-              if (!country) return null;
+              // Island nations are drawn once, as a pin below.
+              if (!country || shard.slug in ISLAND_PINS) return null;
               const isHovered = hover === country.slug;
               const dimmed = isDimmed(country.slug);
 
@@ -454,7 +458,7 @@ export function ClayAtlasMap() {
                   <path
                     d={shard.path}
                     fill={`url(#detail-grad-${shard.slug})`}
-                    stroke={isHovered ? "var(--atlas-accent)" : "rgba(25, 15, 10, 0.75)"}
+                    stroke={isHovered ? "var(--atlas-accent)" : "var(--clay-outline)"}
                     strokeWidth={isHovered ? 2.2 : 1.2}
                     strokeLinejoin="round"
                     className="nu-clay-top"
@@ -481,12 +485,7 @@ export function ClayAtlasMap() {
               if (!country) return null;
               const isHovered = hover === isle.slug;
               const dimmed = isDimmed(isle.slug);
-              const palette = shardMap.get(isle.slug)?.palette || {
-                topLight: "#E8C59A",
-                topBase: "#DEB484",
-                topDark: "#C69966",
-                sideDark: "#342215",
-              };
+              const palette = shardMap.get(isle.slug)?.palette ?? getClayPalette(isle.slug, artistCountries.has(isle.slug));
 
               return (
                 <g
@@ -519,7 +518,7 @@ export function ClayAtlasMap() {
                     cy={isle.y}
                     r={isHovered ? 6 : 4.5}
                     fill={palette.topBase}
-                    stroke={isHovered ? "var(--atlas-accent)" : "rgba(35, 22, 14, 0.75)"}
+                    stroke={isHovered ? "var(--atlas-accent)" : "var(--clay-outline)"}
                     strokeWidth={isHovered ? 1.4 : 1}
                   />
                   <circle

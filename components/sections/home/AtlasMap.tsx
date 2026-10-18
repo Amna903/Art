@@ -5,7 +5,7 @@ import Link from "@/components/i18n/Link";
 import { geoConicEqualArea, geoPath } from "d3-geo";
 import africaGeo from "@/lib/data/africa-geo.json";
 import { ISLAND_PINS, getCountryByGeoName, getCountryBySlug, getCountryDisplayName } from "@/lib/data/africa";
-import { buildCountryShards, type CountryInput, type Shard } from "@/lib/data/africa-shards";
+import { buildCountryShards, getClayPalette, type CountryInput, type Shard } from "@/lib/data/africa-shards";
 import { useCountrySoundUrls } from "@/lib/data/country-sounds";
 import { useLanguage, useRouter } from "@/lib/i18n";
 import "@/components/map/clay-atlas.css";
@@ -102,10 +102,13 @@ type AtlasStats = {
   /** Recorded site visits (VisitCounter); 0 hides the stat. */
   visits: number;
   countries: number;
+  /** Slugs of the countries with NUA-ARTE artists; their pieces are red. */
+  countrySlugs: string[];
 };
 
 export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
   const router = useRouter();
+  const artistCountries = useMemo(() => new Set(stats.countrySlugs), [stats.countrySlugs]);
   const features = (africaGeo as unknown as { features: FeatureLike[] }).features;
 
   const projection = useMemo(() => {
@@ -141,8 +144,8 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
         bbox: [bounds[0][0], bounds[0][1], bounds[1][0], bounds[1][1]],
       });
     });
-    return buildCountryShards(inputs);
-  }, [features, path]);
+    return buildCountryShards(inputs, artistCountries);
+  }, [features, path, artistCountries]);
 
   // Island droplet pins
   const islands = useMemo(() => {
@@ -441,7 +444,9 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
             {/* 3D Relief Country Puzzle Pieces */}
             {shards.map((shard) => {
               const country = getCountryBySlug(shard.slug);
-              if (!country) return null;
+              // Island nations are drawn once, as a pin below (change brief §6:
+              // Cabo Verde and Comoros appeared twice).
+              if (!country || shard.slug in ISLAND_PINS) return null;
               const isActive = activeSlug === country.slug;
 
               return (
@@ -509,7 +514,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                   <path
                     d={shard.path}
                     fill={`url(#clay-grad-${shard.slug})`}
-                    stroke={isActive ? "var(--atlas-accent)" : "rgba(25, 15, 10, 0.75)"}
+                    stroke={isActive ? "var(--atlas-accent)" : "var(--clay-outline)"}
                     strokeWidth={isActive ? 2.2 : 1.2}
                     strokeLinejoin="round"
                     className="nu-clay-top"
@@ -535,12 +540,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
               const country = getCountryBySlug(isle.slug);
               if (!country) return null;
               const isActive = activeSlug === isle.slug;
-              const palette = shardMap.get(isle.slug)?.palette || {
-                topLight: "#E8C59A",
-                topBase: "#DEB484",
-                topDark: "#C69966",
-                sideDark: "#342215",
-              };
+              const palette = shardMap.get(isle.slug)?.palette ?? getClayPalette(isle.slug, artistCountries.has(isle.slug));
 
               return (
                 <g
@@ -568,7 +568,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                     cy={isle.y}
                     r={isActive ? 6 : 4.5}
                     fill={palette.topBase}
-                    stroke={isActive ? "var(--atlas-accent)" : "rgba(35, 22, 14, 0.75)"}
+                    stroke={isActive ? "var(--atlas-accent)" : "var(--clay-outline)"}
                     strokeWidth={isActive ? 1.4 : 1}
                   />
                   {/* Specular highlight */}
@@ -645,7 +645,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                           <path
                             d={shard.path}
                             fill={isActive ? "var(--atlas-accent)" : shard.palette.topBase}
-                            stroke="rgba(35, 22, 14, 0.65)"
+                            stroke="var(--clay-outline)"
                             strokeWidth={4}
                           />
                         </svg>

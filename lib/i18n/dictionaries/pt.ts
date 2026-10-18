@@ -1283,6 +1283,11 @@ const pt: Record<string, string> = {
   "If there is something that I think art does, I think it awakens the spiritual.": "Se há algo que penso que a arte faz, penso que desperta o espiritual.",
   "Ideas and creativity are not restricted to any one place.": "As ideias e a criatividade não estão restritas a um só lugar.",
   "Stories matter. Many stories matter.": "As histórias importam. Muitas histórias importam.",
+  // Account tabs and journal
+  "Saved Artworks": "Obras guardadas",
+  "Followed Artists": "Artistas seguidos",
+  "Order History": "Histórico de encomendas",
+  "3 Minutes": "3 minutos",
 };
 
 export default pt;
