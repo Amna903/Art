@@ -21,7 +21,11 @@ export function ProcessSteps() {
               <div className="w-12 h-12 flex items-center justify-center bg-primary text-on-primary font-bold">
                 {step.n}
               </div>
-              <h3 className="font-headline-sm text-headline-sm">{t(step.title)}</h3>
+              {/* Keyed with the step number so "Save"/"Support" get the step
+                  meaning, not the button / help-desk translation. */}
+              <h3 className="font-headline-sm text-headline-sm">
+                {t(`${step.n} ${step.title}`).replace(/^\d+\s+/, "")}
+              </h3>
               <p className="text-on-surface-variant">{t(step.body)}</p>
             </div>
           ))}
