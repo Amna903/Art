@@ -50,6 +50,10 @@ type ResolvedWork = {
   artistBio: string | null;
   artistStatement: string | null;
   relatedWorks: RelatedWork[];
+  artistAvatar?: string | null;
+  artistLocation?: string | null;
+  artistTechnique?: string | null;
+  dimensions?: string | null;
 };
 
 /**
@@ -98,6 +102,10 @@ async function resolveArtwork(slug: string, lang: Language, t: Translator): Prom
       artistBio: real.artistBio,
       // The work's own story, shown above the artist's bio.
       artistStatement: real.description?.trim() || null,
+      artistAvatar: real.artistAvatarUrl,
+      artistLocation: [real.artistCity, real.artistCountry].filter(Boolean).join(", ") || null,
+      artistTechnique: real.artistTechnique,
+      dimensions: real.dimensions,
       relatedWorks: (await getPublishedArtworks(lang))
         .filter((work) => work.artistId === real.artistId && work.slug !== slug)
         .slice(0, 3)
@@ -158,8 +166,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ArtworkDetailPage({ params }: Props) {
   const { slug } = await params;
   const { lang, t } = await getI18n(params);
-  const { title, artist, artistSlug, medium, year, image, imageAlt, artistBio, artistStatement, relatedWorks } =
-    await resolveArtwork(slug, lang, t);
+  const {
+    title, artist, artistSlug, medium, year, image, imageAlt, artistBio, artistStatement, relatedWorks,
+    artistAvatar, artistLocation, artistTechnique, dimensions,
+  } = await resolveArtwork(slug, lang, t);
 
   return (
     <main className="max-w-container-max mx-auto px-gutter-page pt-24 md:pt-28">
@@ -196,9 +206,41 @@ export default async function ArtworkDetailPage({ params }: Props) {
             >
               {artist}
             </Link>
-            <span className="text-on-surface-variant">•</span>
-            <span className="font-label-caps text-label-caps uppercase tracking-widest">{t("Lagos, Nigeria")}</span>
+            {artistLocation && (
+              <>
+                <span className="text-on-surface-variant">•</span>
+                <span className="font-label-caps text-label-caps uppercase tracking-widest">{artistLocation}</span>
+              </>
+            )}
           </div>
+
+          {/* Artist card — the first thing a visitor sees after scanning a QR
+              label (nua-arte.com/q/<id> redirects here): who made the work,
+              where they come from, and a way into the rest of their work. */}
+          {(artistBio || artistAvatar) && (
+            <section className="mb-10 p-5 border border-outline/10 bg-surface-container-lowest">
+              <p className="font-label-caps text-label-caps uppercase text-on-surface-variant mb-4">{t("About the artist")}</p>
+              <div className="flex items-start gap-4">
+                {artistAvatar && (
+                  <div className="relative w-16 h-16 shrink-0 overflow-hidden bg-surface-container">
+                    <Image src={artistAvatar} alt={artist} fill sizes="64px" className="object-cover" />
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="font-body-lg text-body-lg font-semibold">{artist}</p>
+                  {artistLocation && <p className="text-sm text-on-surface-variant">{artistLocation}</p>}
+                  {artistTechnique && <p className="text-sm text-on-surface-variant">{t(artistTechnique)}</p>}
+                </div>
+              </div>
+              {artistBio && <p className="mt-4 text-base leading-relaxed line-clamp-6">{artistBio}</p>}
+              <Link
+                href={`/artists/${artistSlug}`}
+                className="mt-5 inline-block w-full text-center border border-primary/20 py-3 font-navigation text-navigation uppercase tracking-widest hover:border-secondary hover:text-secondary transition-colors"
+              >
+                {t("Explore this artist’s artwork")}
+              </Link>
+            </section>
+          )}
 
           <div className="grid grid-cols-2 gap-y-6 gap-x-4 mb-10 pb-10 border-b border-outline/10">
             <div>
@@ -211,7 +253,7 @@ export default async function ArtworkDetailPage({ params }: Props) {
             </div>
             <div>
               <p className="font-label-caps text-label-caps uppercase text-on-surface-variant mb-1">{t("Dimensions")}</p>
-              <p className="font-body-md text-body-md">150 x 120 cm</p>
+              <p className="font-body-md text-body-md">{dimensions || "—"}</p>
             </div>
             <div>
               <p className="font-label-caps text-label-caps uppercase text-on-surface-variant mb-1">{t("Stock")}</p>

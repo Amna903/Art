@@ -18,35 +18,6 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/journal">)
 // Matches the 60s window the underlying Supabase/Sanity reads are cached at.
 export const revalidate = 60;
 
-const IMAGE_HOLDS_PARAGRAPHS = [
-  "Every time I look at this photograph, I am back at the funeral of my aunt, Catarina Pinto.",
-  "She was my best aunt. I say it plainly, the way a child would, because that is how I still feel it.",
-  "She was the woman who delivered me. I was born in precarious conditions, and hers were the first hands to hold me.",
-  "I took this photograph myself, at her funeral. It is my tribute to her, and to the Bantu family that gathered to honour her.",
-  "In the photograph, they sit on the ground in a row, their backs to us. Strings of beads cross their shoulders. Skins are tied at the waist. A long drum rests beside them.",
-  "Behind them, people stand and talk. Life carries on at the edges, as it always does.",
-  "No one in the frame is looking at the camera. Nothing in it explains itself.",
-  "Someone who was not there will see a composition. Light on skin. The rhythm of backs in a line. A beautiful image in black and white.",
-  "I see something else.",
-  "I see the weight of that day. I hear what the picture cannot hold. I think of the one person who is missing from the crowd, because she was the reason all of us had come.",
-  "That is the distance between an image and its story.",
-  "It is the same distance I kept thinking about when Anané came home from Luanda with twenty pieces of art.",
-  "She had chosen them by instinct. Something in each work had reached her before she knew anything about the hands that made it. When I approached her about working together, we began with the simplest questions.",
-  "Who made this? Where did they come from? What were they carrying when they made it?",
-  "I knew why those questions mattered, because I knew this photograph.",
-  "An artwork can be admired without its story. Many are. They are bought, hung and praised by people who will never learn the name of the person who made them.",
-  "Something is lost in that silence. For the viewer, a deeper way of seeing. For the artist, the dignity of being known.",
-  "My aunt does not appear in this photograph. And yet, for me, she is all of it.",
-  "I believe the same is true of most art made far from the galleries. There is someone in it who does not appear. A mother. A teacher. A village. A loss. A reason.",
-  "NUA-ARTE exists to shorten that distance. To let the artist say, in their own words, what the work holds. To give the person who stops in front of a painting the chance to meet whoever stands behind it.",
-  "I cannot give you my aunt. I can only tell you that her name was Catarina Pinto, that she was loved, and that this photograph is one of the ways I carry her.",
-  "The artists we work with carry people too.",
-  "This Journal is where we will ask them, with care, who those people are.",
-  "A stranger sees beads, bare shoulders and a drum.",
-  "I see my aunt.",
-  "Now, when you look again, perhaps you will see her too.",
-];
-
 
 export default async function JournalPage({ params }: PageProps<"/[lang]/journal">) {
   const { lang, t } = await getI18n(params);
@@ -154,78 +125,6 @@ export default async function JournalPage({ params }: PageProps<"/[lang]/journal
         </aside>
       </article>
       )}
-
-      {/* Journal 02 — Nilton's photograph from the funeral of Catarina Pinto,
-          from the "What an Image Holds" document. */}
-      <article className="px-gutter-page max-w-container-max mx-auto grid grid-cols-1 md:grid-cols-12 gap-gutter mb-section-gap pt-16 border-t border-[var(--nua-line)] dark:border-[var(--nua-line-dark)]">
-        <aside className="hidden md:block md:col-span-2">
-          <div className="sticky top-32 space-y-12">
-            <div>
-              <h4 className="font-label-caps text-label-caps uppercase text-secondary mb-4">{t("Read Time")}</h4>
-              <EditableText page="journal" blockKey="image_holds_read_time" value={blockText(blocks, "image_holds_read_time", "4 Minutes")} as="p" className="font-body-md text-body-md" multiline={false} />
-            </div>
-            <div>
-              <h4 className="font-label-caps text-label-caps uppercase text-secondary mb-4">{t("Topic")}</h4>
-              <EditableText page="journal" blockKey="image_holds_topic" value={blockText(blocks, "image_holds_topic", "Memory")} as="p" className="font-body-md text-body-md" multiline={false} />
-            </div>
-            <div>
-              <h4 className="font-label-caps text-label-caps uppercase text-secondary mb-4">{t("Share")}</h4>
-              <ShareLinks />
-            </div>
-          </div>
-        </aside>
-
-        <div className="md:col-span-7 space-y-8">
-          <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-on-surface-variant">{t("Journal 02")}</p>
-            <EditableText
-              page="journal"
-              blockKey="image_holds_title"
-              value={blockText(blocks, "image_holds_title", "What an Image Holds")}
-              as="h2"
-              className="mt-3 font-display text-4xl md:text-5xl leading-[1.08]"
-              multiline={false}
-            />
-            <p className="mt-4 text-base text-on-surface-variant">
-              <span translate="no">Nilton Viana</span> · {t("Words and photograph")}
-            </p>
-          </div>
-          <figure>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/images/journal-02-what-an-image-holds.jpg"
-              alt={t("Members of a Bantu family seated in a row with their backs to the camera, beads across their shoulders and a long drum beside them.")}
-              className="w-full max-w-md mx-auto grayscale"
-            />
-            <figcaption className="mt-3 text-sm text-on-surface-variant text-center">
-              {t("Photograph taken at the funeral of Catarina Pinto.")}
-            </figcaption>
-          </figure>
-          {IMAGE_HOLDS_PARAGRAPHS.map((text, i) => (
-            <EditableText
-              key={i}
-              page="journal"
-              blockKey={`image_holds_body_${i + 1}`}
-              value={blockText(blocks, `image_holds_body_${i + 1}`, text)}
-              as="p"
-              className="text-lg md:text-xl leading-[1.6] text-on-surface"
-            />
-          ))}
-        </div>
-
-        <aside className="hidden md:block md:col-span-3">
-          <div className="sticky top-1/3 border-l border-secondary pl-8">
-            <EditableText
-              page="journal"
-              blockKey="image_holds_pull_quote"
-              value={blockText(blocks, "image_holds_pull_quote", "A stranger sees beads, bare shoulders and a drum. I see the woman who brought me into the world. NUA-ARTE exists for that distance: the one between what an image shows and what it holds.")}
-              as="blockquote"
-              className="font-display text-3xl leading-tight mb-6"
-            />
-            <p className="text-sm uppercase tracking-widest text-on-surface-variant" translate="no">Nilton Viana</p>
-          </div>
-        </aside>
-      </article>
 
       {/* The quote closes the main story and leads into the other stories,
           instead of sitting between the header and the story. */}

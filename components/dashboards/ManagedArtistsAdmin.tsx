@@ -12,6 +12,7 @@ import type { Json } from "@/lib/supabase/types";
 import { TranslationFields } from "./TranslationFields";
 import type { Database } from "@/lib/supabase/types";
 import { slugify } from "@/lib/utils/slugify";
+import { QrCodeButton } from "./QrCodeButton";
 import { pingRevalidate } from "@/lib/utils/revalidate";
 import { F } from "./FormField";
 import { ListRowSkeleton } from "@/components/ui/Skeleton";
@@ -419,6 +420,8 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                   {artistDraft.id ? t("Edit artist profile") : t("New artist profile")}
                 </h3>
                 {selected && (
+                  <span className="flex items-center gap-3">
+                  <QrCodeButton id={selected.id} name={selected.display_name} label={t("Artist QR")} />
                   <Link
                     href={`/artists/${selected.slug}`}
                     className="text-[10px] uppercase tracking-widest text-secondary hover:underline"
@@ -426,6 +429,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                   >
                     {t("View public page →")}
                   </Link>
+                  </span>
                 )}
               </div>
 
@@ -700,6 +704,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                         </p>
                       </div>
                       <div className="flex gap-2 shrink-0">
+                        <QrCodeButton id={work.id} name={work.title} />
                         <button
                           type="button"
                           onClick={() =>
