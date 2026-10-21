@@ -11,7 +11,7 @@ import { CountrySoundsAdmin } from "./CountrySoundsAdmin";
 import { GalleryMusicAdmin } from "./GalleryMusicAdmin";
 import { HeroImagesAdmin } from "./HeroImagesAdmin";
 import { ManagedArtistsAdmin } from "./ManagedArtistsAdmin";
-import { QrCodeButton } from "./QrCodeButton";
+import { QrCodeButton, QR_CODES_ENABLED } from "./QrCodeButton";
 import { OriginalityReviewAdmin } from "./OriginalityReviewAdmin";
 import { ListRowSkeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/lib/auth";
@@ -234,7 +234,7 @@ export function AdminDashboard() {
                 <th className="text-left py-3">{t("Country")}</th>
                 <th className="text-left py-3">{t("Price")}</th>
                 <th className="text-left py-3">{t("Status")}</th>
-                <th className="text-left py-3">{t("QR code")}</th>
+                {QR_CODES_ENABLED && <th className="text-left py-3">{t("QR code")}</th>}
                 <th className="text-right py-3">{t("Moderation")}</th>
               </tr>
             </thead>
@@ -247,9 +247,11 @@ export function AdminDashboard() {
                     {Number(a.price_usd) > 0 ? formatUsd(Number(a.price_usd)) : "—"}
                   </td>
                   <td className="py-3 uppercase tracking-widest text-xs text-secondary">{a.status}</td>
-                  <td className="py-3">
-                    <QrCodeButton id={a.id} name={a.title} />
-                  </td>
+                  {QR_CODES_ENABLED && (
+                    <td className="py-3">
+                      <QrCodeButton id={a.id} name={a.title} />
+                    </td>
+                  )}
                   <td className="py-3 text-right">
                     <select
                       value={a.status}

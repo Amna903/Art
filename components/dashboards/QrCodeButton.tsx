@@ -4,6 +4,9 @@ import QRCode from "qrcode";
 import { useLanguage } from "@/lib/i18n";
 import { slugify } from "@/lib/utils/slugify";
 
+/** QR downloads are built but hidden until the client launches them — set to true to show the buttons. */
+export const QR_CODES_ENABLED = false;
+
 /** Printed codes always point at the live domain, whichever environment the admin is using. */
 export const QR_BASE_URL = "https://nua-arte.com/q/";
 
@@ -25,6 +28,7 @@ async function download(id: string, name: string, format: "png" | "svg") {
 /** Download links for a print-ready QR code that opens nua-arte.com/q/<id>. */
 export function QrCodeButton({ id, name, label }: { id: string; name: string; label?: string }) {
   const { t } = useLanguage();
+  if (!QR_CODES_ENABLED) return null;
   const cls = "text-[10px] uppercase tracking-widest border border-primary/20 px-2 py-1 hover:border-secondary hover:text-secondary";
   return (
     <span className="inline-flex gap-1 items-center" title={`${QR_BASE_URL}${id}`}>
