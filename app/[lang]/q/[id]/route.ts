@@ -1,4 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "@/lib/supabase/types";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { isLocale, localizePath, DEFAULT_LOCALE } from "@/lib/i18n/config";
 
@@ -7,13 +9,23 @@ import { isLocale, localizePath, DEFAULT_LOCALE } from "@/lib/i18n/config";
  *
  * Printed QR codes encode the record's id (never its slug), so a label keeps
  * working when a title, slug or page layout changes. The id may be an artwork
- * (→ its page, or its artist's page once it is no longer on show) or a
- * managed artist (→ their profile). Anything unknown lands on /artists.
+ * (→ its page while published, otherwise its artist's page — /artworks/<slug>
+ * only renders published works) or a managed artist (→ their profile).
+ * Anything unknown lands on /artists.
  *
  * Always a 307 (temporary) redirect, so phones and browsers never cache the
  * target and admins can change where a code points just by editing the record.
  */
-const VISIBLE_STATUSES = new Set(["published", "sold"]);
+
+// RLS hides unpublished artworks from anon, but a sold or archived work's label
+// should still reach its artist — so read with the service key when available.
+// Only slugs and artist links are selected; nothing private is exposed.
+function reader() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return supabase;
+  return createClient<Database>(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+}
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ lang: string; id: string }> }) {
   const { lang: rawLang, id } = await params;
@@ -23,16 +35,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   if (!isSupabaseConfigured() || !/^[0-9a-f-]{36}$/i.test(id)) return go("/artists");
 
   try {
-    const { data: artwork } = await supabase
+    const db = reader();
+    const { data: artwork } = await db
       .from("artworks")
       .select("slug, status, artist_id, managed_artist_id")
       .eq("id", id)
       .maybeSingle();
 
     if (artwork) {
-      if (VISIBLE_STATUSES.has(artwork.status)) return go(`/artworks/${artwork.slug}?ref=qr`);
+      if (artwork.status === "published") return go(`/artworks/${artwork.slug}?ref=qr`);
       if (artwork.managed_artist_id) {
-        const { data: managed } = await supabase
+        const { data: managed } = await db
           .from("managed_artists")
           .select("slug")
           .eq("id", artwork.managed_artist_id)
@@ -42,7 +55,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return go(`/artists/${artwork.artist_id}?ref=qr`);
     }
 
-    const { data: artist } = await supabase.from("managed_artists").select("slug").eq("id", id).maybeSingle();
+    const { data: artist } = await db.from("managed_artists").select("slug").eq("id", id).maybeSingle();
     if (artist) return go(`/artists/${artist.slug}?ref=qr`);
   } catch (err) {
     console.error("[QR] Failed to resolve", id, err);
