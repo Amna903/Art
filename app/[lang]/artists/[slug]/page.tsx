@@ -162,7 +162,7 @@ export default async function ArtistProfilePage({ params }: Props) {
     .slice(0, 4);
 
   return (
-    <main>
+    <main className="pt-24 md:pt-28">
       <section className="max-w-[1440px] mx-auto px-gutter-page grid grid-cols-12 gap-gutter relative">
         <div className="absolute top-1/3 left-0 w-full h-[1px] bg-secondary-container/20 -z-10 overflow-hidden">
           <div className="w-full h-full bg-gradient-to-r from-transparent via-secondary-container to-transparent animate-[pan_10s_linear_infinite]" />

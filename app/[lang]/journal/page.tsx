@@ -138,7 +138,9 @@ export default async function JournalPage({ params }: PageProps<"/[lang]/journal
         </div>
       )}
 
-      <LatestFromJournal lang={lang} />
+      {/* Hide whichever story is featured above so it isn't listed twice —
+          the Luanda story also exists as a post so it shows on detail pages. */}
+      <LatestFromJournal excludeSlug={pinnedPost?.slug ?? "twenty-works-from-luanda"} lang={lang} />
 
       <section className="w-full py-section-gap bg-surface-container-low overflow-hidden relative">
         <div className="max-w-container-max mx-auto px-gutter-page text-center relative z-10">
