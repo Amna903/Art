@@ -5,7 +5,7 @@ import { useLanguage } from "@/lib/i18n";
 import { slugify } from "@/lib/utils/slugify";
 
 /** QR downloads are built but hidden until the client launches them — set to true to show the buttons. */
-export const QR_CODES_ENABLED = false;
+export const QR_CODES_ENABLED = true;
 
 /** Printed codes always point at the live domain, whichever environment the admin is using. */
 export const QR_BASE_URL = "https://nua-arte.com/q/";
