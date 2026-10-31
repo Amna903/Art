@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     // Closing the enquiry retires its quote link so it can't be paid twice.
     await db.from("enquiries").update({ status: "closed" }).eq("checkout_order_id", orderId);
   } else if (event.type === "checkout.session.expired") {
-    await db.from("orders").update({ status: "cancelled" }).eq("id", orderId).eq("status", "pending");
+    await db.from("orders").update({ status: "cancelled", enquiry_id: null }).eq("id", orderId).eq("status", "pending");
   }
   return new Response("ok");
 }

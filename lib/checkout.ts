@@ -52,14 +52,20 @@ export async function startCheckout(req: Request, quoteTokens: string[], cancelP
   // anyone else currently has one of them open in Stripe.
   const since = new Date(now.getTime() - RESERVATION_MINUTES * 60_000).toISOString();
   const { data: openItems } = await db.from("order_items")
-    .select("artwork_id, orders!inner(id, buyer_id, status, created_at)")
+    .select("artwork_id, orders!inner(id, buyer_id, status, created_at, stripe_checkout_session_id)")
     .in("artwork_id", artworkIds).eq("orders.status", "pending");
-  const mine = new Set<string>();
-  for (const row of (openItems || []) as unknown as { orders: { id: string; buyer_id: string; created_at: string } }[]) {
-    if (row.orders.buyer_id === buyerId) mine.add(row.orders.id);
+  const mine = new Map<string, string | null>();
+  for (const row of (openItems || []) as unknown as { orders: { id: string; buyer_id: string; created_at: string; stripe_checkout_session_id: string | null } }[]) {
+    if (row.orders.buyer_id === buyerId) mine.set(row.orders.id, row.orders.stripe_checkout_session_id);
     else if (row.orders.created_at > since) return { error: "Another collector is currently checking out one of these pieces. Please try again shortly.", status: 409 };
   }
-  if (mine.size) await db.from("orders").update({ status: "cancelled" }).in("id", [...mine]);
+  if (mine.size) {
+    // Close the old Stripe pages so the buyer can't pay for both attempts.
+    await Promise.all([...mine.values()].filter(Boolean).map((id) =>
+      fetch(`https://api.stripe.com/v1/checkout/sessions/${id}/expire`, { method: "POST", headers: { Authorization: `Bearer ${stripeKey}` } })));
+    // enquiry_id is UNIQUE — release it or the replacement order can't be created.
+    await db.from("orders").update({ status: "cancelled", enquiry_id: null }).in("id", [...mine.keys()]);
+  }
 
   const total = items.reduce((sum, i) => sum + Number(i.enquiry.quoted_price), 0);
   const { data: order, error: orderError } = await db.from("orders")
@@ -101,7 +107,7 @@ export async function startCheckout(req: Request, quoteTokens: string[], cancelP
   });
   const session = await stripe.json();
   if (!stripe.ok || !session.url) {
-    await db.from("orders").update({ status: "cancelled" }).eq("id", order.id);
+    await db.from("orders").update({ status: "cancelled", enquiry_id: null }).eq("id", order.id);
     return { error: session.error?.message || "Could not start Stripe checkout.", status: 502 };
   }
   await db.from("orders").update({ stripe_checkout_session_id: session.id }).eq("id", order.id);
