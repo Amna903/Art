@@ -68,14 +68,21 @@ export function EnquiriesAdmin() {
       return;
     }
 
-    const res = await fetch("/api/enquiries/quote", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({ enquiryId: enquiry.id, quotedPrice }),
-    });
+    const send = (accessToken: string) =>
+      fetch("/api/enquiries/quote", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ enquiryId: enquiry.id, quotedPrice }),
+      });
+    let res = await send(session.access_token);
+    // A stored token can be stale (tab left open, clock skew) — refresh once and retry.
+    if (res.status === 401) {
+      const { data: refreshed } = await supabase.auth.refreshSession();
+      if (refreshed.session) res = await send(refreshed.session.access_token);
+    }
     const body = await res.json().catch(() => ({}));
 
     if (!res.ok) {

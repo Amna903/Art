@@ -48,7 +48,8 @@ export async function POST(req: Request) {
     error: callerErr,
   } = await callerClient.auth.getUser(token);
   if (callerErr || !caller) {
-    return NextResponse.json({ error: "Invalid session." }, { status: 401 });
+    console.error("[enquiries/quote] getUser failed:", callerErr?.message);
+    return NextResponse.json({ error: `Invalid session: ${callerErr?.message || "no user"}` }, { status: 401 });
   }
 
   const quoteToken = crypto.randomUUID();
@@ -88,7 +89,7 @@ export async function POST(req: Request) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "NUA-ARTE Concierge <onboarding@resend.dev>",
+          from: process.env.RESEND_FROM_EMAIL || "NUA-ARTE Concierge <onboarding@resend.dev>",
           to: [updated.email],
           reply_to: adminEmail,
           subject: `Your quote for "${updated.artwork_title}" is ready`,

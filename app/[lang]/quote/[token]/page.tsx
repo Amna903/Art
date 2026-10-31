@@ -55,6 +55,9 @@ export default async function QuotePage({ params }: Props) {
   if (error || !quote || quote.quoted_price == null) {
     return <InvalidLink t={t} reason={t("This link is invalid or has expired.")} />;
   }
+  if (quote.status === "closed") {
+    return <InvalidLink t={t} reason={t("This artwork has already been purchased.")} />;
+  }
 
   return (
     <main className="max-w-2xl mx-auto px-gutter-page py-24">
@@ -84,7 +87,10 @@ export default async function QuotePage({ params }: Props) {
               { name: quote.name, title: quote.artwork_title },
             )}
           </p>
-          <QuoteCheckoutButton quoteToken={token} />
+          <QuoteCheckoutButton
+            quoteToken={token}
+            item={{ quoteToken: token, title: quote.artwork_title, artist: quote.artist_name, price: Number(quote.quoted_price) }}
+          />
         </div>
       </div>
     </main>

@@ -1,39 +1,47 @@
-// Tiny localStorage cart for the demo.
+// Basket of admin-confirmed quotes, kept in localStorage. Only the quote token
+// matters at checkout — the server re-reads every price from the enquiry, so
+// the title/price here are for display only.
 
 export type CartItem = {
-  id: string;
+  quoteToken: string;
   title: string;
-  artist: string;
+  artist: string | null;
   price: number;
-  country: string;
-  swatch: string;
 };
 
-const KEY = "nuart:cart";
+const KEY = "nuart:basket";
+export const CART_EVENT = "nuart:cart-change";
 
 export function getCart(): CartItem[] {
   if (typeof window === "undefined") return [];
   try {
-    return JSON.parse(localStorage.getItem(KEY) || "[]");
+    const items = JSON.parse(localStorage.getItem(KEY) || "[]");
+    return Array.isArray(items) ? items : [];
   } catch {
     return [];
   }
 }
 
-export function addToCart(item: CartItem) {
-  const cart = getCart();
-  if (cart.find((c) => c.id === item.id)) return cart;
-  cart.push(item);
-  localStorage.setItem(KEY, JSON.stringify(cart));
-  window.dispatchEvent(new CustomEvent("nuart:cart-change"));
+function save(cart: CartItem[]) {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(cart));
+  } catch {}
+  window.dispatchEvent(new CustomEvent(CART_EVENT));
   return cart;
 }
 
-export function removeFromCart(id: string) {
-  const cart = getCart().filter((c) => c.id !== id);
-  localStorage.setItem(KEY, JSON.stringify(cart));
-  window.dispatchEvent(new CustomEvent("nuart:cart-change"));
-  return cart;
+export function addToCart(item: CartItem) {
+  const cart = getCart();
+  if (cart.some((c) => c.quoteToken === item.quoteToken)) return cart;
+  return save([...cart, item]);
+}
+
+export function removeFromCart(quoteToken: string) {
+  return save(getCart().filter((c) => c.quoteToken !== quoteToken));
+}
+
+export function clearCart() {
+  return save([]);
 }
 
 export function cartCount(): number {

@@ -190,12 +190,21 @@ export async function listFollowedArtists(userId: string | undefined | null): Pr
   // guest and client dashboards show up-to-date artist profile pictures.
   if (isSupabaseConfigured() && merged.length > 0) {
     try {
-      const ids = merged.map((m) => m.artist_slug);
-      const { data: live } = await supabase
-        .from("profiles")
-        .select("id, avatar_url, display_name")
-        .in("id", ids);
-      if (live?.length) {
+      // Account artists are followed by profile UUID, represented artists by
+      // managed_artists slug — querying profiles.id with a slug is a 400.
+      const isUuid = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
+      const keys = merged.map((m) => m.artist_slug);
+      const ids = keys.filter(isUuid);
+      const slugs = keys.filter((k) => !isUuid(k));
+      const [profiles, managed] = await Promise.all([
+        ids.length ? supabase.from("profiles").select("id, avatar_url, display_name").in("id", ids) : null,
+        slugs.length ? supabase.from("managed_artists").select("slug, avatar_url, display_name").in("slug", slugs) : null,
+      ]);
+      const live = [
+        ...(profiles?.data || []),
+        ...(managed?.data || []).map((row) => ({ id: row.slug, avatar_url: row.avatar_url, display_name: row.display_name })),
+      ];
+      if (live.length) {
         const byId = new Map(live.map((row) => [row.id, row]));
         merged = merged.map((row) => {
           const current = byId.get(row.artist_slug);

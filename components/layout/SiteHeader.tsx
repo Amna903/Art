@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { useLanguage, useRouter, useUnlocalizedPathname } from "@/lib/i18n";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { BasketLink } from "./BasketLink";
 
 const NAV = [
   { href: "/artists", label: "Artists" },
@@ -115,6 +116,7 @@ export function SiteHeader() {
           >
             {searchOpen ? "close" : "search"}
           </button>
+          <BasketLink />
 
           <div className="hidden lg:flex items-center gap-2 xl:gap-3 shrink-0">
             <ThemeToggle />

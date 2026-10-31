@@ -62,7 +62,7 @@ export async function POST(req: Request) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: "NUA-ARTE Concierge <onboarding@resend.dev>",
+            from: process.env.RESEND_FROM_EMAIL || "NUA-ARTE Concierge <onboarding@resend.dev>",
             to: [adminEmail],
             reply_to: email,
             subject: `🎨 Price Inquiry: "${artworkTitle}" — ${name}`,
