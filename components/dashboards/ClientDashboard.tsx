@@ -94,7 +94,11 @@ export function ClientDashboard({ userId }: { userId: string }) {
         <Stat label={t("Orders")} value={orders.length} />
         <Stat
           label={t("Total spent")}
-          value={formatUsd(orders.reduce((s, o) => s + Number(o.total_usd), 0))}
+          value={formatUsd(
+            orders
+              .filter((o) => o.status !== "pending" && o.status !== "cancelled")
+              .reduce((s, o) => s + Number(o.total_usd), 0),
+          )}
         />
       </section>
 
