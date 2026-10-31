@@ -169,6 +169,15 @@ export function EnquiriesAdmin() {
                     {t("Quoted: {price}", { price: formatUsd(Number(e.quoted_price)) })}
                   </span>
                 )}
+                {e.quote_token && (
+                  <button
+                    type="button"
+                    onClick={() => navigator.clipboard?.writeText(`${window.location.origin}/quote/${e.quote_token}`)}
+                    className="text-xs uppercase tracking-widest underline text-on-surface-variant hover:text-secondary"
+                  >
+                    {t("Copy quote link")}
+                  </button>
+                )}
                 <input
                   type="number"
                   min={1}
