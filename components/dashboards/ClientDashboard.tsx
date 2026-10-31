@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase/client";
 import { listSavedArtworks, unsaveArtwork, SAVED_ARTWORKS_EVENT, type SavedArtworkRow } from "@/lib/data/saved";
 import { listFollowedArtists, unfollowArtist, FOLLOWED_ARTISTS_EVENT, type FollowedArtistRow } from "@/lib/data/followed-artists";
 import { CardGridSkeleton } from "@/components/ui/Skeleton";
+import { PAYMENTS_ENABLED } from "@/lib/features";
 
 type Order = {
   id: string;
@@ -91,15 +92,19 @@ export function ClientDashboard({ userId }: { userId: string }) {
       <section className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <Stat label={t("Saved works")} value={favs.length} />
         <Stat label={t("Followed artists")} value={followed.length} />
-        <Stat label={t("Orders")} value={orders.length} />
-        <Stat
-          label={t("Total spent")}
-          value={formatUsd(
-            orders
-              .filter((o) => o.status !== "pending" && o.status !== "cancelled")
-              .reduce((s, o) => s + Number(o.total_usd), 0),
-          )}
-        />
+        {PAYMENTS_ENABLED && (
+          <>
+            <Stat label={t("Orders")} value={orders.length} />
+            <Stat
+              label={t("Total spent")}
+              value={formatUsd(
+                orders
+                  .filter((o) => o.status !== "pending" && o.status !== "cancelled")
+                  .reduce((s, o) => s + Number(o.total_usd), 0),
+              )}
+            />
+          </>
+        )}
       </section>
 
       <section>
@@ -229,9 +234,9 @@ export function ClientDashboard({ userId }: { userId: string }) {
 
       <section>
         <h2 className="font-display-sm text-display-sm text-primary mb-6 border-b border-primary/10 pb-4">
-          {t("Order history & enquiries")}
+          {PAYMENTS_ENABLED ? t("Order history & enquiries") : t("Enquiries")}
         </h2>
-        {orders.length === 0 ? (
+        {!PAYMENTS_ENABLED ? null : orders.length === 0 ? (
           <p className="text-on-surface-variant text-sm">{t("No orders recorded yet.")}</p>
         ) : (
           <table className="w-full text-sm">

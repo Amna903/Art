@@ -3,6 +3,7 @@ import Link from "@/components/i18n/Link";
 import Image from "next/image";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { QuoteCheckoutButton } from "@/components/enquiry/QuoteCheckoutButton";
+import { PAYMENTS_ENABLED } from "@/lib/features";
 import { getI18n } from "@/lib/i18n/server";
 import { formatUsd, type Translator } from "@/lib/i18n/translate";
 
@@ -82,15 +83,22 @@ export default async function QuotePage({ params }: Props) {
           </div>
 
           <p className="text-on-surface-variant leading-relaxed mb-2">
-            {t(
-              "Hi {name}, one of our curators has prepared this quote for {title}. Sign in to the account used for this request to complete your secure purchase.",
-              { name: quote.name, title: quote.artwork_title },
-            )}
+            {PAYMENTS_ENABLED
+              ? t(
+                  "Hi {name}, one of our curators has prepared this quote for {title}. Sign in to the account used for this request to complete your secure purchase.",
+                  { name: quote.name, title: quote.artwork_title },
+                )
+              : t(
+                  "Hi {name}, one of our curators has prepared this quote for {title}. Our team will be in touch to arrange your acquisition.",
+                  { name: quote.name, title: quote.artwork_title },
+                )}
           </p>
-          <QuoteCheckoutButton
-            quoteToken={token}
-            item={{ quoteToken: token, title: quote.artwork_title, artist: quote.artist_name, price: Number(quote.quoted_price) }}
-          />
+          {PAYMENTS_ENABLED && (
+            <QuoteCheckoutButton
+              quoteToken={token}
+              item={{ quoteToken: token, title: quote.artwork_title, artist: quote.artist_name, price: Number(quote.quoted_price) }}
+            />
+          )}
         </div>
       </div>
     </main>

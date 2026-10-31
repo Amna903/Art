@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "@/components/i18n/Link";
 import { useLanguage } from "@/lib/i18n";
 import { cartCount, CART_EVENT } from "@/lib/data/cart";
+import { PAYMENTS_ENABLED } from "@/lib/features";
 
 export function BasketLink() {
   const { t } = useLanguage();
@@ -18,7 +19,7 @@ export function BasketLink() {
       window.removeEventListener("storage", sync);
     };
   }, []);
-  if (!count) return null;
+  if (!PAYMENTS_ENABLED || !count) return null;
   return (
     <Link
       href="/basket"

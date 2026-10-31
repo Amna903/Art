@@ -7,6 +7,7 @@ import type { Database } from "@/lib/supabase/types";
 import { pingRevalidate } from "@/lib/utils/revalidate";
 import { EnquiriesAdmin } from "./EnquiriesAdmin";
 import { OrdersAdmin } from "./OrdersAdmin";
+import { PAYMENTS_ENABLED } from "@/lib/features";
 import { CollectionsAdmin } from "./CollectionsAdmin";
 import { CountrySoundsAdmin } from "./CountrySoundsAdmin";
 import { GalleryMusicAdmin } from "./GalleryMusicAdmin";
@@ -146,7 +147,7 @@ export function AdminDashboard() {
             "gallery music",
             "country sounds",
           ] as const
-        ).map((name) => (
+        ).filter((name) => PAYMENTS_ENABLED || name !== "orders").map((name) => (
           <button
             key={name}
             onClick={() => setTab(name)}
@@ -278,7 +279,7 @@ export function AdminDashboard() {
         <CollectionsAdmin />
       ) : tab === "enquiries" ? (
         <EnquiriesAdmin />
-      ) : tab === "orders" ? (
+      ) : tab === "orders" && PAYMENTS_ENABLED ? (
         <OrdersAdmin />
       ) : tab === "hero images" ? (
         <HeroImagesAdmin />

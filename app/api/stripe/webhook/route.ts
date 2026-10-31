@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { createClient } from "@supabase/supabase-js";
+import { PAYMENTS_ENABLED } from "@/lib/features";
 
 function validSignature(raw: string, header: string, secret: string) {
   const parts = Object.fromEntries(header.split(",").map((part) => part.split("=", 2)));
@@ -75,7 +76,7 @@ export async function POST(req: Request) {
     if (artworkIds.length) await db.from("artworks").update({ status: "sold" }).in("id", artworkIds);
     // Closing the enquiry retires its quote link so it can't be paid twice.
     await db.from("enquiries").update({ status: "closed" }).eq("checkout_order_id", orderId);
-    await notifyAdmin(orderId, session, buyer, (items || []) as unknown as { price_usd: number; artworks: { title: string } | null }[]);
+    if (PAYMENTS_ENABLED) await notifyAdmin(orderId, session, buyer, (items || []) as unknown as { price_usd: number; artworks: { title: string } | null }[]);
   } else if (event.type === "checkout.session.expired") {
     await db.from("orders").update({ status: "cancelled", enquiry_id: null }).eq("id", orderId).eq("status", "pending");
   }

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getI18n } from "@/lib/i18n/server";
+import { notFound } from "next/navigation";
 import { BasketView } from "@/components/enquiry/BasketView";
+import { PAYMENTS_ENABLED } from "@/lib/features";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { t } = await getI18n(params);
@@ -8,5 +10,6 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 }
 
 export default function BasketPage() {
+  if (!PAYMENTS_ENABLED) notFound();
   return <BasketView />;
 }
