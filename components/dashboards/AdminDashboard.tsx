@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/types";
 import { pingRevalidate } from "@/lib/utils/revalidate";
 import { EnquiriesAdmin } from "./EnquiriesAdmin";
+import { OrdersAdmin } from "./OrdersAdmin";
 import { CollectionsAdmin } from "./CollectionsAdmin";
 import { CountrySoundsAdmin } from "./CountrySoundsAdmin";
 import { GalleryMusicAdmin } from "./GalleryMusicAdmin";
@@ -41,6 +42,7 @@ export function AdminDashboard() {
     | "artworks"
     | "collections"
     | "enquiries"
+    | "orders"
     | "country sounds"
     | "gallery music"
     | "hero images"
@@ -139,6 +141,7 @@ export function AdminDashboard() {
             "artworks",
             "collections",
             "enquiries",
+            "orders",
             "hero images",
             "gallery music",
             "country sounds",
@@ -275,6 +278,8 @@ export function AdminDashboard() {
         <CollectionsAdmin />
       ) : tab === "enquiries" ? (
         <EnquiriesAdmin />
+      ) : tab === "orders" ? (
+        <OrdersAdmin />
       ) : tab === "hero images" ? (
         <HeroImagesAdmin />
       ) : tab === "gallery music" ? (
