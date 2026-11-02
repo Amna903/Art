@@ -12,7 +12,7 @@ import {
 import { supabase } from "@/lib/supabase/client";
 
 const MAX_AUDIO_SIZE_BYTES = 10 * 1024 * 1024;
-const MAX_AUDIO_DURATION_SECONDS = 6;
+const MAX_AUDIO_DURATION_SECONDS = 30;
 
 function getAudioDuration(file: File): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -205,7 +205,7 @@ export function CountrySoundsAdmin() {
         <div>
           <h2 className="font-display text-xl text-primary">{t("Country Sound Identity")}</h2>
           <p className="text-sm text-on-surface-variant mt-1">
-            {t("Upload characteristic sounds up to 6 seconds for each of the 54 African nations. These sounds play when users hover over countries on the interactive map.")}
+            {t("Upload characteristic sounds up to 30 seconds for each of the 54 African nations. These sounds play when users hover over countries on the interactive map.")}
           </p>
         </div>
         <input

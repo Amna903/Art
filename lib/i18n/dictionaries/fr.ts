@@ -636,7 +636,7 @@ const fr: Record<string, string> = {
   "Search nation or region…": "Rechercher un pays ou une région…",
   "Sound for {country} removed.": "Son de {country} supprimé.",
   "Upload Sound": "Téléverser un son",
-  "Upload characteristic sounds up to 6 seconds for each of the 54 African nations. These sounds play when users hover over countries on the interactive map.": "Téléversez des sons caractéristiques de 6 secondes maximum pour chacune des 54 nations africaines. Ils sont joués au survol des pays sur la carte interactive.",
+  "Upload characteristic sounds up to 30 seconds for each of the 54 African nations. These sounds play when users hover over countries on the interactive map.": "Téléversez des sons caractéristiques de 30 secondes maximum pour chacune des 54 nations africaines. Ils sont joués au survol des pays sur la carte interactive.",
   "Upload failed": "Échec du téléversement",
   "Uploaded": "Téléversé",
   "Enter a valid price first.": "Saisissez d'abord un prix valide.",

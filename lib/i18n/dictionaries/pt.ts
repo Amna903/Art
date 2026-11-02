@@ -635,7 +635,7 @@ const pt: Record<string, string> = {
   "Search nation or region…": "Pesquisar país ou região…",
   "Sound for {country} removed.": "Som de {country} removido.",
   "Upload Sound": "Carregar Som",
-  "Upload characteristic sounds up to 6 seconds for each of the 54 African nations. These sounds play when users hover over countries on the interactive map.": "Carregue sons característicos de até 6 segundos para cada uma das 54 nações africanas. Estes sons tocam quando os utilizadores passam o cursor sobre os países no mapa interativo.",
+  "Upload characteristic sounds up to 30 seconds for each of the 54 African nations. These sounds play when users hover over countries on the interactive map.": "Carregue sons característicos de até 30 segundos para cada uma das 54 nações africanas. Estes sons tocam quando os utilizadores passam o cursor sobre os países no mapa interativo.",
   "Upload failed": "Falha no carregamento",
   "Uploaded": "Carregado",
   "Enter a valid price first.": "Introduza primeiro um preço válido.",
