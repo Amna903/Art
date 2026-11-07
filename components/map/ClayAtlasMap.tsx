@@ -6,7 +6,7 @@ import africaGeo from "@/lib/data/africa-geo.json";
 import { ISLAND_PINS, getCountryByGeoName, getCountryBySlug, getCountryDisplayName } from "@/lib/data/africa";
 import { getStats } from "@/lib/data/africa-map";
 import { buildCountryShards, getClayPalette, type CountryInput, type Shard } from "@/lib/data/africa-shards";
-import { useCountrySoundUrls } from "@/lib/data/country-sounds";
+import { useCountrySoundPlayer } from "@/lib/data/use-country-sound-player";
 import { ARTISTS, TECHNIQUES, type Technique } from "@/lib/data/artists";
 import { useLanguage, useRouter } from "@/lib/i18n";
 import "@/components/map/clay-atlas.css";
@@ -146,59 +146,13 @@ export function ClayAtlasMap() {
   const [activeFilter, setActiveFilter] = useState<Technique | null>(null);
   const [zoom, setZoom] = useState(1);
 
-  const audioRef = useRef<{ ctx: AudioContext; master: GainNode } | null>(null);
   const lastHoverRef = useRef<string | null>(null);
-  const uploadedSounds = useCountrySoundUrls();
-  const htmlAudioRef = useRef<HTMLAudioElement | null>(null);
+  const { play: triggerCue, stop: stopUploadedAudio } = useCountrySoundPlayer(soundOn, playCountryCue);
 
-  const ensureAudio = () => {
-    if (audioRef.current) return audioRef.current;
-    if (typeof window === "undefined") return null;
-    const AC =
-      (window.AudioContext as typeof AudioContext) ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    if (!AC) return null;
-    const ctx = new AC();
-    const master = ctx.createGain();
-    master.gain.value = 0.4;
-    master.connect(ctx.destination);
-    audioRef.current = { ctx, master };
-    return audioRef.current;
-  };
-
-  const stopUploadedAudio = () => {
-    if (!htmlAudioRef.current) return;
-    htmlAudioRef.current.pause();
-    htmlAudioRef.current.currentTime = 0;
-    htmlAudioRef.current = null;
-  };
-
-  const toggleSound = () => {
-    const next = !soundOn;
-    setSoundOn(next);
-    if (!next) stopUploadedAudio();
-  };
-
-  const triggerCue = (slug: string) => {
-    if (!soundOn) return;
-    stopUploadedAudio();
-
-    const uploaded = uploadedSounds[slug];
-    if (uploaded) {
-      const el = new Audio(uploaded);
-      el.volume = 0.8;
-      el.play().catch(() => {});
-      htmlAudioRef.current = el;
-      return;
-    }
-    const a = ensureAudio();
-    if (!a) return;
-    if (a.ctx.state === "suspended") a.ctx.resume();
-    playCountryCue(slug, a.ctx, a.master);
-  };
+  const toggleSound = () => setSoundOn((v) => !v);
 
   const enterCountry = (slug: string) => {
-    stopUploadedAudio();
+    stopUploadedAudio(true);
     router.push(`/discover/${slug}`);
   };
 
