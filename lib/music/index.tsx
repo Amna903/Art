@@ -9,9 +9,12 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
  * The <audio> element is created once in MusicProvider at the app root, so
  * nothing in the gallery or the guided tour can destroy it: changing artwork,
  * opening the grid, "Back to artworks" and free exploration never touch it.
- * Tracks play one after another and the playlist loops. The only things that
- * stop the music are the visitor (Pause) and leaving the gallery, both with a
- * ~1 s fade.
+ * Each country has its own soundtrack: `setCountry()` switches to the tracks
+ * the admin assigned to that country (crossfading ~1 s), and tracks with no
+ * country are the fallback for countries that have none. Moving between
+ * artworks of the same country never interrupts the music. Within a country
+ * the tracks play one after another and loop. The only things that stop the
+ * music are the visitor (Pause) and leaving the gallery, both with a fade.
  */
 
 export type Track = { url: string; title: string; country: string | null };
@@ -21,6 +24,8 @@ type MusicContextValue = {
   current: Track | null;
   playing: boolean;
   muted: boolean;
+  /** Country whose soundtrack is playing (null = general playlist). */
+  country: string | null;
   /** Fetches the playlist; call when the gallery mounts so Start can play instantly. */
   loadPlaylist: () => Promise<void>;
   /** Starts the music. Call from a click handler (browsers need the gesture). */
@@ -30,7 +35,24 @@ type MusicContextValue = {
   toggleMute: () => void;
   /** Fades out and stops; used when the visitor leaves the gallery. */
   stop: () => void;
+  /**
+   * Switches to the soundtrack of the artwork on show. A no-op while that
+   * soundtrack is already playing, so works from one country play straight on.
+   */
+  setCountry: (slug: string | null) => void;
 };
+
+/** Which tracks belong to a country: its own, else the general ones. */
+export function playlistFor(all: Track[], slug: string | null): { key: string; list: Track[] } {
+  if (slug) {
+    const own = all.filter((t) => t.country === slug);
+    if (own.length > 0) return { key: `country:${slug}`, list: own };
+  }
+  const general = all.filter((t) => !t.country);
+  if (general.length > 0) return { key: "general", list: general };
+  // No general tracks either: nothing fits this country.
+  return { key: "none", list: [] };
+}
 
 const MusicContext = createContext<MusicContextValue | null>(null);
 
@@ -77,15 +99,20 @@ async function fetchPlaylist(): Promise<Track[]> {
 
 export function MusicProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const tracksRef = useRef<Track[]>([]);
+  const allTracksRef = useRef<Track[]>([]);
+  const tracksRef = useRef<Track[]>([]); // the active (per-country) playlist
+  const playlistKeyRef = useRef<string>("");
+  const countryRef = useRef<string | null>(null);
   const indexRef = useRef(0);
   const fadeRef = useRef<number | null>(null);
   const failuresRef = useRef(0);
   const loadingRef = useRef<Promise<void> | null>(null);
   const pendingStartRef = useRef(false);
   const hiddenPauseRef = useRef(false);
+  const stoppingRef = useRef(false); // a Pause / Stop fade-out is running
 
   const [tracks, setTracks] = useState<Track[]>([]);
+  const [activeCountry, setActiveCountry] = useState<string | null>(null);
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(() => typeof window !== "undefined" && !!readPrefs().muted);
@@ -122,7 +149,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     fadeRef.current = requestAnimationFrame(step);
   }, [getAudio]);
 
-  const playIndex = useCallback((i: number) => {
+  const playIndex = useCallback((i: number, fadeIn = false) => {
     const list = tracksRef.current;
     if (list.length === 0) return;
     const audio = getAudio();
@@ -130,9 +157,29 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     setIndex(indexRef.current);
     audio.src = list[indexRef.current].url; // full-length file, not a preview
     cancelFade();
-    audio.volume = VOLUME;
-    void audio.play().catch(() => setPlaying(false));
-  }, [getAudio]);
+    audio.volume = fadeIn ? 0 : VOLUME;
+    void audio
+      .play()
+      .then(() => {
+        if (fadeIn) fadeTo(VOLUME);
+      })
+      .catch(() => setPlaying(false));
+  }, [getAudio, fadeTo]);
+
+  /** Points the active playlist at the current country. True if it changed. */
+  const selectPlaylist = useCallback(() => {
+    const { key, list } = playlistFor(allTracksRef.current, countryRef.current);
+    // A country with no music of its own (and no general tracks) keeps
+    // whatever is already playing rather than going silent.
+    if (key === "none" && tracksRef.current.length > 0) return false;
+    if (key === playlistKeyRef.current) return false;
+    playlistKeyRef.current = key;
+    tracksRef.current = list;
+    setTracks(list);
+    setActiveCountry(key.startsWith("country:") ? key.slice(8) : null);
+    failuresRef.current = 0;
+    return true;
+  }, []);
 
   // Wire the element once: next track on end, skip broken files, mirror state.
   useEffect(() => {
@@ -181,9 +228,9 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     if (!loadingRef.current) {
       loadingRef.current = fetchPlaylist()
         .then((list) => {
-          tracksRef.current = list;
-          setTracks(list);
-          if (pendingStartRef.current && list.length > 0) {
+          allTracksRef.current = list;
+          selectPlaylist();
+          if (pendingStartRef.current && tracksRef.current.length > 0) {
             pendingStartRef.current = false;
             playIndex(0);
           }
@@ -193,15 +240,27 @@ export function MusicProvider({ children }: { children: ReactNode }) {
         });
     }
     return loadingRef.current ?? Promise.resolve();
-  }, [playIndex]);
+  }, [playIndex, selectPlaylist]);
 
   const start = useCallback(() => {
     if (readPrefs().paused) return;
     const audio = getAudio();
+    if (stoppingRef.current) {
+      // Came back during the fade-out: keep playing.
+      stoppingRef.current = false;
+      cancelFade();
+      audio.volume = VOLUME;
+    }
     if (!audio.paused) return; // already playing: never restart
-    if (tracksRef.current.length === 0) {
+    if (allTracksRef.current.length === 0) {
       pendingStartRef.current = true;
       void loadPlaylist();
+      return;
+    }
+    // Paused while the visitor moved to another country: start that
+    // country's soundtrack instead of resuming the old one.
+    if (selectPlaylist()) {
+      playIndex(0);
       return;
     }
     if (audio.src) {
@@ -211,13 +270,17 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     } else {
       playIndex(0);
     }
-  }, [getAudio, loadPlaylist, playIndex]);
+  }, [getAudio, loadPlaylist, playIndex, selectPlaylist]);
 
   const pause = useCallback(() => {
     writePrefs({ paused: true });
     const audio = getAudio();
     if (audio.paused) return;
-    fadeTo(0, () => audio.pause());
+    stoppingRef.current = true;
+    fadeTo(0, () => {
+      stoppingRef.current = false;
+      audio.pause();
+    });
   }, [fadeTo, getAudio]);
 
   const resume = useCallback(() => {
@@ -236,8 +299,34 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     pendingStartRef.current = false;
     const audio = getAudio();
     if (audio.paused) return;
-    fadeTo(0, () => audio.pause());
+    stoppingRef.current = true;
+    fadeTo(0, () => {
+      stoppingRef.current = false;
+      audio.pause();
+    });
   }, [fadeTo, getAudio]);
+
+  const setCountry = useCallback(
+    (slug: string | null) => {
+      if (countryRef.current === slug) return;
+      countryRef.current = slug;
+      if (allTracksRef.current.length === 0) return; // applied once loaded
+      // Not playing, or fading out after Pause / leaving: start() picks up
+      // the right country next time.
+      if (getAudio().paused || stoppingRef.current) return;
+      const before = playlistKeyRef.current;
+      const { key } = playlistFor(allTracksRef.current, slug);
+      if (key === before || (key === "none" && tracksRef.current.length > 0)) return;
+      // Crossfade: fade the old soundtrack out, then fade the new one in.
+      fadeTo(0, () => {
+        // The visitor may have moved on again during the fade.
+        if (stoppingRef.current) return;
+        if (selectPlaylist()) playIndex(0, true);
+        else fadeTo(VOLUME);
+      });
+    },
+    [fadeTo, getAudio, playIndex, selectPlaylist],
+  );
 
   const value = useMemo<MusicContextValue>(
     () => ({
@@ -245,14 +334,16 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       current: tracks[index] ?? null,
       playing,
       muted,
+      country: activeCountry,
       loadPlaylist,
       start,
       pause,
       resume,
       toggleMute,
       stop,
+      setCountry,
     }),
-    [tracks, index, playing, muted, loadPlaylist, start, pause, resume, toggleMute, stop],
+    [tracks, index, playing, muted, activeCountry, loadPlaylist, start, pause, resume, toggleMute, stop, setCountry],
   );
 
   return <MusicContext.Provider value={value}>{children}</MusicContext.Provider>;

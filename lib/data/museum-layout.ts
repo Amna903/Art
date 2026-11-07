@@ -1,5 +1,6 @@
 import type { Artwork } from "@/components/three/VirtualMuseum";
 import type { SupabaseArtwork } from "@/lib/data/supabase-artists";
+import { normalizeCountrySlug } from "@/lib/data/africa";
 
 type ZoneId = 1 | 2 | 3 | 4;
 
@@ -245,6 +246,7 @@ function details(a: SupabaseArtwork) {
     dimensions: a.dimensions ?? undefined,
     slug: a.slug,
     artistSlug: a.artistSlug,
+    country: normalizeCountrySlug(a.artistCountry ?? a.country ?? "") || undefined,
   };
 }
 
@@ -255,5 +257,21 @@ function details(a: SupabaseArtwork) {
  */
 export function layoutArtworks(source: SupabaseArtwork[]): Artwork[] {
   const placements = computePlacements(source.length);
-  return source.map((a, index) => ({ ...details(a), ...placements[index] }));
+  return groupByCountry(source.map(details)).map((a, index) => ({ ...a, ...placements[index] }));
+}
+
+/**
+ * Keeps each country's works together (countries in order of their newest
+ * work, works newest first within a country), so the tour moves country by
+ * country and each soundtrack plays through instead of flipping per painting.
+ */
+function groupByCountry<T extends { country?: string }>(items: T[]): T[] {
+  const groups = new Map<string, T[]>();
+  for (const item of items) {
+    const key = item.country ?? "";
+    const group = groups.get(key);
+    if (group) group.push(item);
+    else groups.set(key, [item]);
+  }
+  return [...groups.values()].flat();
 }

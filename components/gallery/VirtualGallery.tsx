@@ -85,7 +85,7 @@ export function VirtualGallery({
 
   // Fetch the playlist up front so "Start the tour" can play inside the tap.
   // Leaving the gallery fades the music out; nothing else inside it stops it.
-  const { loadPlaylist, start: startMusic, stop: stopMusic } = music;
+  const { loadPlaylist, start: startMusic, stop: stopMusic, setCountry: setMusicCountry } = music;
   useEffect(() => {
     void loadPlaylist();
     return () => stopMusic();
@@ -106,14 +106,24 @@ export function VirtualGallery({
     };
   }, [inExperience]);
 
+  // Each country has its own soundtrack: follow the artwork on show. The
+  // player ignores repeats, so works from one country play straight on.
+  const tourCountry = view === "tour" ? (current?.country ?? null) : undefined;
+  useEffect(() => {
+    if (tourCountry !== undefined) setMusicCountry(tourCountry);
+  }, [tourCountry, setMusicCountry]);
+
   const openTour = useCallback(
     (at: number) => {
+      const i = Math.max(0, Math.min(at, total - 1));
+      // Pick the country before starting, so the first notes already match.
+      setMusicCountry(artworks[i]?.country ?? null);
       startMusic();
-      setIndex(Math.max(0, Math.min(at, total - 1)));
+      setIndex(i);
       setZoomed(false);
       setView("tour");
     },
-    [startMusic, total],
+    [artworks, setMusicCountry, startMusic, total],
   );
 
   const next = useCallback(() => {
@@ -215,6 +225,7 @@ export function VirtualGallery({
                 <button
                   type="button"
                   onClick={() => {
+                    setMusicCountry(artworks[0]?.country ?? null);
                     startMusic();
                     setView("free");
                   }}

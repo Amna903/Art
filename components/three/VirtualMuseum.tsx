@@ -24,6 +24,8 @@ export type Artwork = {
   slug?: string;
   /** Public artist route key (/artists/[slug]). */
   artistSlug?: string;
+  /** Country slug; picks the soundtrack that plays while this work is shown. */
+  country?: string;
 };
 
 // Room physical dimensions (in meters)

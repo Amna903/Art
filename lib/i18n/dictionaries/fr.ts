@@ -1330,6 +1330,8 @@ const fr: Record<string, string> = {
   "Audio file": "Fichier audio",
   "Track title": "Titre du morceau",
   "Country (optional)": "Pays (facultatif)",
+  "General (all countries)": "Général (tous les pays)",
+  "Each country has its own soundtrack. While the tour shows a country’s artworks, that country’s tracks play in order and loop; moving to another country’s artworks crossfades to its music. Tracks with no country are the general playlist, used for countries without their own music.": "Chaque pays a sa propre bande sonore. Pendant que la visite montre les œuvres d’un pays, ses morceaux sont joués dans l’ordre et en boucle ; passer aux œuvres d’un autre pays enchaîne en fondu vers sa musique. Les morceaux sans pays forment la liste générale, utilisée pour les pays qui n’ont pas leur propre musique.",
   "Add track": "Ajouter le morceau",
   "No tracks yet. The gallery shows no music control until a track is added.": "Aucun morceau pour l'instant. La galerie n'affiche pas de commande de musique tant qu'aucun morceau n'est ajouté.",
   "Active playlist: {count} tracks, {duration} in total.": "Liste active : {count} morceaux, {duration} au total.",

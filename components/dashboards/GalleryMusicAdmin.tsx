@@ -37,12 +37,21 @@ function readDuration(file: File): Promise<number | null> {
   });
 }
 
+const fetchTracks = () =>
+  supabase
+    .from("gallery_tracks")
+    .select("id, title, country_slug, audio_path, duration_seconds, position, active")
+    .order("position")
+    .order("created_at");
+
 const publicUrl = (path: string) =>
   /^https?:\/\//.test(path) ? path : supabase.storage.from("gallery-music").getPublicUrl(path).data.publicUrl;
 
 /**
- * The gallery playlist (change brief §3): full-length tracks played in order,
- * looping, for the whole guided tour.
+ * Gallery soundtracks, one playlist per country: while the tour shows a
+ * country's artworks, that country's tracks play in order and loop. Tracks
+ * with no country form the general playlist, used for countries that have
+ * no music of their own.
  */
 export function GalleryMusicAdmin() {
   const { t, language } = useLanguage();
@@ -53,20 +62,26 @@ export function GalleryMusicAdmin() {
   const [country, setCountry] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const load = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("gallery_tracks")
-      .select("id, title, country_slug, audio_path, duration_seconds, position, active")
-      .order("position")
-      .order("created_at");
-    if (error) toast.error(t(error.message));
-    setTracks((data ?? []) as TrackRow[]);
-    setLoading(false);
-  }, [t]);
+  const apply = useCallback(
+    ({ data, error }: { data: unknown; error: { message: string } | null }) => {
+      if (error) toast.error(t(error.message));
+      setTracks((data ?? []) as TrackRow[]);
+      setLoading(false);
+    },
+    [t],
+  );
+
+  const load = useCallback(async () => apply(await fetchTracks()), [apply]);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let cancelled = false;
+    void fetchTracks().then((result) => {
+      if (!cancelled) apply(result);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [apply]);
 
   const upload = async () => {
     if (!file || !title.trim()) return;
@@ -84,6 +99,7 @@ export function GalleryMusicAdmin() {
       toast.error(t(upErr.message));
       return;
     }
+    // Goes to the end of its country's playlist.
     const position = tracks.length ? Math.max(...tracks.map((x) => x.position)) + 1 : 0;
     const { error } = await supabase.from("gallery_tracks").insert({
       title: title.trim(),
@@ -114,9 +130,22 @@ export function GalleryMusicAdmin() {
     void load();
   };
 
-  const move = async (i: number, dir: -1 | 1) => {
-    const a = tracks[i];
-    const b = tracks[i + dir];
+  // One playlist per country (general first, then countries A–Z), each in
+  // its own play order.
+  const groups = (() => {
+    const map = new Map<string, TrackRow[]>();
+    for (const track of tracks) {
+      const key = track.country_slug ?? "";
+      map.set(key, [...(map.get(key) ?? []), track]);
+    }
+    return [...map.entries()].sort(([a], [b]) =>
+      a === "" ? -1 : b === "" ? 1 : getCountryDisplayName(a, language).localeCompare(getCountryDisplayName(b, language)),
+    );
+  })();
+
+  const move = async (list: TrackRow[], i: number, dir: -1 | 1) => {
+    const a = list[i];
+    const b = list[i + dir];
     if (!a || !b) return;
     await Promise.all([
       supabase.from("gallery_tracks").update({ position: b.position }).eq("id", a.id),
@@ -134,14 +163,20 @@ export function GalleryMusicAdmin() {
   };
 
   const minutes = (s: number | null) => (s == null ? "—" : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`);
-  const totalSeconds = tracks.filter((x) => x.active).reduce((sum, x) => sum + (x.duration_seconds ?? 0), 0);
+  const summary = (list: TrackRow[]) => {
+    const active = list.filter((x) => x.active);
+    return t("Active playlist: {count} tracks, {duration} in total.", {
+      count: active.length,
+      duration: minutes(active.reduce((sum, x) => sum + (x.duration_seconds ?? 0), 0)),
+    });
+  };
 
   return (
     <section className="mt-10 space-y-10">
       <div>
         <h2 className="font-headline-sm text-headline-sm text-primary">{t("Gallery music")}</h2>
         <p className="mt-2 max-w-2xl text-sm text-on-surface-variant">
-          {t("Full-length tracks for the virtual gallery. They play in this order for the whole tour, and the playlist loops. Music starts when a visitor taps “Start the tour”.")}
+          {t("Each country has its own soundtrack. While the tour shows a country’s artworks, that country’s tracks play in order and loop; moving to another country’s artworks crossfades to its music. Tracks with no country are the general playlist, used for countries without their own music.")}
         </p>
       </div>
 
@@ -155,9 +190,9 @@ export function GalleryMusicAdmin() {
           <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full border-b border-primary/30 bg-transparent py-2 text-primary" />
         </label>
         <label className="block">
-          <span className="mb-2 block font-label-caps text-label-caps uppercase text-on-surface-variant">{t("Country (optional)")}</span>
+          <span className="mb-2 block font-label-caps text-label-caps uppercase text-on-surface-variant">{t("Country")}</span>
           <select value={country} onChange={(e) => setCountry(e.target.value)} className="w-full border-b border-primary/30 bg-transparent py-2 text-primary">
-            <option value="">—</option>
+            <option value="">{t("General (all countries)")}</option>
             {AFRICAN_COUNTRIES.map((c) => (
               <option key={c.slug} value={c.slug}>
                 {getCountryDisplayName(c, language)}
@@ -175,44 +210,59 @@ export function GalleryMusicAdmin() {
       ) : tracks.length === 0 ? (
         <p className="text-sm text-on-surface-variant">{t("No tracks yet. The gallery shows no music control until a track is added.")}</p>
       ) : (
-        <div>
-          <p className="mb-3 text-sm text-on-surface-variant">
-            {t("Active playlist: {count} tracks, {duration} in total.", {
-              count: tracks.filter((x) => x.active).length,
-              duration: minutes(totalSeconds),
-            })}
-          </p>
-          <ul className="divide-y divide-primary/10 border-y border-primary/10">
-            {tracks.map((track, i) => (
-              <li key={track.id} className="flex flex-wrap items-center gap-4 py-4">
-                <div className="flex flex-col">
-                  <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label={t("Move up")} className="material-symbols-outlined text-[18px] disabled:opacity-20">
-                    keyboard_arrow_up
-                  </button>
-                  <button type="button" onClick={() => move(i, 1)} disabled={i === tracks.length - 1} aria-label={t("Move down")} className="material-symbols-outlined text-[18px] disabled:opacity-20">
-                    keyboard_arrow_down
-                  </button>
-                </div>
-                <div className="min-w-[200px] flex-1">
-                  <p className="text-primary">{track.title}</p>
-                  <p className="text-xs text-on-surface-variant">
-                    {[track.country_slug && getCountryDisplayName(track.country_slug, language), minutes(track.duration_seconds)].filter(Boolean).join(" · ")}
-                    {track.duration_seconds != null && track.duration_seconds <= PREVIEW_SECONDS && (
-                      <span className="ml-2 text-secondary">{t("Short clip — replace with the full track")}</span>
-                    )}
-                  </p>
-                </div>
-                <audio controls preload="none" src={publicUrl(track.audio_path)} className="h-9 max-w-[260px]" />
-                <label className="flex items-center gap-2 text-xs uppercase tracking-widest text-on-surface-variant">
-                  <input type="checkbox" checked={track.active} onChange={(e) => update(track.id, { active: e.target.checked })} />
-                  {t("In playlist")}
-                </label>
-                <button type="button" onClick={() => remove(track)} className="text-xs uppercase tracking-widest text-secondary">
-                  {t("Delete")}
-                </button>
-              </li>
-            ))}
-          </ul>
+        <div className="space-y-8">
+          {groups.map(([slug, list]) => (
+            <div key={slug || "general"}>
+              <h3 className="font-label-caps text-label-caps uppercase text-primary">
+                {slug ? getCountryDisplayName(slug, language) : t("General (all countries)")}
+              </h3>
+              <p className="mb-3 mt-1 text-sm text-on-surface-variant">{summary(list)}</p>
+              <ul className="divide-y divide-primary/10 border-y border-primary/10">
+                {list.map((track, i) => (
+                  <li key={track.id} className="flex flex-wrap items-center gap-4 py-4">
+                    <div className="flex flex-col">
+                      <button type="button" onClick={() => move(list, i, -1)} disabled={i === 0} aria-label={t("Move up")} className="material-symbols-outlined text-[18px] disabled:opacity-20">
+                        keyboard_arrow_up
+                      </button>
+                      <button type="button" onClick={() => move(list, i, 1)} disabled={i === list.length - 1} aria-label={t("Move down")} className="material-symbols-outlined text-[18px] disabled:opacity-20">
+                        keyboard_arrow_down
+                      </button>
+                    </div>
+                    <div className="min-w-[200px] flex-1">
+                      <p className="text-primary">{track.title}</p>
+                      <p className="text-xs text-on-surface-variant">
+                        {minutes(track.duration_seconds)}
+                        {track.duration_seconds != null && track.duration_seconds <= PREVIEW_SECONDS && (
+                          <span className="ml-2 text-secondary">{t("Short clip — replace with the full track")}</span>
+                        )}
+                      </p>
+                    </div>
+                    <audio controls preload="none" src={publicUrl(track.audio_path)} className="h-9 max-w-[260px]" />
+                    <select
+                      value={track.country_slug ?? ""}
+                      onChange={(e) => update(track.id, { country_slug: e.target.value || null })}
+                      aria-label={t("Country")}
+                      className="max-w-[180px] border-b border-primary/30 bg-transparent py-1 text-xs text-primary"
+                    >
+                      <option value="">{t("General (all countries)")}</option>
+                      {AFRICAN_COUNTRIES.map((c) => (
+                        <option key={c.slug} value={c.slug}>
+                          {getCountryDisplayName(c, language)}
+                        </option>
+                      ))}
+                    </select>
+                    <label className="flex items-center gap-2 text-xs uppercase tracking-widest text-on-surface-variant">
+                      <input type="checkbox" checked={track.active} onChange={(e) => update(track.id, { active: e.target.checked })} />
+                      {t("In playlist")}
+                    </label>
+                    <button type="button" onClick={() => remove(track)} className="text-xs uppercase tracking-widest text-secondary">
+                      {t("Delete")}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       )}
     </section>

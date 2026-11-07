@@ -1165,6 +1165,8 @@ const es: Record<string, string> = {
   "Audio file": "Archivo de audio",
   "Track title": "Título de la pista",
   "Country (optional)": "País (opcional)",
+  "General (all countries)": "General (todos los países)",
+  "Each country has its own soundtrack. While the tour shows a country’s artworks, that country’s tracks play in order and loop; moving to another country’s artworks crossfades to its music. Tracks with no country are the general playlist, used for countries without their own music.": "Cada país tiene su propia banda sonora. Mientras la visita muestra las obras de un país, sus pistas suenan en orden y en bucle; al pasar a las obras de otro país, la música cambia con un fundido. Las pistas sin país forman la lista general, que se usa para los países sin música propia.",
   "Add track": "Añadir pista",
   "No tracks yet. The gallery shows no music control until a track is added.": "Todavía no hay pistas. La galería no muestra el control de música hasta que se añada una.",
   "Active playlist: {count} tracks, {duration} in total.": "Lista activa: {count} pistas, {duration} en total.",
