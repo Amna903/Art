@@ -60,12 +60,12 @@ export function CollectorPicks({ picks }: CollectorPicksProps) {
               <div className="flex justify-between items-start gap-4">
                 <div>
                   <p className="font-label-caps text-[10px] text-secondary mb-1">{t(pick.collection)}</p>
-                  <h4
+                  <h3
                     onClick={() => setActive(pick)}
                     className="font-headline-sm text-headline-sm cursor-pointer hover:text-secondary transition-colors"
                   >
                     {pick.title}
-                  </h4>
+                  </h3>
                   <Link
                     href={`/artists/${getArtistSlugByName(pick.artist)}`}
                     className="font-body-md text-on-surface-variant italic hover:text-secondary hover:underline transition-colors block mt-0.5"

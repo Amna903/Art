@@ -94,7 +94,7 @@ export function ZoomableImage({ src, alt, className }: Props) {
         <Image
           fill
           sizes="(max-width: 1024px) 100vw, 58vw"
-          priority
+          preload
           className="object-cover transition-transform duration-700 ease-out"
           alt={alt}
           src={src}

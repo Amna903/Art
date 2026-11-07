@@ -70,11 +70,13 @@ export function SiteHeader() {
         <div className="flex items-center justify-start shrink-0">
           <Link href="/" className="flex items-center shrink-0">
             <Image
-              src="/images/ChatGPT%20Image%20Sep%2028,%202026,%2010_18_38%20PM.png"
+              src="/images/logo.webp"
               alt="NUA-ARTE"
-              width={1103}
-              height={1426}
-              priority
+              // 3× its largest display size (40 px tall); served as-is, no optimizer.
+              width={93}
+              height={120}
+              unoptimized
+              loading="eager"
               className={`w-auto object-contain transition-all duration-300 ${scrolled ? "h-8" : "h-10"}`}
             />
           </Link>

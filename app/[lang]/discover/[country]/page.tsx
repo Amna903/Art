@@ -262,7 +262,7 @@ export default async function CountryExperience({ params }: Props) {
               src={heroImg}
               alt={t("Editorial hero image evoking contemporary art from {name}", { name })}
               fill
-              priority
+              preload
               sizes="100vw"
               className="object-cover"
             />

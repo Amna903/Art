@@ -5,11 +5,11 @@
 
 @theme {
   /* Fonts — NUA-ARTE Collective brand identity */
-  --font-display: "Cormorant Garamond", "Trajan Pro", serif;
-  --font-body: "Montserrat", sans-serif;
-  --font-script: "Allura", "Great Vibes", cursive;
-  --font-navigation: "Montserrat", sans-serif;
-  --font-label-caps: "Montserrat", sans-serif;
+  --font-display: var(--font-cormorant), "Trajan Pro", serif;
+  --font-body: var(--font-montserrat), sans-serif;
+  --font-script: var(--font-allura), "Great Vibes", cursive;
+  --font-navigation: var(--font-montserrat), sans-serif;
+  --font-label-caps: var(--font-montserrat), sans-serif;
 
   /* Type scale — fluid clamp() for proportional responsive sizing */
   --text-display-lg: clamp(36px, 4.6vw, 56px);

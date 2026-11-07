@@ -56,7 +56,8 @@ export function Hero({ blocks, siteHero }: { blocks: PageBlocks; siteHero: SiteH
               src={hero.imageSrc}
               alt={t(hero.imageAlt)}
               fill
-              priority
+              preload
+              quality={70}
               sizes="(max-width: 1023px) 100vw, 58vw"
               className="object-cover object-[60%_center]"
             />

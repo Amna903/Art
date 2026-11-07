@@ -96,7 +96,7 @@ function playCountryCue(slug: string, ctx: AudioContext, master: GainNode) {
   osc2.stop(now + dur + 0.05);
 }
 
-type AtlasStats = {
+export type AtlasStats = {
   artists: number;
   artworks: number;
   /** Recorded site visits (VisitCounter); 0 hides the stat. */
