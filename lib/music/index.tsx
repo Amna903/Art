@@ -340,7 +340,12 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       if (audio.paused) return;
 
       const { key } = playlistFor(allTracksRef.current, slug);
-      if (key === playlistKeyRef.current) return; // same soundtrack: play on
+      if (key === playlistKeyRef.current) {
+        // Same soundtrack: play on. If it was fading out towards another
+        // country the visitor has now left, fade it back up instead.
+        if (fadeRef.current != null) fadeTo(VOLUME);
+        return;
+      }
       // Fade the old soundtrack out, then fade the new one in — or stay
       // quiet if this country has no music.
       fadeTo(0, () => {

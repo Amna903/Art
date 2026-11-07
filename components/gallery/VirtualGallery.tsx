@@ -85,7 +85,7 @@ export function VirtualGallery({
 
   // Fetch the playlist up front so "Start the tour" can play inside the tap.
   // Leaving the gallery fades the music out; nothing else inside it stops it.
-  const { loadPlaylist, start: startMusic, stop: stopMusic, setCountry: setMusicCountry } = music;
+  const { loadPlaylist, start: startMusic, resume: resumeMusic, stop: stopMusic, setCountry: setMusicCountry } = music;
   useEffect(() => {
     void loadPlaylist();
     return () => stopMusic();
@@ -114,16 +114,20 @@ export function VirtualGallery({
   }, [tourCountry, setMusicCountry]);
 
   const openTour = useCallback(
-    (at: number) => {
+    (at: number, { begin = false }: { begin?: boolean } = {}) => {
       const i = Math.max(0, Math.min(at, total - 1));
       // Pick the country before starting, so the first notes already match.
       setMusicCountry(artworks[i]?.country ?? null);
-      startMusic();
+      // "Start the tour" / "Start again" always start the music, even if the
+      // visitor paused it on an earlier visit; opening one artwork respects
+      // that choice.
+      if (begin) resumeMusic();
+      else startMusic();
       setIndex(i);
       setZoomed(false);
       setView("tour");
     },
-    [artworks, setMusicCountry, startMusic, total],
+    [artworks, resumeMusic, setMusicCountry, startMusic, total],
   );
 
   const next = useCallback(() => {
@@ -209,7 +213,7 @@ export function VirtualGallery({
                 <div className="mt-9 flex flex-wrap items-center gap-3">
                   <button
                     type="button"
-                    onClick={() => openTour(0)}
+                    onClick={() => openTour(0, { begin: true })}
                     className="btn-primary min-h-[48px] px-8 text-base font-semibold"
                   >
                     {t("Start the tour")}
@@ -226,7 +230,7 @@ export function VirtualGallery({
                   type="button"
                   onClick={() => {
                     setMusicCountry(artworks[0]?.country ?? null);
-                    startMusic();
+                    resumeMusic();
                     setView("free");
                   }}
                   className="mt-6 inline-flex min-h-[44px] items-center text-sm text-[var(--nua-white)]/80 underline underline-offset-4 hover:text-[var(--nua-white)]"
@@ -444,7 +448,7 @@ export function VirtualGallery({
                 <h2 className="font-display text-4xl">{t("You have seen every work")}</h2>
                 <p className="mt-3 text-lg text-[var(--nua-grey-light)]">{t("Thank you for taking your time with the work.")}</p>
                 <div className="mt-8 flex flex-col gap-3">
-                  <button type="button" onClick={() => openTour(0)} className="btn-primary min-h-[48px] px-6 text-base font-semibold">
+                  <button type="button" onClick={() => openTour(0, { begin: true })} className="btn-primary min-h-[48px] px-6 text-base font-semibold">
                     {t("Start again")}
                   </button>
                   <Link href="/artists" className="flex min-h-[48px] items-center justify-center border border-[var(--nua-white)]/85 px-6 text-base text-[var(--nua-white)] hover:bg-[var(--nua-white)] hover:text-[var(--nua-charcoal)]">
