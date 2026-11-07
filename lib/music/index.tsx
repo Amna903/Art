@@ -11,7 +11,8 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
  * opening the grid, "Back to artworks" and free exploration never touch it.
  * Each country has its own soundtrack: `setCountry()` switches to the tracks
  * the admin assigned to that country (crossfading ~1 s), and tracks with no
- * country are the fallback for countries that have none. Moving between
+ * country are the fallback for countries that have none; a country with no
+ * music and no fallback is silent (never another country's music). Moving between
  * artworks of the same country never interrupts the music. Within a country
  * the tracks play one after another and loop. The only things that stop the
  * music are the visitor (Pause) and leaving the gallery, both with a fade.
@@ -110,6 +111,10 @@ export function MusicProvider({ children }: { children: ReactNode }) {
   const pendingStartRef = useRef(false);
   const hiddenPauseRef = useRef(false);
   const stoppingRef = useRef(false); // a Pause / Stop fade-out is running
+  // Music is wanted but the current country has none (and there is no
+  // general playlist): stay quiet rather than play another country's music,
+  // and start again as soon as the tour reaches a country that has some.
+  const silencedRef = useRef(false);
 
   const [tracks, setTracks] = useState<Track[]>([]);
   const [activeCountry, setActiveCountry] = useState<string | null>(null);
@@ -169,9 +174,6 @@ export function MusicProvider({ children }: { children: ReactNode }) {
   /** Points the active playlist at the current country. True if it changed. */
   const selectPlaylist = useCallback(() => {
     const { key, list } = playlistFor(allTracksRef.current, countryRef.current);
-    // A country with no music of its own (and no general tracks) keeps
-    // whatever is already playing rather than going silent.
-    if (key === "none" && tracksRef.current.length > 0) return false;
     if (key === playlistKeyRef.current) return false;
     playlistKeyRef.current = key;
     tracksRef.current = list;
@@ -230,9 +232,10 @@ export function MusicProvider({ children }: { children: ReactNode }) {
         .then((list) => {
           allTracksRef.current = list;
           selectPlaylist();
-          if (pendingStartRef.current && tracksRef.current.length > 0) {
+          if (pendingStartRef.current) {
             pendingStartRef.current = false;
-            playIndex(0);
+            if (tracksRef.current.length > 0) playIndex(0);
+            else silencedRef.current = true;
           }
         })
         .catch(() => {
@@ -259,7 +262,13 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     }
     // Paused while the visitor moved to another country: start that
     // country's soundtrack instead of resuming the old one.
-    if (selectPlaylist()) {
+    const changed = selectPlaylist();
+    if (tracksRef.current.length === 0) {
+      silencedRef.current = true; // this country has no music
+      return;
+    }
+    silencedRef.current = false;
+    if (changed) {
       playIndex(0);
       return;
     }
@@ -274,6 +283,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
 
   const pause = useCallback(() => {
     writePrefs({ paused: true });
+    silencedRef.current = false;
     const audio = getAudio();
     if (audio.paused) return;
     stoppingRef.current = true;
@@ -297,6 +307,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
 
   const stop = useCallback(() => {
     pendingStartRef.current = false;
+    silencedRef.current = false;
     const audio = getAudio();
     if (audio.paused) return;
     stoppingRef.current = true;
@@ -311,17 +322,35 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       if (countryRef.current === slug) return;
       countryRef.current = slug;
       if (allTracksRef.current.length === 0) return; // applied once loaded
-      // Not playing, or fading out after Pause / leaving: start() picks up
-      // the right country next time.
-      if (getAudio().paused || stoppingRef.current) return;
-      const before = playlistKeyRef.current;
+      // Fading out after Pause / leaving: leave it be.
+      if (stoppingRef.current) return;
+      const audio = getAudio();
+
+      // Quiet because the previous country had no music.
+      if (silencedRef.current) {
+        selectPlaylist();
+        if (tracksRef.current.length > 0) {
+          silencedRef.current = false;
+          playIndex(0, true);
+        }
+        return;
+      }
+      // Not playing (not started, or paused by the visitor): start() picks
+      // up the right country next time.
+      if (audio.paused) return;
+
       const { key } = playlistFor(allTracksRef.current, slug);
-      if (key === before || (key === "none" && tracksRef.current.length > 0)) return;
-      // Crossfade: fade the old soundtrack out, then fade the new one in.
+      if (key === playlistKeyRef.current) return; // same soundtrack: play on
+      // Fade the old soundtrack out, then fade the new one in — or stay
+      // quiet if this country has no music.
       fadeTo(0, () => {
-        // The visitor may have moved on again during the fade.
         if (stoppingRef.current) return;
-        if (selectPlaylist()) playIndex(0, true);
+        // The visitor may have moved on again during the fade.
+        const changed = selectPlaylist();
+        if (tracksRef.current.length === 0) {
+          silencedRef.current = true;
+          audio.pause();
+        } else if (changed) playIndex(0, true);
         else fadeTo(VOLUME);
       });
     },

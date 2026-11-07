@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useLanguage } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase/client";
-import { AFRICAN_COUNTRIES, getCountryDisplayName } from "@/lib/data/africa";
+import { AFRICAN_COUNTRIES, getCountryDisplayName, normalizeCountrySlug } from "@/lib/data/africa";
 
 type TrackRow = {
   id: string;
@@ -44,6 +44,19 @@ const fetchTracks = () =>
     .order("position")
     .order("created_at");
 
+/** Countries of the published artworks, as the gallery resolves them. */
+async function fetchGalleryCountries(): Promise<string[]> {
+  const [{ data: works }, { data: managed }] = await Promise.all([
+    supabase.from("artworks").select("country, managed_artist_id").eq("status", "published"),
+    supabase.from("managed_artists").select("id, country"),
+  ]);
+  const managedCountry = new Map((managed ?? []).map((m) => [m.id, m.country as string | null]));
+  const slugs = (works ?? []).map((w) =>
+    normalizeCountrySlug((w.managed_artist_id && managedCountry.get(w.managed_artist_id)) || w.country || ""),
+  );
+  return [...new Set(slugs.filter(Boolean))];
+}
+
 const publicUrl = (path: string) =>
   /^https?:\/\//.test(path) ? path : supabase.storage.from("gallery-music").getPublicUrl(path).data.publicUrl;
 
@@ -61,6 +74,17 @@ export function GalleryMusicAdmin() {
   const [title, setTitle] = useState("");
   const [country, setCountry] = useState("");
   const [busy, setBusy] = useState(false);
+  const [galleryCountries, setGalleryCountries] = useState<string[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetchGalleryCountries().then((list) => {
+      if (!cancelled) setGalleryCountries(list);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const apply = useCallback(
     ({ data, error }: { data: unknown; error: { message: string } | null }) => {
@@ -163,6 +187,12 @@ export function GalleryMusicAdmin() {
   };
 
   const minutes = (s: number | null) => (s == null ? "—" : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`);
+  // Gallery countries the tour will pass through in silence.
+  const hasGeneral = tracks.some((x) => x.active && !x.country_slug);
+  const silentCountries = hasGeneral
+    ? []
+    : galleryCountries.filter((slug) => !tracks.some((x) => x.active && x.country_slug === slug));
+
   const summary = (list: TrackRow[]) => {
     const active = list.filter((x) => x.active);
     return t("Active playlist: {count} tracks, {duration} in total.", {
@@ -179,6 +209,14 @@ export function GalleryMusicAdmin() {
           {t("Each country has its own soundtrack. While the tour shows a country’s artworks, that country’s tracks play in order and loop; moving to another country’s artworks crossfades to its music. Tracks with no country are the general playlist, used for countries without their own music.")}
         </p>
       </div>
+
+      {silentCountries.length > 0 && (
+        <p role="status" className="border-l-2 border-secondary bg-secondary/5 px-4 py-3 text-sm text-primary">
+          {t("These countries have artworks in the gallery but no music, so the tour is silent while they are shown: {countries}. Upload a track for each, or add a general track.", {
+            countries: silentCountries.map((slug) => getCountryDisplayName(slug, language)).join(", "),
+          })}
+        </p>
+      )}
 
       <div className="grid gap-5 border border-primary/10 p-6 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-end">
         <label className="block">
