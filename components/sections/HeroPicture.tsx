@@ -1,34 +1,50 @@
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
+import type { CSSProperties } from "react";
 import type { SiteHero } from "@/lib/data/site-heroes";
 
 /**
  * Fills its (relative) parent with a site hero: the 4:5 mobile image on
  * phones when there is one, otherwise the desktop image cropped around its
  * focal point.
+ *
+ * With a mobile image this is one <picture> (art direction), so a phone
+ * downloads only the mobile file and a desktop only the desktop file —
+ * previously both were preloaded everywhere. `fetchPriority="high"` makes it
+ * the first image the browser fetches.
  */
 export function HeroPicture({ hero, className = "" }: { hero: SiteHero; className?: string }) {
-  return (
-    <>
+  if (!hero.imageMobile) {
+    return (
       <Image
         src={hero.imageDesktop}
         alt={hero.alt}
         fill
-        priority
+        preload
+        quality={70}
         sizes="100vw"
-        className={`object-cover ${hero.imageMobile ? "hidden md:block" : ""} ${className}`}
+        className={`object-cover ${className}`}
         style={{ objectPosition: hero.focalPoint }}
       />
-      {hero.imageMobile && (
-        <Image
-          src={hero.imageMobile}
-          alt={hero.alt}
-          fill
-          priority
-          sizes="100vw"
-          className={`object-cover md:hidden ${className}`}
-        />
-      )}
-    </>
+    );
+  }
+
+  const common = { alt: hero.alt, fill: true, sizes: "100vw", quality: 70 } as const;
+  const {
+    props: { srcSet: desktopSrcSet },
+  } = getImageProps({ ...common, src: hero.imageDesktop });
+  const { props: mobile } = getImageProps({ ...common, src: hero.imageMobile, fetchPriority: "high", loading: "eager" });
+
+  return (
+    <picture>
+      <source media="(min-width: 768px)" srcSet={desktopSrcSet} sizes="100vw" />
+      <img
+        {...mobile}
+        alt={hero.alt}
+        // Focal point applies to the desktop crop only, as before.
+        className={`object-cover md:[object-position:var(--hero-focal)] ${className}`}
+        style={{ ...mobile.style, "--hero-focal": hero.focalPoint } as CSSProperties}
+      />
+    </picture>
   );
 }
 

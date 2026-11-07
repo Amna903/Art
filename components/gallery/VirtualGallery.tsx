@@ -189,7 +189,7 @@ export function VirtualGallery({
           {hero ? (
             <HeroPicture hero={hero} />
           ) : entranceImage ? (
-            <Image src={entranceImage.src} alt="" fill priority sizes="100vw" className="object-cover" />
+            <Image src={entranceImage.src} alt="" fill preload sizes="100vw" className="object-cover" />
           ) : null}
           <div className="absolute inset-0 bg-[var(--overlay-scrim)]" aria-hidden="true" />
         </div>
@@ -348,7 +348,7 @@ export function VirtualGallery({
                     fill
                     sizes="(max-width: 1023px) 100vw, 440px"
                     className="object-contain"
-                    priority
+                    preload
                   />
                 </button>
 
