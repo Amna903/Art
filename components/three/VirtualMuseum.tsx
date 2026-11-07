@@ -28,6 +28,9 @@ export type Artwork = {
 
 // Room physical dimensions (in meters)
 const ROOM = { w: 20, h: 5.6, d: 24 };
+// Every spot light adds shader uniforms to every lit material; beyond this many
+// some GPUs fail to compile the shaders, so crowded rooms rely on the wall wash.
+const MAX_SPOTLIGHTS = 20;
 
 // Viewpoint positions and target focus points for each zone so the camera directly faces that zone's artworks
 export const ZONE_VIEWPOINTS: Record<
@@ -732,11 +735,13 @@ function ArtworkFrame({
   entry,
   palette,
   onSelect,
+  withSpot = true,
 }: {
   art: Artwork;
   entry: TexEntry;
   palette: Palette;
   onSelect: (a: Artwork) => void;
+  withSpot?: boolean;
 }) {
   const { t } = useLanguage();
   const [hovered, setHovered] = useState(false);
@@ -745,24 +750,6 @@ function ArtworkFrame({
   const errorLabel = t("IMAGE UNAVAILABLE");
   const loadingLabel = t("LOADING ARTWORK…");
 
-  // Artwork canvas material: lighting-independent, high-res SRGB, no z-fighting
-  const mat = useMemo(() => {
-    const m = new THREE.MeshBasicMaterial({
-      color: 0xffffff,
-      toneMapped: false,
-      transparent: false,
-      side: THREE.FrontSide,
-      depthTest: true,
-      depthWrite: true,
-    });
-    m.polygonOffset = true;
-    m.polygonOffsetFactor = -1;
-    m.polygonOffsetUnits = -1;
-    return m;
-  }, []);
-
-  useEffect(() => () => mat.dispose(), [mat]);
-
   useEffect(() => {
     document.body.style.cursor = hovered ? "pointer" : "";
     return () => {
@@ -770,15 +757,10 @@ function ArtworkFrame({
     };
   }, [hovered]);
 
-  useEffect(() => {
-    let tex: THREE.Texture;
-    if (entry.status === "ready" && entry.texture) tex = entry.texture;
-    else if (entry.status === "error") tex = getPlaceholder(errorLabel);
-    else tex = getPlaceholder(loadingLabel);
-    mat.map = tex;
-    mat.color.set(0xffffff);
-    mat.needsUpdate = true;
-  }, [mat, entry.status, entry.texture, errorLabel, loadingLabel]);
+  const canvasTexture =
+    entry.status === "ready" && entry.texture
+      ? entry.texture
+      : getPlaceholder(entry.status === "error" ? errorLabel : loadingLabel);
 
   useEffect(() => {
     if (spotRef.current && targetRef.current) {
@@ -787,8 +769,16 @@ function ArtworkFrame({
     }
   }, []);
 
+  // Fit the frame to the image's real aspect ratio inside the wall slot's
+  // bounding box (object-fit: contain), so paintings are never cropped or
+  // stretched.
+  const img = entry.status === "ready" ? (entry.texture?.image as { width?: number; height?: number } | undefined) : undefined;
+  const aspect = img?.width && img?.height ? img.width / img.height : art.width / art.height;
+  const fw = aspect >= art.width / art.height ? art.width : art.height * aspect;
+  const fh = aspect >= art.width / art.height ? art.width / aspect : art.height;
+
   const label = [art.artist, art.year, art.medium && t(art.medium)].filter(Boolean).join(" · ");
-  const plaqueW = Math.max(1.4, Math.min(art.width * 0.85, 2.0));
+  const plaqueW = Math.max(Math.min(1.4, art.width), Math.min(fw * 0.85, 2.0));
   const plaqueTexture = useMemo(
     () => createPlaqueTexture(art.title, label, palette.accent),
     [art.title, label, palette.accent],
@@ -819,7 +809,7 @@ function ArtworkFrame({
       <object3D ref={targetRef} position={[0, 0, 0.04]} />
 
       {/* Dedicated spotlight from the ceiling track (direct illumination without consuming WebGL texture units for shadow maps) */}
-      <spotLight
+      {withSpot && <spotLight
         ref={spotRef}
         position={[0, ceilingY, 2.2]}
         angle={0.38}
@@ -828,11 +818,11 @@ function ArtworkFrame({
         distance={9.5}
         decay={1.3}
         color={palette.spotColor}
-      />
+      />}
 
       {/* Outer Museum Frame Box */}
       <mesh position={[0, 0, 0.02]} castShadow receiveShadow>
-        <boxGeometry args={[art.width + 0.16, art.height + 0.16, 0.04]} />
+        <boxGeometry args={[fw + 0.16, fh + 0.16, 0.04]} />
         <meshStandardMaterial
           color={palette.frameColor}
           roughness={0.45}
@@ -842,7 +832,7 @@ function ArtworkFrame({
 
       {/* Archival Matte Board */}
       <mesh position={[0, 0, 0.041]} receiveShadow>
-        <planeGeometry args={[art.width + 0.04, art.height + 0.04]} />
+        <planeGeometry args={[fw + 0.04, fh + 0.04]} />
         <meshStandardMaterial
           color={palette.matteColor}
           roughness={0.75}
@@ -854,7 +844,6 @@ function ArtworkFrame({
       {/* Artwork Canvas Plane */}
       <mesh
         position={[0, 0, 0.043]}
-        material={mat}
         castShadow={false}
         receiveShadow={false}
         onClick={(e) => {
@@ -867,11 +856,21 @@ function ArtworkFrame({
         }}
         onPointerOut={() => setHovered(false)}
       >
-        <planeGeometry args={[art.width, art.height]} />
+        <planeGeometry args={[fw, fh]} />
+        {/* Lighting-independent, high-res SRGB, offset to avoid z-fighting */}
+        <meshBasicMaterial
+          map={canvasTexture}
+          color={0xffffff}
+          toneMapped={false}
+          side={THREE.FrontSide}
+          polygonOffset
+          polygonOffsetFactor={-1}
+          polygonOffsetUnits={-1}
+        />
       </mesh>
 
       {/* Refined Museum Label Plaque Beneath Frame */}
-      <group position={[0, -art.height / 2 - 0.21, 0.018]}>
+      <group position={[0, -fh / 2 - 0.21, 0.018]}>
         {/* Plaque backplate */}
         <mesh castShadow receiveShadow>
           <boxGeometry args={[plaqueW, 0.24, 0.035]} />
@@ -990,7 +989,9 @@ function Player({
   touchKeys: React.MutableRefObject<MoveKeys>;
   setKeysActive: (k: MoveKeys) => void;
 }) {
-  const { camera, gl } = useThree();
+  // Read the camera/renderer at call time: they are three.js objects we
+  // drive imperatively, not React state.
+  const get = useThree((state) => state.get);
   const keys = useRef<MoveKeys>({});
   const velocity = useRef(new THREE.Vector3());
   const goal = useRef<{ pos: THREE.Vector3; quat: THREE.Quaternion } | null>(null);
@@ -998,9 +999,10 @@ function Player({
   // Initial view: a diagonal sightline across the near wall, long white side
   // wall, and charcoal floor.
   useEffect(() => {
+    const { camera } = get();
     camera.position.set(-5.8, 1.65, 7.5);
     camera.lookAt(3.2, 1.7, -3.8);
-  }, [camera]);
+  }, [get]);
 
   useEffect(() => {
     goal.current = mode === "tour" && focus ? viewpointFor(focus, focusOffset) : null;
@@ -1030,6 +1032,7 @@ function Player({
   // Drag to look around on touch screens (pointer lock does not exist there).
   useEffect(() => {
     if (mode !== "free") return;
+    const { camera, gl } = get();
     const el = gl.domElement;
     let last: { x: number; y: number } | null = null;
     const euler = new THREE.Euler(0, 0, 0, "YXZ");
@@ -1066,9 +1069,9 @@ function Player({
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", onUp);
     };
-  }, [mode, gl, camera]);
+  }, [mode, get]);
 
-  useFrame((_, delta) => {
+  useFrame(({ camera }, delta) => {
     if (mode === "tour") {
       if (goal.current) {
         const k = 1 - Math.exp(-delta * 2.6);
@@ -1135,16 +1138,6 @@ function Player({
     camera.position.y = 1.65;
   });
 
-  return null;
-}
-
-function SceneRig() {
-  const { gl } = useThree();
-  useEffect(() => {
-    gl.toneMapping = THREE.ACESFilmicToneMapping;
-    gl.toneMappingExposure = 1.05;
-    gl.outputColorSpace = THREE.SRGBColorSpace;
-  }, [gl]);
   return null;
 }
 
@@ -1232,8 +1225,12 @@ export default function VirtualMuseum({
         camera={{ fov: 58, near: 0.1, far: 100, position: [-5.8, 1.65, 7.5] }}
         gl={{ antialias: true, powerPreference: "high-performance" }}
         dpr={[1, 2]}
+        onCreated={({ gl }) => {
+          gl.toneMapping = THREE.ACESFilmicToneMapping;
+          gl.toneMappingExposure = 1.05;
+          gl.outputColorSpace = THREE.SRGBColorSpace;
+        }}
       >
-        <SceneRig />
         <color attach="background" args={[palette.bg]} />
         <ambientLight intensity={palette.ambientIntensity} />
         <hemisphereLight args={[palette.hemiSky, palette.hemiGround, palette.hemiIntensity]} />
@@ -1259,6 +1256,7 @@ export default function VirtualMuseum({
             entry={entries[a.id] ?? { status: "loading" }}
             palette={palette}
             onSelect={onSelectArtwork}
+            withSpot={artworks.length <= MAX_SPOTLIGHTS}
           />
         ))}
 

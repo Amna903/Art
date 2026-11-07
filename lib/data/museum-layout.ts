@@ -3,54 +3,125 @@ import type { SupabaseArtwork } from "@/lib/data/supabase-artists";
 
 type ZoneId = 1 | 2 | 3 | 4;
 
-// Mirrors VirtualMuseum's ROOM geometry — each zone is one physical wall.
-// `axis` is the direction frames get spaced out along; `fixed` is the
-// wall's position on the other axis.
-const ZONE_WALL: Record<ZoneId, { axis: "x" | "z"; fixed: number; rotationY: number }> = {
-  1: { axis: "x", fixed: 11.95, rotationY: Math.PI },
-  2: { axis: "z", fixed: -9.95, rotationY: Math.PI / 2 },
-  3: { axis: "z", fixed: 9.95, rotationY: -Math.PI / 2 },
-  4: { axis: "x", fixed: -11.95, rotationY: 0 },
+// Usable wall segments, in the order the guided tour walks them. Each one
+// mirrors VirtualMuseum's ROOM geometry, trimmed so frames never hang over a
+// corner, the entrance opening or the end of the partition wall.
+type Segment = {
+  zone: ZoneId;
+  rotationY: number;
+  // Start/end of the usable span along the wall, in world space (y ignored).
+  from: [number, number];
+  to: [number, number];
 };
 
-const FRAME_WIDTH = 2.2;
-const FRAME_HEIGHT = 1.8;
-const SLOT_HALF_GAP = 3; // distance of the first pair of frames from wall center
-const SLOT_PAIR_STEP = 6; // distance between successive pairs
+const SEGMENTS: Segment[] = [
+  // South entrance wall, left wing (x -10 → -3.2), facing into the room.
+  { zone: 1, rotationY: Math.PI, from: [-3.6, 11.95], to: [-9.6, 11.95] },
+  // West wall
+  { zone: 2, rotationY: Math.PI / 2, from: [-9.95, 11.4], to: [-9.95, -11.4] },
+  // North wall
+  { zone: 4, rotationY: 0, from: [-9.4, -11.95], to: [9.4, -11.95] },
+  // East wall
+  { zone: 3, rotationY: -Math.PI / 2, from: [9.95, -11.4], to: [9.95, 11.4] },
+  // South entrance wall, right wing (x 3.2 → 10).
+  { zone: 1, rotationY: Math.PI, from: [9.6, 11.95], to: [3.6, 11.95] },
+  // Mid partition wall (x = -3.7, z -1.2 → 8.0): east face, then west face.
+  { zone: 1, rotationY: Math.PI / 2, from: [-3.45, 7.7], to: [-3.45, -0.9] },
+  { zone: 2, rotationY: -Math.PI / 2, from: [-3.95, -0.9], to: [-3.95, 7.7] },
+];
 
-// 4 zones × 4 slots/wall + 4 mid wall slots = 20 artworks total.
-export const MAX_ARTWORKS = 20;
+const MAX_FRAME = 2.4; // largest side of a frame's bounding box (metres)
+const MIN_SPACING = 1.5; // closest centre-to-centre distance between frames
+const SPACINGS = [3.2, 2.8, 2.4, 2.0, 1.75, MIN_SPACING];
 
-// Mid partition wall (at x = -3.7, length 9.2 in z) slots: 2 on East face, 2 on West face
-const MID_WALL_SLOTS: Array<{
+const segLength = (s: Segment) => Math.hypot(s.to[0] - s.from[0], s.to[1] - s.from[1]);
+
+/** Spread `n` frames over the walls in proportion to each wall's capacity. */
+function distribute(n: number, caps: number[]): number[] {
+  const totalCap = caps.reduce((a, b) => a + b, 0);
+  const counts = caps.map((c) => Math.min(c, Math.floor((n * c) / totalCap)));
+  let left = n - counts.reduce((a, b) => a + b, 0);
+  // Hand out the rest to walls in tour order that still have room.
+  while (left > 0) {
+    let placed = false;
+    for (let i = 0; i < caps.length && left > 0; i++) {
+      if (counts[i] < caps[i]) {
+        counts[i] += 1;
+        left -= 1;
+        placed = true;
+      }
+    }
+    if (!placed) break;
+  }
+  return counts;
+}
+
+type Placement = {
   position: [number, number, number];
   rotationY: number;
   zone: ZoneId;
-}> = [
-  // Side 1 (East Face): 2 paintings facing the main central gallery hall
-  { position: [-3.45, 1.9, 1.6], rotationY: Math.PI / 2, zone: 1 },
-  { position: [-3.45, 1.9, 5.2], rotationY: Math.PI / 2, zone: 1 },
-  // Side 2 (West Face): 2 paintings facing the west gallery wing
-  { position: [-3.95, 1.9, 1.6], rotationY: -Math.PI / 2, zone: 2 },
-  { position: [-3.95, 1.9, 5.2], rotationY: -Math.PI / 2, zone: 2 },
-];
+  width: number;
+  height: number;
+};
 
 /**
- * No curator, no hand-picked coordinates: artworks are assigned to zones
- * purely by their position in the incoming list. Two frames per wall per
- * pass, cycling 1 → 2 → 3 → 4 → 1 → 2 … as more artworks arrive, with the
- * mid partition wall receiving 4 paintings (2 per side).
+ * Computes a wall placement for every artwork — there is no fixed cap. Few
+ * artworks get generous spacing; as more arrive the spacing tightens and,
+ * past one full row, a second (upper) row is hung. `width`/`height` are the
+ * bounding box; the frame itself is fitted to the image's real aspect ratio
+ * at render time so nothing is cropped or stretched.
  */
-function slotFor(index: number): { zone: ZoneId; slot: number } {
-  const zone = ((Math.floor(index / 2) % 4) + 1) as ZoneId;
-  const cyclesCompleted = Math.floor(index / 8);
-  const slot = cyclesCompleted * 2 + (index % 2);
-  return { zone, slot };
-}
+export function computePlacements(n: number): Placement[] {
+  if (n <= 0) return [];
+  const lengths = SEGMENTS.map(segLength);
 
-function offsetForSlot(slot: number): number {
-  const sign = slot % 2 === 0 ? -1 : 1;
-  return sign * (SLOT_HALF_GAP + SLOT_PAIR_STEP * Math.floor(slot / 2));
+  let rows = 1;
+  let spacing = MIN_SPACING;
+  let caps: number[] = [];
+  outer: for (const r of [1, 2, 3]) {
+    // A single row stays comfortably spaced; past that a second row is hung
+    // rather than squeezing frames into narrow slivers.
+    for (const sp of r === 1 ? SPACINGS.filter((x) => x >= 2.0) : SPACINGS) {
+      const c = lengths.map((l) => Math.max(0, Math.floor(l / sp)));
+      if (c.reduce((a, b) => a + b, 0) * r >= n) {
+        rows = r;
+        spacing = sp;
+        caps = c;
+        break outer;
+      }
+    }
+  }
+  if (caps.length === 0) {
+    // More artworks than even 3 tight rows hold: keep adding rows.
+    caps = lengths.map((l) => Math.floor(l / MIN_SPACING));
+    rows = Math.ceil(n / caps.reduce((a, b) => a + b, 0));
+  }
+
+  // Ceiling is 5.6 m; keep every frame (plus its plaque) between ~0.3 m and 5.3 m.
+  const rowYs =
+    rows === 1 ? [1.9] : rows === 2 ? [1.55, 3.75] : Array.from({ length: rows }, (_, i) => 1.0 + (i * 3.6) / (rows - 1));
+  const maxH = rows === 1 ? 2.0 : rows === 2 ? 1.6 : 3.6 / (rows - 1) - 0.55;
+
+  const counts = distribute(n, caps.map((c) => c * rows));
+  const out: Placement[] = [];
+  SEGMENTS.forEach((seg, si) => {
+    const count = counts[si];
+    if (!count) return;
+    const perRow = Math.ceil(count / rows);
+    const len = lengths[si];
+    for (let k = 0; k < count; k++) {
+      const row = Math.floor(k / perRow);
+      const inRow = row === rows - 1 ? count - perRow * (rows - 1) : perRow;
+      const j = k % perRow;
+      const step = len / inRow;
+      const t = (step * (j + 0.5)) / len;
+      const x = seg.from[0] + (seg.to[0] - seg.from[0]) * t;
+      const z = seg.from[1] + (seg.to[1] - seg.from[1]) * t;
+      const width = Math.min(MAX_FRAME, Math.max(0.8, Math.min(step, spacing * 1.25) - 0.55));
+      out.push({ position: [x, rowYs[row], z], rotationY: seg.rotationY, zone: seg.zone, width, height: maxH });
+    }
+  });
+  return out;
 }
 
 export const FALLBACK_ARTWORKS: Artwork[] = [
@@ -169,8 +240,6 @@ function details(a: SupabaseArtwork) {
     artist: a.artistName,
     description: a.description ?? "",
     image: a.imageUrl,
-    width: FRAME_WIDTH,
-    height: FRAME_HEIGHT,
     year: a.year ? String(a.year) : undefined,
     medium: a.medium ?? undefined,
     dimensions: a.dimensions ?? undefined,
@@ -180,31 +249,11 @@ function details(a: SupabaseArtwork) {
 }
 
 /**
- * Places every published artwork for the gallery. The first MAX_ARTWORKS
- * (newest first) get a wall in the 3D room; any beyond that are still part of
- * the guided tour and the grid, just without a wall position (the camera stays
- * put for them). Sample artworks are never mixed in with real ones.
+ * Places every published artwork (newest first) on a wall of the 3D room.
+ * Every artwork gets a real wall position, so the guided tour can visit all
+ * of them. Sample artworks are never mixed in with real ones.
  */
 export function layoutArtworks(source: SupabaseArtwork[]): Artwork[] {
-  return source.map((a, index) => {
-    if (index >= MAX_ARTWORKS) {
-      return { ...details(a), position: [0, 1.9, 0] as [number, number, number], rotationY: 0, zone: 1 as ZoneId };
-    }
-
-    // Indices 8..11 are mounted on the mid partition wall (2 on East face, 2 on West face)
-    if (index >= 8 && index < 12) {
-      const mid = MID_WALL_SLOTS[index - 8];
-      return { ...details(a), position: mid.position, rotationY: mid.rotationY, zone: mid.zone };
-    }
-
-    // Outer perimeter walls (indices 0..7 and 12..19)
-    const effectiveIndex = index >= 12 ? index - 4 : index;
-    const { zone, slot } = slotFor(effectiveIndex);
-    const wall = ZONE_WALL[zone];
-    const offset = offsetForSlot(slot);
-    const position: [number, number, number] =
-      wall.axis === "x" ? [offset, 1.9, wall.fixed] : [wall.fixed, 1.9, offset];
-
-    return { ...details(a), position, rotationY: wall.rotationY, zone };
-  });
+  const placements = computePlacements(source.length);
+  return source.map((a, index) => ({ ...details(a), ...placements[index] }));
 }

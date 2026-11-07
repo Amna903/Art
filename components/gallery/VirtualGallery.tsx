@@ -10,7 +10,6 @@ import { MusicControl } from "@/components/gallery/MusicControl";
 import { QuoteBlock } from "@/components/sections/QuoteBlock";
 import { quoteFor } from "@/lib/data/quotes";
 import { RoomTitlesEditor } from "@/components/gallery/RoomTitlesEditor";
-import { MAX_ARTWORKS } from "@/lib/data/museum-layout";
 import type { SiteHero } from "@/lib/data/site-heroes";
 import { useAuth } from "@/lib/auth";
 import { useLanguage } from "@/lib/i18n";
@@ -253,9 +252,9 @@ export function VirtualGallery({
             <div className={`absolute inset-0 ${wantsMuseum ? "" : "invisible"}`}>
               <Suspense fallback={<p className="absolute inset-0 flex items-center justify-center text-sm text-[var(--nua-grey-light)]">{t("Loading the gallery…")}</p>}>
                 <VirtualMuseum
-                  artworks={artworks.slice(0, MAX_ARTWORKS)}
+                  artworks={artworks}
                   mode={view === "free" ? "free" : "tour"}
-                  focus={view === "tour" && index < MAX_ARTWORKS ? current : null}
+                  focus={view === "tour" ? current : null}
                   focusOffset={desktop ? 0.9 : 0}
                   onSelectArtwork={(a) => openTour(artworks.findIndex((x) => x.id === a.id))}
                 />
