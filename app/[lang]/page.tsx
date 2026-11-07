@@ -2,7 +2,7 @@ import { Hero } from "@/components/sections/home/Hero";
 import { HomeIntro } from "@/components/sections/home/HomeIntro";
 import { QuoteBlock } from "@/components/sections/QuoteBlock";
 import { quoteFor } from "@/lib/data/quotes";
-import { AfricaMapSection } from "@/components/sections/home/AtlasMap";
+import { AfricaMapSectionLazy } from "@/components/sections/home/AtlasMapLazy";
 import { FeaturedArtists } from "@/components/sections/home/FeaturedArtists";
 import { CollectorPicks, type CollectorPick } from "@/components/sections/home/CollectorPicks";
 import { DiscoverOrigin } from "@/components/sections/home/DiscoverOrigin";
@@ -83,7 +83,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
       <HomeIntro />
       <FeaturedArtists />
       <ThreadDivider />
-      <AfricaMapSection stats={atlasStats} />
+      <AfricaMapSectionLazy stats={atlasStats} />
       {placeQuote && <QuoteBlock quote={placeQuote} />}
       {picks.length > 0 && <CollectorPicks picks={picks} />}
       <DiscoverOrigin />
