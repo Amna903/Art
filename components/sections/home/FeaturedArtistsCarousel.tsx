@@ -160,7 +160,7 @@ function CardPhoto({ name, src }: { name: string; src: string }) {
   return (
     <Image
       fill
-      sizes="400px"
+      sizes="(max-width: 488px) 82vw, 400px"
       draggable={false}
       className="object-cover transition-transform duration-700 group-hover:scale-105"
       alt={name}
