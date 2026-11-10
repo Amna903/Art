@@ -179,7 +179,7 @@ export default async function CollectionDetailPage({ params }: Props) {
                     <ArtworkImage
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="object-cover transition-transform duration-700 ease-out group-hover/card:scale-105"
+                      className="object-contain p-4 transition-transform duration-700 ease-out group-hover/card:scale-[1.03]"
                       alt={artwork.title}
                       src={artwork.image}
                     />

@@ -92,13 +92,13 @@ export function ZoomableImage({ src, displaySrc, alt, className }: Props) {
     <>
       <div
         onClick={() => setOpen(true)}
-        className={`relative overflow-hidden aspect-[4/5] zoom-container cursor-zoom-in group border border-outline/5 ${className ?? ""}`}
+        className={`relative overflow-hidden aspect-[4/5] zoom-container cursor-zoom-in group border border-outline/5 bg-surface-container-low ${className ?? ""}`}
       >
         <ArtworkImage
           fill
           sizes="(max-width: 1024px) 100vw, 58vw"
           preload
-          className="object-cover transition-transform duration-700 ease-out"
+          className="object-contain transition-transform duration-700 ease-out"
           alt={alt}
           src={displaySrc ?? src}
         />

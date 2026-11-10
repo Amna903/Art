@@ -69,16 +69,13 @@ export function CuratedWorksGrid({ works }: { works: CuratedWork[] }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
             {visible.map((w) => (
               <article key={w.id} className="group">
-                <div
-                  className="relative aspect-[3/4] overflow-hidden mb-5"
-                  style={{ background: `#${w.swatch}` }}
-                >
+                <div className="relative aspect-[3/4] overflow-hidden mb-5 bg-surface-container">
                   <ArtworkImage
                     src={w.image}
                     alt={t("{title} by {artist}", { title: w.title, artist: w.artist })}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                    className="object-contain p-3 transition-transform duration-700 group-hover:scale-[1.03]"
                   />
                   {w.price !== null && (
                     <span className="absolute top-4 left-4 bg-beige text-primary px-3 py-1 font-label-caps tracking-widest text-[10px]">
