@@ -43,7 +43,10 @@ CREATE INDEX IF NOT EXISTS managed_artists_name_trgm_idx
 -- effective_country / artist_slug / artist_display_name mirror the rules in
 -- lib/data/supabase-artists.ts (managed artist first, then the account
 -- profile, then the artwork's own country).
-CREATE OR REPLACE VIEW public.published_artworks
+-- Dropped first so the file can be re-run after an earlier version created
+-- the view with different columns. A view stores no data.
+DROP VIEW IF EXISTS public.published_artworks;
+CREATE VIEW public.published_artworks
 WITH (security_invoker = true) AS
 SELECT
   a.id,
