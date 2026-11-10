@@ -24,6 +24,8 @@ export type Artwork = {
   slug?: string;
   /** Public artist route key (/artists/[slug]). */
   artistSlug?: string;
+  /** Pre-generated 1280px thumbnail (lists, the tour panel and the walls). */
+  thumb?: string;
   /** Country slug; picks the soundtrack that plays while this work is shown. */
   country?: string;
 };
@@ -957,6 +959,20 @@ function PerimeterWallWash() {
 
 type MoveKeys = Record<string, boolean>;
 
+/**
+ * Wall textures go through the image optimizer at 1080 px (plenty for a
+ * frame at viewing distance) instead of the full-resolution original, so a
+ * room loads quickly and stays light on GPU memory. The zoom view still
+ * shows the original.
+ */
+function wallTextureUrl(a: Artwork): string {
+  // Pre-generated 1280px WebP: no optimizer request at all.
+  if (a.thumb) return a.thumb;
+  const src = a.image;
+  if (!src || src.startsWith("data:") || src.startsWith("blob:")) return src;
+  return `/_next/image?url=${encodeURIComponent(src)}&w=1080&q=75`;
+}
+
 /** Where the camera stands to look at one artwork: in front of it, at eye
  * height, shifted sideways by `offset` metres so the painting sits clear of
  * the viewing panel on the right. */
@@ -1181,11 +1197,12 @@ export default function VirtualMuseum({
     let loaded = 0;
     let errors = 0;
     const total = artworks.length;
+    const textures: THREE.Texture[] = [];
     onLoadProgress?.(0, total, 0);
 
     artworks.forEach((a) => {
       loader.load(
-        a.image,
+        wallTextureUrl(a),
         (tex) => {
           if (cancelled) {
             tex.dispose();
@@ -1199,6 +1216,7 @@ export default function VirtualMuseum({
           tex.wrapT = THREE.ClampToEdgeWrapping;
           tex.anisotropy = 8;
           tex.needsUpdate = true;
+          textures.push(tex);
           loaded += 1;
           setEntries((prev) => ({ ...prev, [a.id]: { status: "ready", texture: tex } }));
           onLoadProgress?.(loaded, total, errors);
@@ -1216,6 +1234,8 @@ export default function VirtualMuseum({
 
     return () => {
       cancelled = true;
+      // Leaving the room (or changing rooms) frees its images from GPU memory.
+      textures.forEach((tex) => tex.dispose());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [artworks]);

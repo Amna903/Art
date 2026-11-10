@@ -780,6 +780,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: { country: string | null; works: number }[]
       }
+      published_country_rooms: {
+        Args: Record<PropertyKey, never>
+        Returns: { country: string | null; works: number; covers: string[] | null }[]
+      }
       published_artist_summaries: {
         Args: Record<PropertyKey, never>
         Returns: { newest: Json; works: number; mediums: string[] | null }[]

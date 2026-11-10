@@ -241,6 +241,7 @@ function details(a: SupabaseArtwork) {
     artist: a.artistName,
     description: a.description ?? "",
     image: a.imageUrl,
+    thumb: a.thumbUrl ?? undefined,
     year: a.year ? String(a.year) : undefined,
     medium: a.medium ?? undefined,
     dimensions: a.dimensions ?? undefined,

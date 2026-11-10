@@ -129,9 +129,16 @@ export async function listPublishedArtworks(opts: ListOptions): Promise<Page<Sup
     .order("id", { ascending: false });
 
   if (opts.country) {
-    const values = opts.country === "other" ? null : (await getCountryCounts()).find((c) => c.slug === opts.country)?.values;
-    if (opts.country !== "other" && (!values || values.length === 0)) return { items: [], total: 0 };
-    query = values ? query.in("effective_country", values) : query.is("effective_country", null);
+    // The stored spellings that map to this country (from the counts query).
+    const values = (await getCountryCounts()).find((c) => c.slug === opts.country)?.values ?? [];
+    if (opts.country === "other") {
+      // No country, or a name that isn't a recognised country.
+      const quoted = values.map((v) => `"${v.replace(/["\\]/g, "")}"`).join(",");
+      query = query.or(quoted ? `effective_country.is.null,effective_country.in.(${quoted})` : "effective_country.is.null");
+    } else {
+      if (values.length === 0) return { items: [], total: 0 };
+      query = query.in("effective_country", values);
+    }
   }
   if (opts.artistSlug) query = query.eq("artist_slug", opts.artistSlug);
   if (opts.excludeSlug) query = query.neq("slug", opts.excludeSlug);
