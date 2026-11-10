@@ -191,7 +191,7 @@ export default async function ArtworkDetailPage({ params }: Props) {
                   href={`/artworks/${work.slug}`}
                   className="relative block w-24 h-24 border border-outline/20 hover:border-secondary transition-colors"
                 >
-                  <ArtworkImage fill sizes="96px" className="object-cover" alt={work.imageAlt} src={work.image} />
+                  <ArtworkImage fill sizes="96px" className="object-contain" alt={work.imageAlt} src={work.image} />
                 </Link>
               ))}
             </div>

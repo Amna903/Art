@@ -231,7 +231,7 @@ export default async function ArtistProfilePage({ params, searchParams }: Props)
             <div className="h-1 w-24 bg-tertiary mb-8" />
             {/* The bio is curatorial copy, not the artist's words: no quotation
                 marks. Only its opening paragraph appears here. */}
-            <p className="text-body-lg text-on-surface-variant max-w-md leading-relaxed mb-8">
+            <p className="text-body-lg text-on-surface max-w-md leading-relaxed mb-8">
               {artist.bio?.split(/\n\s*\n/)[0] || t("A contemporary practice rooted in {place}.", { place: getCountryDisplayName(country ?? artist.countryName, lang) || t("Africa") })}
             </p>
             <p className="text-body-md font-semibold text-tertiary uppercase tracking-widest">
@@ -268,7 +268,7 @@ export default async function ArtistProfilePage({ params, searchParams }: Props)
           <h2 className="text-headline-sm font-display mb-6 border-b border-outline-variant pb-4">{t("The Narrative")}</h2>
         </div>
         <div className="col-span-12 lg:col-span-8">
-          <div className="prose prose-lg text-body-lg text-on-surface-variant leading-relaxed columns-1 md:columns-2 gap-12">
+          <div className="prose prose-lg text-body-lg text-on-surface leading-relaxed columns-1 md:columns-2 gap-12">
             <p className="mb-6 whitespace-pre-line first-letter:text-5xl first-letter:font-display first-letter:float-left first-letter:mr-3 first-letter:text-secondary-container">
               {artist.bio || t("{name} works across contemporary African visual culture.", { name: artist.name })}
             </p>
@@ -310,7 +310,7 @@ export default async function ArtistProfilePage({ params, searchParams }: Props)
                   <ArtworkImage
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="object-contain p-3 transition-transform duration-700 group-hover:scale-[1.03]"
                     alt={w.imageAlt ?? w.title}
                     src={workImageFor(w.imageUrl)}
                   />
@@ -354,7 +354,7 @@ export default async function ArtistProfilePage({ params, searchParams }: Props)
                 <ArtworkImage
                   fill
                   sizes="(max-width: 768px) 50vw, 20vw"
-                  className="object-cover"
+                  className="object-contain p-2"
                   alt={work.imageAlt ?? work.title}
                   src={workImageFor(work.imageUrl)}
                 />
