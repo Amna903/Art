@@ -138,7 +138,7 @@ export default async function CountryExperience({ params, searchParams }: Props)
         t("A work from {country} that folds inherited symbols into a contemporary register.", { country: name }),
       swatch: swatchFor(a.slug),
       room: (i % 3) as 0 | 1 | 2,
-      image: a.imageUrl,
+      image: a.thumbUrl ?? a.imageUrl,
     }));
 
   // Generated placeholder copy is re-rendered in this language.

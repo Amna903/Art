@@ -26,6 +26,7 @@ export type Database = {
           id: string
           image_phash: string | null
           image_url: string
+          thumb_base: string | null
           medium: string | null
           originality_checked_at: string | null
           originality_report: Json | null
@@ -49,6 +50,7 @@ export type Database = {
           id?: string
           image_phash?: string | null
           image_url?: string
+          thumb_base?: string | null
           medium?: string | null
           originality_checked_at?: string | null
           originality_report?: Json | null
@@ -72,6 +74,7 @@ export type Database = {
           id?: string
           image_phash?: string | null
           image_url?: string
+          thumb_base?: string | null
           medium?: string | null
           originality_checked_at?: string | null
           originality_report?: Json | null
@@ -743,6 +746,7 @@ export type Database = {
           description: string | null
           dimensions: string | null
           image_url: string
+          thumb_base: string | null
           artist_id: string
           managed_artist_id: string | null
           translations: Json

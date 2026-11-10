@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "@/components/i18n/Link";
 import Image from "next/image";
+import { ArtworkImage } from "@/components/ui/ArtworkImage";
 import { useSearchParams } from "next/navigation";
 import type { Artist } from "@/lib/data/artists";
 import { AFRICAN_COUNTRIES, getCountryDisplayName } from "@/lib/data/africa";
@@ -160,7 +161,7 @@ function SearchPageInner({ q, artists: artistResults, artworks: artworkResults }
                 {artworkResults.map((w) => (
                   <Link key={w.slug} href={`/artworks/${w.slug}`} className="group">
                     <div className="relative aspect-square overflow-hidden bg-surface-container mb-3">
-                      <Image
+                      <ArtworkImage
                         src={w.image}
                         alt={w.title}
                         fill

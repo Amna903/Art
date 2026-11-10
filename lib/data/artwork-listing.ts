@@ -41,7 +41,7 @@ type ViewRow = ArtworkRow & {
 };
 
 const VIEW_SELECT =
-  "id, slug, title, medium, year, country, description, dimensions, image_url, artist_id, managed_artist_id, translations, created_at, effective_country, artist_slug, ma_slug, ma_display_name, ma_bio, ma_country, ma_city, ma_technique, ma_avatar_url, ma_translations, p_display_name, p_bio, p_country, p_avatar_url, p_translations";
+  "id, slug, title, medium, year, country, description, dimensions, image_url, thumb_base, artist_id, managed_artist_id, translations, created_at, effective_country, artist_slug, ma_slug, ma_display_name, ma_bio, ma_country, ma_city, ma_technique, ma_avatar_url, ma_translations, p_display_name, p_bio, p_country, p_avatar_url, p_translations";
 
 /** Same mapping as the rest of the app (toArtwork), from one view row. */
 export function viewRowToArtwork(r: ViewRow, lang: Language): SupabaseArtwork {

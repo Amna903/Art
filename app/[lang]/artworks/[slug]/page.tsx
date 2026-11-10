@@ -11,6 +11,7 @@ import { ARTWORKS as STATIC_ARTWORKS } from "@/lib/data/content";
 import { getArtistSlugByName } from "@/lib/data/artists";
 import Link from "@/components/i18n/Link";
 import Image from "next/image";
+import { ArtworkImage } from "@/components/ui/ArtworkImage";
 import type { Metadata } from "next";
 import { getI18n } from "@/lib/i18n/server";
 import type { Language } from "@/lib/i18n/config";
@@ -36,6 +37,8 @@ type RelatedWork = {
   title: string;
   medium: string | null;
   image: string;
+  /** Smaller copy shown on the page (the original opens in the zoom view). */
+  displayImage?: string;
   imageAlt: string;
 };
 
@@ -46,6 +49,8 @@ type ResolvedWork = {
   medium: string;
   year: string;
   image: string;
+  /** Smaller copy shown on the page (the original opens in the zoom view). */
+  displayImage?: string;
   imageAlt: string;
   artistBio: string | null;
   artistStatement: string | null;
@@ -98,6 +103,7 @@ async function resolveArtwork(slug: string, lang: Language, t: Translator): Prom
       medium: real.medium ?? FALLBACK.medium,
       year: real.year ? String(real.year) : FALLBACK.year,
       image: real.imageUrl,
+      displayImage: real.thumbUrl ?? real.imageUrl,
       imageAlt: t("{title} by {artist}", { title: real.title, artist: real.artistName }),
       artistBio: real.artistBio,
       // The work's own story, shown above the artist's bio.
@@ -111,7 +117,7 @@ async function resolveArtwork(slug: string, lang: Language, t: Translator): Prom
           slug: work.slug,
           title: work.title,
           medium: work.medium,
-          image: work.imageUrl,
+          image: work.thumbUrl ?? work.imageUrl,
           imageAlt: t("{title} by {artist}", { title: work.title, artist: work.artistName }),
         })),
     };
@@ -165,7 +171,7 @@ export default async function ArtworkDetailPage({ params }: Props) {
   const { slug } = await params;
   const { lang, t } = await getI18n(params);
   const {
-    title, artist, artistSlug, medium, year, image, imageAlt, artistBio, artistStatement, relatedWorks,
+    title, artist, artistSlug, medium, year, image, displayImage, imageAlt, artistBio, artistStatement, relatedWorks,
     artistAvatar, artistLocation, artistTechnique, dimensions,
   } = await resolveArtwork(slug, lang, t);
 
@@ -174,7 +180,7 @@ export default async function ArtworkDetailPage({ params }: Props) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
         <div className="lg:col-span-7 flex flex-col gap-6 relative gallery-lighting p-4">
           <div className="relative">
-            <ZoomableImage src={image} alt={imageAlt} />
+            <ZoomableImage src={image} displaySrc={displayImage} alt={imageAlt} />
             <SaveButton artworkSlug={slug} artworkTitle={title} artistName={artist} artworkImage={image} />
           </div>
           {relatedWorks.length > 0 && (
@@ -185,7 +191,7 @@ export default async function ArtworkDetailPage({ params }: Props) {
                   href={`/artworks/${work.slug}`}
                   className="relative block w-24 h-24 border border-outline/20 hover:border-secondary transition-colors"
                 >
-                  <Image fill sizes="96px" className="object-cover" alt={work.imageAlt} src={work.image} />
+                  <ArtworkImage fill sizes="96px" className="object-cover" alt={work.imageAlt} src={work.image} />
                 </Link>
               ))}
             </div>

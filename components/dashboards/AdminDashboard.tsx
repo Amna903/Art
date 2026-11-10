@@ -15,6 +15,7 @@ import { HeroImagesAdmin } from "./HeroImagesAdmin";
 import { ManagedArtistsAdmin } from "./ManagedArtistsAdmin";
 import { QrCodeButton, QR_CODES_ENABLED } from "./QrCodeButton";
 import { OriginalityReviewAdmin } from "./OriginalityReviewAdmin";
+import { ThumbnailBackfill } from "./ThumbnailBackfill";
 import { ListRowSkeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/lib/auth";
 
@@ -242,6 +243,7 @@ export function AdminDashboard() {
         </section>
       ) : tab === "artworks" ? (
         <section>
+          <ThumbnailBackfill />
           <table className="w-full text-sm">
             <thead className="text-xs uppercase tracking-widest text-on-surface-variant">
               <tr className="border-b border-primary/10">

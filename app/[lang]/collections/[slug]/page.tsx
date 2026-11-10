@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "@/components/i18n/Link";
 import Image from "next/image";
+import { ArtworkImage } from "@/components/ui/ArtworkImage";
 import { notFound } from "next/navigation";
 import { getCollectionBySlug, COLLECTIONS } from "@/lib/data/collections";
 import { ARTWORKS } from "@/lib/data/content";
@@ -54,7 +55,7 @@ async function resolveCollection(
       artworks: real.artworks.map((a) => ({
         slug: a.slug,
         title: a.title,
-        image: a.imageUrl,
+        image: a.thumbUrl ?? a.imageUrl,
         artist: a.artistName,
         medium: a.medium ?? "",
         year: a.year ?? "",
@@ -175,7 +176,7 @@ export default async function CollectionDetailPage({ params }: Props) {
               <article key={artwork.slug} className="group flex flex-col">
                 <div className="relative mb-6 overflow-hidden aspect-[3/4] bg-surface-container group/card">
                   <Link href={`/artworks/${artwork.slug}`} className="block w-full h-full">
-                    <Image
+                    <ArtworkImage
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       className="object-cover transition-transform duration-700 ease-out group-hover/card:scale-105"

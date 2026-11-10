@@ -2,10 +2,13 @@
 
 import { useLanguage } from "@/lib/i18n";
 import { useRef, useState, type WheelEvent as ReactWheelEvent } from "react";
-import Image from "next/image";
+import { ArtworkImage } from "@/components/ui/ArtworkImage";
 
 type Props = {
+  /** Original image: shown in the zoom lightbox. */
   src: string;
+  /** Smaller copy for the page (a pre-generated thumbnail); defaults to src. */
+  displaySrc?: string;
   alt: string;
   className?: string;
 };
@@ -23,7 +26,7 @@ function distance(t: TouchList): number {
  * plus drag/swipe-to-pan once zoomed in — matches the UX spec's "Image zoom
  * ... like Google Maps" and "Click Opens full-screen lightbox viewer".
  */
-export function ZoomableImage({ src, alt, className }: Props) {
+export function ZoomableImage({ src, displaySrc, alt, className }: Props) {
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [scale, setScale] = useState(1);
@@ -91,13 +94,13 @@ export function ZoomableImage({ src, alt, className }: Props) {
         onClick={() => setOpen(true)}
         className={`relative overflow-hidden aspect-[4/5] zoom-container cursor-zoom-in group border border-outline/5 ${className ?? ""}`}
       >
-        <Image
+        <ArtworkImage
           fill
           sizes="(max-width: 1024px) 100vw, 58vw"
           preload
           className="object-cover transition-transform duration-700 ease-out"
           alt={alt}
-          src={src}
+          src={displaySrc ?? src}
         />
         <button
           onClick={(e) => {

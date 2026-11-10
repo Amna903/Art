@@ -23,7 +23,11 @@ export type SupabaseArtwork = {
   country: string | null;
   description: string | null;
   dimensions: string | null;
+  /** Original upload (detail page zoom). */
   imageUrl: string;
+  /** Pre-generated 1280px WebP for lists, cards and the 3D walls (640px
+   * sibling picked by the image loader); null until generated. */
+  thumbUrl: string | null;
   /** Account user id, or managed_artists.id when admin-represented. */
   artistId: string;
   /** Public route key: managed slug, or account user id. */
@@ -47,6 +51,7 @@ export type ArtworkRow = {
   description: string | null;
   dimensions: string | null;
   image_url: string;
+  thumb_base?: string | null;
   artist_id: string;
   managed_artist_id: string | null;
   translations: Json;
@@ -75,7 +80,7 @@ export type ManagedArtistRow = {
 };
 
 const ARTWORK_SELECT =
-  "id, slug, title, medium, year, country, description, dimensions, image_url, artist_id, managed_artist_id, translations";
+  "id, slug, title, medium, year, country, description, dimensions, image_url, thumb_base, artist_id, managed_artist_id, translations";
 const PROFILE_SELECT = "id, display_name, bio, country, avatar_url, translations";
 export const MANAGED_SELECT = "id, slug, display_name, bio, country, city, technique, avatar_url, translations, created_at";
 
@@ -98,6 +103,7 @@ export function toArtwork(
       description,
       dimensions: row.dimensions ?? null,
       imageUrl: row.image_url,
+      thumbUrl: row.thumb_base ? `${row.thumb_base}/1280.webp` : null,
       artistId: managed.id,
       artistSlug: managed.slug,
       artistName: splitArtistName(managed.display_name ?? "").name || "Artist",
@@ -120,6 +126,7 @@ export function toArtwork(
     description,
     dimensions: row.dimensions ?? null,
     imageUrl: row.image_url,
+    thumbUrl: row.thumb_base ? `${row.thumb_base}/1280.webp` : null,
     artistId: row.artist_id,
     artistSlug: row.artist_id,
     artistName: splitArtistName(profile?.display_name ?? "").name || "Artist",

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 import { runOriginalityCheck } from "@/lib/originality/check";
+import { generateThumbnails } from "@/lib/images/thumbnails";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -46,10 +47,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Artwork country must match your registered profile country." }, { status: 403 });
     }
   }
+  let needsThumbs = true;
   if (input.id) {
-    const { data: existing } = await service.from("artworks").select("id, artist_id").eq("id", input.id).maybeSingle();
+    const { data: existing } = await service
+      .from("artworks")
+      .select("id, artist_id, image_url, thumb_base")
+      .eq("id", input.id)
+      .maybeSingle();
     if (!existing) return NextResponse.json({ error: "Artwork not found." }, { status: 404 });
     if (!isAdmin && existing.artist_id !== user.id) return NextResponse.json({ error: "You can only edit your own artwork." }, { status: 403 });
+    needsThumbs = existing.image_url !== input.image_url || !existing.thumb_base;
   } else if (!isAdmin && input.artist_id && input.artist_id !== user.id) {
     return NextResponse.json({ error: "You can only submit artwork for yourself." }, { status: 403 });
   }
@@ -85,6 +92,16 @@ export async function POST(req: Request) {
       : service.from("artworks").insert(payload).select().single();
     const { data, error } = await query;
     if (error) throw new Error(error.message);
+    // List thumbnails (640/1280 WebP) for a new or changed image. A failure
+    // here never fails the save: lists fall back to the original image, and
+    // the admin "Generate missing thumbnails" button retries.
+    if (needsThumbs) {
+      try {
+        await generateThumbnails([data.id]);
+      } catch (thumbError) {
+        console.error("[thumbnails]", thumbError);
+      }
+    }
     return NextResponse.json({ artwork: data, originality });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Could not save artwork." }, { status: 500 });

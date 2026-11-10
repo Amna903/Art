@@ -39,7 +39,7 @@ type ArtworkHashRow = {
   slug: string;
 };
 
-function serviceClient(): SupabaseClient<Database> {
+export function serviceClient(): SupabaseClient<Database> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
@@ -50,7 +50,7 @@ function serviceClient(): SupabaseClient<Database> {
   });
 }
 
-async function fetchImageBuffer(imageUrl: string): Promise<Buffer> {
+export async function fetchImageBuffer(imageUrl: string): Promise<Buffer> {
   let url: URL;
   try {
     url = new URL(imageUrl);

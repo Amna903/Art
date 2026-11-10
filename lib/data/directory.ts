@@ -57,7 +57,7 @@ export async function searchDirectoryArtworks(query: string, lang: Language = "e
       title: w.title,
       artist: w.artistName,
       country: w.artistCountry ?? w.country ?? "",
-      image: w.imageUrl,
+      image: w.thumbUrl ?? w.imageUrl,
     }));
   }
 

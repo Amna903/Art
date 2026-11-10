@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import { ArtworkImage } from "@/components/ui/ArtworkImage";
 import Link from "@/components/i18n/Link";
 import { getArtistSlugByName } from "@/lib/data/artists";
 import { EnquiryModal } from "@/components/enquiry/EnquiryModal";
@@ -42,7 +42,7 @@ export function CollectorPicks({ picks }: CollectorPicksProps) {
                 onClick={() => setActive(pick)}
                 className="relative mb-6 overflow-hidden aspect-square cursor-pointer bg-surface-container"
               >
-                <Image
+                <ArtworkImage
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"

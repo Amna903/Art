@@ -6,6 +6,20 @@
 --     ".in(id, …)" URLs) plus the artist's effective country;
 --   * count/summary functions so totals never require loading rows.
 
+-- ---------- Thumbnails ----------
+-- Pre-generated list images (lib/images/thumbnails.ts), so lists never use
+-- Vercel's per-image optimizer quota. thumb_base is a public URL prefix;
+-- the files are <thumb_base>/640.webp and <thumb_base>/1280.webp.
+ALTER TABLE public.artworks ADD COLUMN IF NOT EXISTS thumb_base text;
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('artwork-thumbs', 'artwork-thumbs', true)
+ON CONFLICT (id) DO NOTHING;
+-- Public read; only the server (service role, which bypasses RLS) writes.
+DROP POLICY IF EXISTS "artwork-thumbs public read" ON storage.objects;
+CREATE POLICY "artwork-thumbs public read" ON storage.objects
+  FOR SELECT USING (bucket_id = 'artwork-thumbs');
+
 -- ---------- Indexes ----------
 -- Newest-first listings of published works (homepage, gallery, search).
 CREATE INDEX IF NOT EXISTS artworks_published_created_idx
@@ -41,6 +55,7 @@ SELECT
   a.description,
   a.dimensions,
   a.image_url,
+  a.thumb_base,
   a.artist_id,
   a.managed_artist_id,
   a.translations,

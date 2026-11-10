@@ -11,6 +11,7 @@ import { getArtistBySlug as getStaticArtistBySlug } from "@/lib/data/artists";
 import { getDirectoryArtists } from "@/lib/data/directory";
 import Link from "@/components/i18n/Link";
 import Image from "next/image";
+import { ArtworkImage } from "@/components/ui/ArtworkImage";
 import { ArtistPhoto } from "@/components/artist/ArtistPhoto";
 import { getI18n } from "@/lib/i18n/server";
 import type { Language } from "@/lib/i18n/config";
@@ -86,7 +87,7 @@ async function resolveArtist(slug: string, lang: Language, t: Translator, page =
         slug: work.slug,
         title: work.title,
         medium: work.medium,
-        imageUrl: work.imageUrl,
+        imageUrl: work.thumbUrl ?? work.imageUrl,
         imageAlt: t("Artwork by {name}", { name: realArtist.name }),
       })) satisfies ArtistWork[];
     return {
@@ -306,7 +307,7 @@ export default async function ArtistProfilePage({ params, searchParams }: Props)
             <div key={w.slug} className="group hover-lift">
               <Link href={`/artworks/${w.slug}`} className="block">
                 <div className="relative aspect-square overflow-hidden rounded-lg mb-6 bg-surface-container">
-                  <Image
+                  <ArtworkImage
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -350,7 +351,7 @@ export default async function ArtistProfilePage({ params, searchParams }: Props)
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 transition-all duration-500">
             {(works.slice(0, 4).length > 0 ? works.slice(0, 4) : []).map((work, i) => (
               <div key={i} className="relative aspect-square rounded bg-surface-container-highest overflow-hidden">
-                <Image
+                <ArtworkImage
                   fill
                   sizes="(max-width: 768px) 50vw, 20vw"
                   className="object-cover"

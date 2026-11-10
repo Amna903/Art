@@ -19,7 +19,7 @@ import { resolveLang } from "@/lib/i18n/server";
 export const revalidate = 60;
 
 function toPick(artwork: SupabaseArtwork): Omit<CollectorPick, "collection"> {
-  return { slug: artwork.slug, title: artwork.title, artist: artwork.artistName, image: artwork.imageUrl };
+  return { slug: artwork.slug, title: artwork.title, artist: artwork.artistName, image: artwork.thumbUrl ?? artwork.imageUrl };
 }
 
 function ThreadDivider() {
