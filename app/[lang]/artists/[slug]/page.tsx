@@ -5,11 +5,13 @@ import { FollowArtistButton } from "@/components/artist/FollowArtistButton";
 import { SaveArtistButton } from "@/components/artist/SaveArtistButton";
 import { getArtistBySlug, getArtworksByArtistSlug } from "@/lib/sanity/queries";
 import { getCountryBySlug, getCountryDisplayName } from "@/lib/data/africa";
-import { getRealArtists, getPublishedArtworks } from "@/lib/data/supabase-artists-cached";
+import { getRealArtists, listPublishedArtworks } from "@/lib/data/supabase-artists-cached";
+import { Pagination, pageFrom } from "@/components/ui/Pagination";
 import { getArtistBySlug as getStaticArtistBySlug } from "@/lib/data/artists";
 import { getDirectoryArtists } from "@/lib/data/directory";
 import Link from "@/components/i18n/Link";
 import Image from "next/image";
+import { ArtworkImage } from "@/components/ui/ArtworkImage";
 import { ArtistPhoto } from "@/components/artist/ArtistPhoto";
 import { getI18n } from "@/lib/i18n/server";
 import type { Language } from "@/lib/i18n/config";
@@ -17,7 +19,13 @@ import type { Translator } from "@/lib/i18n/translate";
 
 export const revalidate = 60;
 
-type Props = { params: Promise<{ lang: string; slug: string }> };
+type Props = {
+  params: Promise<{ lang: string; slug: string }>;
+  searchParams: Promise<{ page?: string | string[] }>;
+};
+
+/** Works shown per page on an artist's profile. */
+const WORKS_PER_PAGE = 24;
 
 type ArtistWork = {
   slug: string;
@@ -44,10 +52,12 @@ type ResolvedArtist = {
     newDiscovery: boolean;
   };
   works: ArtistWork[];
+  /** All of the artist's works (the list above is one page of them). */
+  worksTotal: number;
   source: "sanity" | "supabase" | "static";
 };
 
-async function resolveArtist(slug: string, lang: Language, t: Translator): Promise<ResolvedArtist | null> {
+async function resolveArtist(slug: string, lang: Language, t: Translator, page = 1): Promise<ResolvedArtist | null> {
   const cmsArtist = await getArtistBySlug(slug);
   if (cmsArtist) {
     return {
@@ -59,20 +69,26 @@ async function resolveArtist(slug: string, lang: Language, t: Translator): Promi
         imageUrl: work.imageUrl,
         imageAlt: work.imageAlt,
       })),
+      worksTotal: 0,
       source: "sanity" as const,
     };
   }
 
   const realArtist = (await getRealArtists(lang)).find((artist) => artist.slug === slug);
   if (realArtist) {
-    const works = (await getPublishedArtworks(lang))
-      .filter((work) => work.artistSlug === slug)
-      .map((work) => ({
+    const worksPage = await listPublishedArtworks({
+      lang,
+      artistSlug: slug,
+      offset: (page - 1) * WORKS_PER_PAGE,
+      limit: WORKS_PER_PAGE,
+      withTotal: true,
+    });
+    const works = worksPage.items.map((work) => ({
         slug: work.slug,
         title: work.title,
         medium: work.medium,
-        imageUrl: work.imageUrl,
-        imageAlt: (work as any).imageAlt ?? t("Artwork by {name}", { name: realArtist.name }),
+        imageUrl: work.thumbUrl ?? work.imageUrl,
+        imageAlt: t("Artwork by {name}", { name: realArtist.name }),
       })) satisfies ArtistWork[];
     return {
       artist: {
@@ -91,6 +107,7 @@ async function resolveArtist(slug: string, lang: Language, t: Translator): Promi
         newDiscovery: realArtist.newDiscovery,
       },
       works,
+      worksTotal: worksPage.total,
       source: "supabase" as const,
     };
   }
@@ -114,6 +131,7 @@ async function resolveArtist(slug: string, lang: Language, t: Translator): Promi
         newDiscovery: false,
       },
       works: [],
+      worksTotal: 0,
       source: "static" as const,
     };
   }
@@ -133,15 +151,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function ArtistProfilePage({ params }: Props) {
+export default async function ArtistProfilePage({ params, searchParams }: Props) {
   const { slug } = await params;
   const { lang, t } = await getI18n(params);
-  const resolved = await resolveArtist(slug, lang, t);
+  const page = pageFrom((await searchParams).page);
+  const resolved = await resolveArtist(slug, lang, t, page);
   if (!resolved) {
     return <main className="max-w-container-max mx-auto px-gutter-page py-24">{t("Artist not found.")}</main>;
   }
 
   const { artist, works } = resolved;
+  const worksTotal = resolved.source === "supabase" ? resolved.worksTotal : works.length;
   const directoryArtists = await getDirectoryArtists(lang);
   const country = artist.countrySlug ? getCountryBySlug(artist.countrySlug) : null;
   const heroImage =
@@ -272,7 +292,7 @@ export default async function ArtistProfilePage({ params }: Props) {
         </div>
       </section>
 
-      <section className="max-w-[1440px] mx-auto px-gutter-page mt-section-gap">
+      <section id="works" className="max-w-[1440px] mx-auto px-gutter-page mt-section-gap scroll-mt-24">
         <div className="flex justify-between items-end mb-12 border-b border-outline-variant pb-6">
           <div>
             <h4 className="text-label-caps text-secondary-container mb-2">{t("CURATED COLLECTION")}</h4>
@@ -287,7 +307,7 @@ export default async function ArtistProfilePage({ params }: Props) {
             <div key={w.slug} className="group hover-lift">
               <Link href={`/artworks/${w.slug}`} className="block">
                 <div className="relative aspect-square overflow-hidden rounded-lg mb-6 bg-surface-container">
-                  <Image
+                  <ArtworkImage
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -314,6 +334,12 @@ export default async function ArtistProfilePage({ params }: Props) {
             </div>
           ))}
         </div>
+        <Pagination
+          page={page}
+          pageCount={Math.ceil(worksTotal / WORKS_PER_PAGE)}
+          href={(n) => `/artists/${slug}${n > 1 ? `?page=${n}` : ""}#works`}
+          lang={lang}
+        />
       </section>
 
       <section className="max-w-[1440px] mx-auto px-gutter-page mt-section-gap bg-surface-container-low py-20 rounded-3xl">
@@ -325,7 +351,7 @@ export default async function ArtistProfilePage({ params }: Props) {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 transition-all duration-500">
             {(works.slice(0, 4).length > 0 ? works.slice(0, 4) : []).map((work, i) => (
               <div key={i} className="relative aspect-square rounded bg-surface-container-highest overflow-hidden">
-                <Image
+                <ArtworkImage
                   fill
                   sizes="(max-width: 768px) 50vw, 20vw"
                   className="object-cover"
@@ -338,7 +364,7 @@ export default async function ArtistProfilePage({ params }: Props) {
           <div className="mt-12 flex items-center gap-2">
             <span className="size-2 rounded-full bg-secondary-container animate-pulse" />
             <p className="text-label-caps text-on-surface-variant uppercase">
-              {t("Highly sought after: {count} works placed in the archive", { count: works.length })}
+              {t("Highly sought after: {count} works placed in the archive", { count: worksTotal })}
             </p>
           </div>
         </div>

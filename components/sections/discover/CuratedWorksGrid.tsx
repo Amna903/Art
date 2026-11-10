@@ -2,7 +2,7 @@
 
 import { useLanguage } from "@/lib/i18n";
 import { useMemo, useState } from "react";
-import Image from "next/image";
+import { ArtworkImage } from "@/components/ui/ArtworkImage";
 import { PriceUponRequest } from "@/components/enquiry/PriceUponRequest";
 import { RequestPriceButton } from "@/components/enquiry/RequestPriceButton";
 
@@ -73,7 +73,7 @@ export function CuratedWorksGrid({ works }: { works: CuratedWork[] }) {
                   className="relative aspect-[3/4] overflow-hidden mb-5"
                   style={{ background: `#${w.swatch}` }}
                 >
-                  <Image
+                  <ArtworkImage
                     src={w.image}
                     alt={t("{title} by {artist}", { title: w.title, artist: w.artist })}
                     fill

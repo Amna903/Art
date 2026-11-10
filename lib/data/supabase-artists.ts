@@ -23,7 +23,11 @@ export type SupabaseArtwork = {
   country: string | null;
   description: string | null;
   dimensions: string | null;
+  /** Original upload (detail page zoom). */
   imageUrl: string;
+  /** Pre-generated 1280px WebP for lists, cards and the 3D walls (640px
+   * sibling picked by the image loader); null until generated. */
+  thumbUrl: string | null;
   /** Account user id, or managed_artists.id when admin-represented. */
   artistId: string;
   /** Public route key: managed slug, or account user id. */
@@ -37,7 +41,7 @@ export type SupabaseArtwork = {
   artistTechnique: string | null;
 };
 
-type ArtworkRow = {
+export type ArtworkRow = {
   id: string;
   slug: string;
   title: string;
@@ -47,12 +51,13 @@ type ArtworkRow = {
   description: string | null;
   dimensions: string | null;
   image_url: string;
+  thumb_base?: string | null;
   artist_id: string;
   managed_artist_id: string | null;
   translations: Json;
 };
 
-type ProfileRow = {
+export type ProfileRow = {
   id: string;
   display_name: string;
   bio: string | null;
@@ -61,7 +66,7 @@ type ProfileRow = {
   translations: Json;
 };
 
-type ManagedArtistRow = {
+export type ManagedArtistRow = {
   id: string;
   slug: string;
   display_name: string;
@@ -75,11 +80,11 @@ type ManagedArtistRow = {
 };
 
 const ARTWORK_SELECT =
-  "id, slug, title, medium, year, country, description, dimensions, image_url, artist_id, managed_artist_id, translations";
+  "id, slug, title, medium, year, country, description, dimensions, image_url, thumb_base, artist_id, managed_artist_id, translations";
 const PROFILE_SELECT = "id, display_name, bio, country, avatar_url, translations";
-const MANAGED_SELECT = "id, slug, display_name, bio, country, city, technique, avatar_url, translations, created_at";
+export const MANAGED_SELECT = "id, slug, display_name, bio, country, city, technique, avatar_url, translations, created_at";
 
-function toArtwork(
+export function toArtwork(
   row: ArtworkRow,
   profile: ProfileRow | undefined,
   managed: ManagedArtistRow | undefined,
@@ -98,6 +103,7 @@ function toArtwork(
       description,
       dimensions: row.dimensions ?? null,
       imageUrl: row.image_url,
+      thumbUrl: row.thumb_base ? `${row.thumb_base}/1280.webp` : null,
       artistId: managed.id,
       artistSlug: managed.slug,
       artistName: splitArtistName(managed.display_name ?? "").name || "Artist",
@@ -120,6 +126,7 @@ function toArtwork(
     description,
     dimensions: row.dimensions ?? null,
     imageUrl: row.image_url,
+    thumbUrl: row.thumb_base ? `${row.thumb_base}/1280.webp` : null,
     artistId: row.artist_id,
     artistSlug: row.artist_id,
     artistName: splitArtistName(profile?.display_name ?? "").name || "Artist",
@@ -171,21 +178,33 @@ async function attachArtistMeta(rows: ArtworkRow[], lang: Language): Promise<Sup
   );
 }
 
-/** Returns [] when Supabase isn't configured or has no published artworks yet. */
+/**
+ * @deprecated Loads every published work. Only the virtual gallery still
+ * uses it, until it moves to per-room queries; everything else uses the
+ * paged helpers in lib/data/artwork-listing.ts. Pages through the results so
+ * it never silently stops at Supabase's 1,000-row response limit.
+ */
 export async function getPublishedArtworks(lang: Language = "en"): Promise<SupabaseArtwork[]> {
   if (!isSupabaseConfigured()) return [];
+  const PAGE = 1000;
+  const rows: ArtworkRow[] = [];
   try {
-    const { data, error } = await supabase
-      .from("artworks")
-      .select(ARTWORK_SELECT)
-      .eq("status", "published")
-      .order("created_at", { ascending: false });
-
-    if (error || !data) {
-      if (error) console.error("[Supabase] Failed to fetch published artworks:", error.message);
-      return [];
+    for (let from = 0; ; from += PAGE) {
+      const { data, error } = await supabase
+        .from("artworks")
+        .select(ARTWORK_SELECT)
+        .eq("status", "published")
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false })
+        .range(from, from + PAGE - 1);
+      if (error) {
+        console.error("[Supabase] Failed to fetch published artworks:", error.message);
+        return [];
+      }
+      rows.push(...((data ?? []) as ArtworkRow[]));
+      if (!data || data.length < PAGE) break;
     }
-    return attachArtistMeta(data as ArtworkRow[], lang);
+    return attachArtistMeta(rows, lang);
   } catch (err) {
     console.error("[Supabase] Failed to fetch published artworks:", err);
     return [];
@@ -263,11 +282,10 @@ export async function getPublishedArtworkBySlug(slug: string, lang: Language = "
   }
 }
 
-function artistFromWorks(works: SupabaseArtwork[]): Artist {
-  const first = works[0];
-  const uniqueMediums = Array.from(
-    new Set(works.map((w) => w.medium?.trim()).filter((m): m is string => Boolean(m))),
-  );
+/** The directory entry for an artist, from their newest work, how many
+ * published works they have and the mediums used across them. */
+export function artistFromSummary(first: SupabaseArtwork, worksCount: number, mediums: string[]): Artist {
+  const uniqueMediums = Array.from(new Set(mediums.map((m) => m.trim()).filter(Boolean)));
   const filterTechniques = Array.from(
     new Set(
       uniqueMediums.map((medium) =>
@@ -296,7 +314,7 @@ function artistFromWorks(works: SupabaseArtwork[]): Artist {
       : TECHNIQUES.includes(technique as Technique)
         ? [technique as Technique]
         : ["Other"],
-    worksCount: works.length,
+    worksCount,
     newDiscovery: false,
     featuredWork: first.title,
     bio: first.artistBio ?? "",
@@ -338,58 +356,3 @@ export function cleanPlace(place: string | null | undefined): string {
   return p ? p.charAt(0).toLocaleUpperCase() + p.slice(1) : "";
 }
 
-/** "NEW DISCOVERY" is kept for artists added in the last 30 days. */
-const NEW_DISCOVERY_MS = 30 * 24 * 60 * 60 * 1000;
-const isRecent = (createdAt?: string) => !!createdAt && Date.now() - new Date(createdAt).getTime() < NEW_DISCOVERY_MS;
-
-/**
- * Groups published artworks by artist (account or admin-managed) into the
- * `Artist` shape used by the directory. Also includes managed profiles that
- * have no published works yet so admins can preview the public page.
- */
-export async function getRealArtists(lang: Language = "en"): Promise<Artist[]> {
-  if (!isSupabaseConfigured()) return [];
-
-  const artworks = await getPublishedArtworks(lang);
-  const bySlug = new Map<string, SupabaseArtwork[]>();
-  for (const a of artworks) {
-    const list = bySlug.get(a.artistSlug) ?? [];
-    list.push(a);
-    bySlug.set(a.artistSlug, list);
-  }
-
-  const artists: Artist[] = Array.from(bySlug.values()).map(artistFromWorks);
-
-  // Include admin-managed profiles with zero published works.
-  try {
-    const { data: managedRows } = await supabase
-      .from("managed_artists")
-      .select(MANAGED_SELECT)
-      .order("created_at", { ascending: false });
-
-    for (const m of (managedRows ?? []) as ManagedArtistRow[]) {
-      if (bySlug.has(m.slug)) continue;
-      artists.push({
-        slug: m.slug,
-        ...splitArtistName(m.display_name),
-        countryCode: "",
-        countryName: m.country,
-        countrySlug: normalizeCountrySlug(m.country),
-        city: cleanPlace(m.city),
-        technique: m.technique?.trim() || "Painting",
-        filterTechniques: TECHNIQUES.includes((m.technique ?? "") as Technique)
-          ? [(m.technique as Technique)]
-          : ["Other"],
-        worksCount: 0,
-        newDiscovery: isRecent(m.created_at),
-        featuredWork: "",
-        bio: localized(m.translations, "bio", lang, m.bio) ?? "",
-        image: m.avatar_url ?? "",
-      });
-    }
-  } catch (err) {
-    console.error("[Supabase] Failed to fetch managed artists:", err);
-  }
-
-  return artists;
-}

@@ -15,6 +15,7 @@ import { HeroImagesAdmin } from "./HeroImagesAdmin";
 import { ManagedArtistsAdmin } from "./ManagedArtistsAdmin";
 import { QrCodeButton, QR_CODES_ENABLED } from "./QrCodeButton";
 import { OriginalityReviewAdmin } from "./OriginalityReviewAdmin";
+import { ThumbnailBackfill } from "./ThumbnailBackfill";
 import { ListRowSkeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/lib/auth";
 
@@ -30,12 +31,17 @@ type ProfileRow = {
 
 type Artwork = Database["public"]["Tables"]["artworks"]["Row"];
 
+const ADMIN_ARTWORKS_PER_PAGE = 50;
+
 export function AdminDashboard() {
   const { t, formatShortDate, formatUsd } = useLanguage();
   const router = useRouter();
   const { user } = useAuth();
   const [profiles, setProfiles] = useState<ProfileRow[]>([]);
   const [artworks, setArtworks] = useState<Artwork[]>([]);
+  // The artworks tab is paged in the database (never the whole catalogue).
+  const [artworkPage, setArtworkPage] = useState(0);
+  const [artworkTotal, setArtworkTotal] = useState(0);
   const [enquiryCount, setEnquiryCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<
@@ -51,7 +57,7 @@ export function AdminDashboard() {
     | "originality"
   >("represented artists");
 
-  const load = async () => {
+  const load = async (page = artworkPage) => {
     setLoading(true);
     // profiles.id and user_roles.user_id both reference auth.users independently —
     // there's no FK directly between profiles and user_roles, so PostgREST can't
@@ -63,7 +69,12 @@ export function AdminDashboard() {
         .select("id, display_name, country, created_at")
         .order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id, role"),
-      supabase.from("artworks").select("*").order("created_at", { ascending: false }),
+      supabase
+        .from("artworks")
+        .select("*", { count: "exact" })
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false })
+        .range(page * ADMIN_ARTWORKS_PER_PAGE, (page + 1) * ADMIN_ARTWORKS_PER_PAGE - 1),
       supabase.from("enquiries").select("id", { count: "exact", head: true }),
     ]);
     if (pRes.error) console.error("[Supabase] Failed to fetch profiles:", pRes.error.message);
@@ -81,6 +92,7 @@ export function AdminDashboard() {
     }));
     setProfiles(profilesWithRoles);
     setArtworks(aRes.data ?? []);
+    setArtworkTotal(aRes.count ?? 0);
     setEnquiryCount(eRes.count ?? 0);
     setLoading(false);
   };
@@ -129,7 +141,7 @@ export function AdminDashboard() {
     <div className="space-y-12">
       <section className="grid grid-cols-2 md:grid-cols-3 gap-6">
         <Stat label={t("Members")} value={profiles.length} />
-        <Stat label={t("Artworks")} value={artworks.length} />
+        <Stat label={t("Artworks")} value={artworkTotal} />
         <Stat label={t("Enquiries")} value={enquiryCount} />
       </section>
 
@@ -231,6 +243,7 @@ export function AdminDashboard() {
         </section>
       ) : tab === "artworks" ? (
         <section>
+          <ThumbnailBackfill />
           <table className="w-full text-sm">
             <thead className="text-xs uppercase tracking-widest text-on-surface-variant">
               <tr className="border-b border-primary/10">
@@ -274,6 +287,35 @@ export function AdminDashboard() {
               ))}
             </tbody>
           </table>
+          {artworkTotal > ADMIN_ARTWORKS_PER_PAGE && (
+            <div className="mt-6 flex items-center justify-between text-sm">
+              <button
+                type="button"
+                disabled={artworkPage === 0}
+                onClick={() => {
+                  setArtworkPage(artworkPage - 1);
+                  void load(artworkPage - 1);
+                }}
+                className="border border-primary/20 px-4 py-2 disabled:opacity-40"
+              >
+                {t("Previous page")}
+              </button>
+              <span className="text-on-surface-variant">
+                {t("Page {n} of {total}", { n: artworkPage + 1, total: Math.ceil(artworkTotal / ADMIN_ARTWORKS_PER_PAGE) })}
+              </span>
+              <button
+                type="button"
+                disabled={(artworkPage + 1) * ADMIN_ARTWORKS_PER_PAGE >= artworkTotal}
+                onClick={() => {
+                  setArtworkPage(artworkPage + 1);
+                  void load(artworkPage + 1);
+                }}
+                className="border border-primary/20 px-4 py-2 disabled:opacity-40"
+              >
+                {t("Next page")}
+              </button>
+            </div>
+          )}
         </section>
       ) : tab === "collections" ? (
         <CollectionsAdmin />

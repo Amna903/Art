@@ -21,7 +21,11 @@ import { getSiteHero } from "@/lib/data/site-heroes";
 import { ArtistPhoto } from "@/components/artist/ArtistPhoto";
 import { HeroCredit, HeroPicture } from "@/components/sections/HeroPicture";
 import { getCountryGalleryBySlug } from "@/lib/sanity/queries";
-import { getRealArtists, getPublishedArtworks } from "@/lib/data/supabase-artists-cached";
+import { getRealArtists, listPublishedArtworks } from "@/lib/data/supabase-artists-cached";
+import { Pagination, pageFrom } from "@/components/ui/Pagination";
+
+/** Real works shown per page in "Curated works". */
+const WORKS_PER_PAGE = 24;
 import { getPublishedJournalPosts } from "@/lib/data/journal";
 import { JOURNAL_FALLBACK_STORIES } from "@/lib/data/journal-fallback";
 import { getPublishedExhibitions } from "@/lib/data/exhibitions";
@@ -29,7 +33,10 @@ import { mergeSlots } from "@/lib/utils/mergeSlots";
 import { CuratedWorksGrid, type CuratedWork } from "@/components/sections/discover/CuratedWorksGrid";
 import { formatDate } from "@/lib/i18n/translate";
 
-type Props = { params: Promise<{ lang: string; country: string }> };
+type Props = {
+  params: Promise<{ lang: string; country: string }>;
+  searchParams: Promise<{ page?: string | string[] }>;
+};
 
 // Pre-render all 54 country pages at build time; ISR regenerates each one in
 // the background at most once every 60s (matching the data layer's own
@@ -74,8 +81,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function CountryExperience({ params }: Props) {
+export default async function CountryExperience({ params, searchParams }: Props) {
   const { country: countrySlug } = await params;
+  const page = pageFrom((await searchParams).page);
   const { lang, t } = await getI18n(params);
   const country = getCountryBySlug(countrySlug);
   if (!country) notFound();
@@ -83,10 +91,17 @@ export default async function CountryExperience({ params }: Props) {
   // that real rows are matched on.
   const name = getCountryDisplayName(country, lang);
   const region = regionLabel(country.region, t);
-  const [gallery, realArtistsAll, realArtworksAll, allJournalPosts, allExhibitions] = await Promise.all([
+  const [gallery, realArtistsAll, realWorksPage, allJournalPosts, allExhibitions] = await Promise.all([
     getCountryGalleryBySlug(countrySlug),
     getRealArtists(lang),
-    getPublishedArtworks(lang),
+    // One page of this country's works, filtered and counted in the database.
+    listPublishedArtworks({
+      lang,
+      country: country.slug,
+      offset: (page - 1) * WORKS_PER_PAGE,
+      limit: WORKS_PER_PAGE,
+      withTotal: true,
+    }),
     getPublishedJournalPosts(),
     getPublishedExhibitions(),
   ]);
@@ -108,9 +123,7 @@ export default async function CountryExperience({ params }: Props) {
       avatarSwatch: swatchFor(a.slug),
       image: a.image || undefined,
     }));
-  const realCountryArtworks: MockArtwork[] = realArtworksAll
-    .filter((a) => (a.country || "").toLowerCase() === countryNameLower)
-    .map((a, i) => ({
+  const realCountryArtworks: MockArtwork[] = realWorksPage.items.map((a, i) => ({
       id: a.slug,
       title: a.title,
       artist: a.artistName,
@@ -125,7 +138,7 @@ export default async function CountryExperience({ params }: Props) {
         t("A work from {country} that folds inherited symbols into a contemporary register.", { country: name }),
       swatch: swatchFor(a.slug),
       room: (i % 3) as 0 | 1 | 2,
-      image: a.imageUrl,
+      image: a.thumbUrl ?? a.imageUrl,
     }));
 
   // Generated placeholder copy is re-rendered in this language.
@@ -146,8 +159,9 @@ export default async function CountryExperience({ params }: Props) {
 
   const stats = {
     artistsCount: mergedArtists.length,
-    worksCount: mergedArtworks.length,
-    forSale: mergedArtworks.filter((w) => w.price !== null).length,
+    // Real works are counted in the database (the grid shows one page).
+    worksCount: hasRealArtists ? realWorksPage.total : mergedArtworks.length,
+    forSale: hasRealArtists ? realWorksPage.total : mergedArtworks.filter((w) => w.price !== null).length,
   };
 
   // Neighbour navigation across the canonical 54-country list.
@@ -438,6 +452,14 @@ export default async function CountryExperience({ params }: Props) {
           </div>
 
           <CuratedWorksGrid works={curatedWorks} />
+          {hasRealArtists && (
+            <Pagination
+              page={page}
+              pageCount={Math.ceil(realWorksPage.total / WORKS_PER_PAGE)}
+              href={(n) => `/discover/${country.slug}${n > 1 ? `?page=${n}` : ""}`}
+              lang={lang}
+            />
+          )}
         </div>
       </section>
         </>

@@ -5,7 +5,7 @@
 import { ARTISTS as STATIC_ARTISTS, type Artist, type Technique } from "@/lib/data/artists";
 import { ARTWORKS as STATIC_ARTWORKS } from "@/lib/data/content";
 import { getArtists, getAllArtworks } from "@/lib/sanity/queries";
-import { getRealArtists, getPublishedArtworks } from "@/lib/data/supabase-artists-cached";
+import { getRealArtists, countPublishedArtworks, listPublishedArtworks } from "@/lib/data/supabase-artists-cached";
 import type { Language } from "@/lib/i18n/config";
 
 export type DirectoryArtwork = {
@@ -41,28 +41,36 @@ export async function getDirectoryArtists(lang: Language = "en"): Promise<Artist
   return STATIC_ARTISTS;
 }
 
-export async function getDirectoryArtworks(lang: Language = "en"): Promise<DirectoryArtwork[]> {
-  const realArtworks = await getPublishedArtworks(lang);
-  if (realArtworks.length > 0) {
-    return realArtworks.map((w) => ({
+/**
+ * Artworks matching a search, at most `limit`. Supabase works are searched
+ * in the database (title, artist, country, medium); the CMS / static
+ * fixtures are only used while no artwork has been published at all.
+ */
+export async function searchDirectoryArtworks(query: string, lang: Language = "en", limit = 12): Promise<DirectoryArtwork[]> {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return [];
+
+  if ((await countPublishedArtworks()) > 0) {
+    const { items } = await listPublishedArtworks({ lang, search: needle, limit });
+    return items.map((w) => ({
       slug: w.slug,
       title: w.title,
       artist: w.artistName,
       country: w.artistCountry ?? w.country ?? "",
-      image: w.imageUrl,
+      image: w.thumbUrl ?? w.imageUrl,
     }));
   }
 
   const cmsArtworks = await getAllArtworks();
-  if (cmsArtworks.length > 0) {
-    return cmsArtworks.map((w) => ({
-      slug: w.slug,
-      title: w.title,
-      artist: w.artistName ?? "Unknown Artist",
-      country: "",
-      image: w.imageUrl ?? "",
-    }));
-  }
-
-  return STATIC_ARTWORKS;
+  const fallback: DirectoryArtwork[] =
+    cmsArtworks.length > 0
+      ? cmsArtworks.map((w) => ({
+          slug: w.slug,
+          title: w.title,
+          artist: w.artistName ?? "Unknown Artist",
+          country: "",
+          image: w.imageUrl ?? "",
+        }))
+      : STATIC_ARTWORKS;
+  return fallback.filter((w) => `${w.title} ${w.artist} ${w.country}`.toLowerCase().includes(needle)).slice(0, limit);
 }

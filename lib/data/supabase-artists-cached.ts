@@ -15,13 +15,49 @@ import {
   getPublishedArtworksByIds as fetchPublishedArtworksByIds,
   getMostRequestedArtworks as fetchMostRequestedArtworks,
   getPublishedArtworkBySlug as fetchPublishedArtworkBySlug,
-  getRealArtists as fetchRealArtists,
 } from "@/lib/data/supabase-artists";
+import {
+  getRealArtists as fetchRealArtists,
+  getCountryCounts as fetchCountryCounts,
+  listPublishedArtworks as fetchPublishedPage,
+  countPublishedArtworks as fetchPublishedCount,
+  type ListOptions,
+} from "@/lib/data/artwork-listing";
 
 // Tagged so an artist publishing/editing/deleting an artwork can invalidate
 // this instantly via revalidateTag("artworks") instead of waiting out the
 // 60s window — see app/api/revalidate/route.ts.
-export const getPublishedArtworks = unstable_cache(fetchPublishedArtworks, ["published-artworks"], {
+/** @deprecated See lib/data/supabase-artists.ts — virtual gallery only. Not
+ * cached: the whole catalogue would exceed the 2 MB cache entry limit. */
+export const getPublishedArtworks = fetchPublishedArtworks;
+
+// Each listing is cached per page/filter, so an entry is one page of works
+// (a few KB), never the catalogue. Free-text search is not cached: its keys
+// are unbounded and each query is a single indexed request anyway.
+export const listPublishedArtworks = (opts: ListOptions) =>
+  opts.search
+    ? fetchPublishedPage(opts)
+    : unstable_cache(
+        () => fetchPublishedPage(opts),
+        [
+          "published-page",
+          opts.lang,
+          opts.country ?? "",
+          opts.artistSlug ?? "",
+          opts.excludeSlug ?? "",
+          String(opts.offset ?? 0),
+          String(opts.limit),
+          opts.withTotal ? "t" : "",
+        ],
+        { revalidate: 60, tags: ["artworks"] },
+      )();
+
+export const getCountryCounts = unstable_cache(fetchCountryCounts, ["country-counts"], {
+  revalidate: 60,
+  tags: ["artworks"],
+});
+
+export const countPublishedArtworks = unstable_cache(fetchPublishedCount, ["published-count"], {
   revalidate: 60,
   tags: ["artworks"],
 });

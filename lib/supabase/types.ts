@@ -26,6 +26,7 @@ export type Database = {
           id: string
           image_phash: string | null
           image_url: string
+          thumb_base: string | null
           medium: string | null
           originality_checked_at: string | null
           originality_report: Json | null
@@ -49,6 +50,7 @@ export type Database = {
           id?: string
           image_phash?: string | null
           image_url?: string
+          thumb_base?: string | null
           medium?: string | null
           originality_checked_at?: string | null
           originality_report?: Json | null
@@ -72,6 +74,7 @@ export type Database = {
           id?: string
           image_phash?: string | null
           image_url?: string
+          thumb_base?: string | null
           medium?: string | null
           originality_checked_at?: string | null
           originality_report?: Json | null
@@ -732,12 +735,58 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      published_artworks: {
+        Row: {
+          id: string
+          slug: string
+          title: string
+          medium: string | null
+          year: number | null
+          country: string | null
+          description: string | null
+          dimensions: string | null
+          image_url: string
+          thumb_base: string | null
+          artist_id: string
+          managed_artist_id: string | null
+          translations: Json
+          created_at: string
+          effective_country: string | null
+          artist_slug: string
+          artist_display_name: string | null
+          ma_slug: string | null
+          ma_display_name: string | null
+          ma_bio: string | null
+          ma_country: string | null
+          ma_city: string | null
+          ma_technique: string | null
+          ma_avatar_url: string | null
+          ma_translations: Json | null
+          p_display_name: string | null
+          p_bio: string | null
+          p_country: string | null
+          p_avatar_url: string | null
+          p_translations: Json | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       record_site_visit: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      published_artwork_country_counts: {
+        Args: Record<PropertyKey, never>
+        Returns: { country: string | null; works: number }[]
+      }
+      published_artist_summaries: {
+        Args: Record<PropertyKey, never>
+        Returns: { newest: Json; works: number; mediums: string[] | null }[]
+      }
+      similar_artworks_by_phash: {
+        Args: { target: string; max_distance: number; exclude_id?: string | null }
+        Returns: { id: string; title: string; slug: string; image_url: string; distance: number }[]
       }
       get_top_requested_artwork_slugs: {
         Args: { limit_count?: number }
