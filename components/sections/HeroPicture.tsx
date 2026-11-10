@@ -20,6 +20,8 @@ export function HeroPicture({ hero, className = "" }: { hero: SiteHero; classNam
         alt={hero.alt}
         fill
         preload
+        fetchPriority="high"
+        loading="eager"
         quality={70}
         sizes="100vw"
         className={`object-cover ${className}`}

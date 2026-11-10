@@ -70,11 +70,11 @@ export function SiteHeader() {
         <div className="flex items-center justify-start shrink-0">
           <Link href="/" className="flex items-center shrink-0">
             <Image
-              src="/images/logo.webp"
+              src="/images/logo-62x80.webp"
               alt="NUA-ARTE"
-              // 3× its largest display size (40 px tall); served as-is, no optimizer.
-              width={93}
-              height={120}
+              // 2× its largest display size (40 px tall); served as-is, no optimizer.
+              width={62}
+              height={80}
               unoptimized
               loading="eager"
               className={`w-auto object-contain transition-all duration-300 ${scrolled ? "h-8" : "h-10"}`}
