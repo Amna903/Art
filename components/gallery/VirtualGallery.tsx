@@ -18,6 +18,23 @@ import { useMusic } from "@/lib/music";
 const VirtualMuseum = lazy(() => import("@/components/three/VirtualMuseum"));
 
 type View = "entrance" | "tour" | "grid" | "free" | "end";
+
+/** The gallery's rooms (see lib/data/gallery-rooms), for the lobby and the
+ * end-of-room screen. Null while the whole collection fits in one room. */
+export type GalleryRooms = {
+  current: { country: string; room: number } | null;
+  featured: { href: string; label: string; count: number; cover: string | null } | null;
+  countries: {
+    country: string;
+    label: string;
+    total: number;
+    cover: string | null;
+    rooms: { room: number; href: string; count: number }[];
+  }[];
+  previous: { href: string; label: string } | null;
+  /** Links with ?start=1, so the next room's tour begins straight away. */
+  next: { href: string; label: string } | null;
+};
 type RoomTitles = Record<1 | 2 | 3 | 4, string>;
 
 /** 2–3 sentences of the curatorial copy. */
@@ -61,18 +78,23 @@ export function VirtualGallery({
   roomTitles,
   hero,
   countryLabel,
+  autoStart = false,
+  rooms = null,
 }: {
   artworks: Artwork[];
   roomTitles: RoomTitles;
   hero: SiteHero | null;
   countryLabel: string | null;
+  /** Arrived from "Next room": open this room's tour immediately. */
+  autoStart?: boolean;
+  rooms?: GalleryRooms | null;
 }) {
   const quote = quoteFor("virtual-gallery");
   const { t } = useLanguage();
   const { role } = useAuth();
   const music = useMusic();
   const desktop = useMediaQuery("(min-width: 1024px)");
-  const [view, setView] = useState<View>("entrance");
+  const [view, setView] = useState<View>(autoStart ? "tour" : "entrance");
   const [index, setIndex] = useState(0);
   const [museumMounted, setMuseumMounted] = useState(false);
   const [enquiryOpen, setEnquiryOpen] = useState(false);
@@ -112,6 +134,16 @@ export function VirtualGallery({
   useEffect(() => {
     if (tourCountry !== undefined) setMusicCountry(tourCountry);
   }, [tourCountry, setMusicCountry]);
+
+  // Continuing from the previous room: the music carries on, switching to
+  // this room's first country (the visitor already tapped, so it may play).
+  useEffect(() => {
+    if (!autoStart) return;
+    setMusicCountry(artworks[0]?.country ?? null);
+    resumeMusic();
+    // Only on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const openTour = useCallback(
     (at: number, { begin = false }: { begin?: boolean } = {}) => {
@@ -257,6 +289,8 @@ export function VirtualGallery({
           </button>
         )}
       </section>
+
+      {rooms && <RoomsLobby rooms={rooms} />}
 
       {quote && <QuoteBlock quote={quote} />}
 
@@ -445,12 +479,39 @@ export function VirtualGallery({
           {view === "end" && (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-[var(--nua-charcoal-deep)]/95 px-6">
               <div className="max-w-md text-center">
-                <h2 className="font-display text-4xl">{t("You have seen every work")}</h2>
+                <h2 className="font-display text-4xl">
+                  {rooms?.next ? t("You have seen every work in this room") : t("You have seen every work")}
+                </h2>
                 <p className="mt-3 text-lg text-[var(--nua-grey-light)]">{t("Thank you for taking your time with the work.")}</p>
                 <div className="mt-8 flex flex-col gap-3">
-                  <button type="button" onClick={() => openTour(0, { begin: true })} className="btn-primary min-h-[48px] px-6 text-base font-semibold">
+                  {rooms?.next && (
+                    <Link href={rooms.next.href} className="btn-primary flex min-h-[48px] items-center justify-center gap-2 px-6 text-base font-semibold">
+                      {t("Next room: {room}", { room: rooms.next.label })}
+                      <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                        arrow_forward
+                      </span>
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => openTour(0, { begin: true })}
+                    className={
+                      rooms?.next
+                        ? "flex min-h-[48px] items-center justify-center border border-[var(--nua-white)]/85 px-6 text-base text-[var(--nua-white)] hover:bg-[var(--nua-white)] hover:text-[var(--nua-charcoal)]"
+                        : "btn-primary min-h-[48px] px-6 text-base font-semibold"
+                    }
+                  >
                     {t("Start again")}
                   </button>
+                  {rooms && (
+                    <Link
+                      href="/virtual-gallery#rooms"
+                      onClick={() => setView("entrance")}
+                      className="flex min-h-[48px] items-center justify-center border border-[var(--nua-white)]/85 px-6 text-base text-[var(--nua-white)] hover:bg-[var(--nua-white)] hover:text-[var(--nua-charcoal)]"
+                    >
+                      {t("All rooms")}
+                    </Link>
+                  )}
                   <Link href="/artists" className="flex min-h-[48px] items-center justify-center border border-[var(--nua-white)]/85 px-6 text-base text-[var(--nua-white)] hover:bg-[var(--nua-white)] hover:text-[var(--nua-charcoal)]">
                     {t("Meet the artists")}
                   </Link>
@@ -551,5 +612,82 @@ function ZoomView({ artwork, onClose }: { artwork: Artwork; onClose: () => void 
         </span>
       </button>
     </div>
+  );
+}
+
+/** The gallery lobby: every room, by country, so visitors can choose where
+ * to go instead of walking the whole collection. */
+function RoomsLobby({ rooms }: { rooms: GalleryRooms }) {
+  const { t, formatNumber } = useLanguage();
+  const isCurrent = (country: string, room: number) =>
+    rooms.current?.country === country && rooms.current.room === room;
+  const works = (n: number) => (n === 1 ? t("1 work") : t("{count} works", { count: formatNumber(n) }));
+
+  const card = (key: string, href: string, label: string, cover: string | null, meta: string, current: boolean, extra?: React.ReactNode) => (
+    <li key={key} className="flex flex-col">
+      <Link href={href} className="group block" aria-current={current ? "page" : undefined}>
+        <div className="relative aspect-[4/5] overflow-hidden bg-surface-container-low">
+          {cover && (
+            <Image
+              src={cover}
+              alt=""
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+            />
+          )}
+          {current && (
+            <span className="absolute left-3 top-3 bg-[var(--nua-charcoal-deep)]/85 px-2.5 py-1 text-[11px] uppercase tracking-[0.18em] text-[var(--nua-white)]">
+              {t("You are here")}
+            </span>
+          )}
+        </div>
+        <h3 className="mt-3 font-display text-xl text-primary group-hover:text-secondary">{label}</h3>
+      </Link>
+      <p className="mt-1 text-sm text-on-surface-variant">{meta}</p>
+      {extra}
+    </li>
+  );
+
+  return (
+    <section id="rooms" className="mx-auto max-w-container-max scroll-mt-20 px-6 py-16 sm:px-10 lg:px-12">
+      <h2 className="font-headline-md text-headline-md">{t("Choose a room")}</h2>
+      <p className="mt-3 max-w-2xl text-on-surface-variant">
+        {t("Each country has its own room and its own music. Larger collections continue across several rooms.")}
+      </p>
+      <ul className="mt-10 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
+        {rooms.featured &&
+          card("featured", rooms.featured.href, rooms.featured.label, rooms.featured.cover, t("The newest works"), isCurrent("featured", 1))}
+        {rooms.countries.map((c) =>
+          card(
+            c.country,
+            c.rooms[0].href,
+            c.label,
+            c.cover,
+            c.rooms.length > 1 ? `${works(c.total)} · ${t("{count} rooms", { count: c.rooms.length })}` : works(c.total),
+            c.rooms.length === 1 && isCurrent(c.country, 1),
+            c.rooms.length > 1 && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {c.rooms.map((r) => (
+                  <Link
+                    key={r.room}
+                    href={r.href}
+                    aria-current={isCurrent(c.country, r.room) ? "page" : undefined}
+                    aria-label={t("{name}, room {n}", { name: c.label, n: r.room })}
+                    className={`flex h-9 min-w-9 items-center justify-center border px-2 text-sm ${
+                      isCurrent(c.country, r.room)
+                        ? "border-[var(--nua-charcoal)] bg-[var(--nua-charcoal)] text-[var(--nua-white)]"
+                        : "border-[var(--nua-line)] text-primary hover:border-[var(--nua-charcoal)]"
+                    }`}
+                  >
+                    {r.room}
+                  </Link>
+                ))}
+              </div>
+            ),
+          ),
+        )}
+      </ul>
+    </section>
   );
 }

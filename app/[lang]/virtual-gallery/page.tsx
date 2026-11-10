@@ -4,7 +4,8 @@ import { getPublishedArtworks } from "@/lib/data/supabase-artists-cached";
 import { getPageBlocks } from "@/lib/data/pageBlocks";
 import { getSiteHero } from "@/lib/data/site-heroes";
 import { layoutArtworks, FALLBACK_ARTWORKS } from "@/lib/data/museum-layout";
-import { getCountryBySlug, getCountryDisplayName, normalizeCountrySlug } from "@/lib/data/africa";
+import { buildRooms, FEATURED, roomHref, type RoomSummary } from "@/lib/data/gallery-rooms";
+import { normalizeCountrySlug } from "@/lib/data/africa";
 import { getI18n } from "@/lib/i18n/server";
 
 export const revalidate = 60;
@@ -18,9 +19,13 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/virtual-ga
 }
 
 export default async function VirtualGalleryPage({ params, searchParams }: PageProps<"/[lang]/virtual-gallery">) {
-  const { lang } = await getI18n(params);
-  const country = (await searchParams).country;
-  const countrySlug = typeof country === "string" ? country : undefined;
+  const { lang, t } = await getI18n(params);
+  const query = await searchParams;
+  const one = (v: string | string[] | undefined) => (typeof v === "string" ? v : undefined);
+  const requestedCountry = one(query.country);
+  const requestedRoom = Number(one(query.room)) || 1;
+  // "Next room" links carry ?start=1 so the tour continues straight away.
+  const autoStart = one(query.start) === "1";
 
   const [published, blocks, hero] = await Promise.all([
     getPublishedArtworks(lang),
@@ -28,26 +33,59 @@ export default async function VirtualGalleryPage({ params, searchParams }: PageP
     getSiteHero("virtual-gallery", lang),
   ]);
 
-  // ?country=angola narrows the tour to that country's works when it has any.
-  const inCountry = countrySlug
-    ? published.filter((a) => normalizeCountrySlug(a.artistCountry ?? a.country ?? "") === countrySlug)
-    : [];
-  const source = inCountry.length > 0 ? inCountry : published;
+  // Rooms of at most ROOM_SIZE works: per country (Room 1 of N…) plus a
+  // Featured room. Only the current room's works are sent to the browser.
+  const rooms = buildRooms(published, lang, t("Featured"), t("Other works"));
+  const countrySlug =
+    requestedCountry === FEATURED ? FEATURED : normalizeCountrySlug(requestedCountry ?? "") || requestedCountry;
+  const current = rooms.resolve(countrySlug, requestedRoom);
+  const { previous, next } = current ? rooms.neighbours(current) : { previous: null, next: null };
 
   // Sample artworks only appear in local development (to work on the tour
   // before real works are published); a live site with nothing published
   // shows an empty state instead.
-  const artworks =
-    source.length > 0 ? layoutArtworks(source) : process.env.NODE_ENV === "development" ? FALLBACK_ARTWORKS : [];
+  const artworks = current
+    ? layoutArtworks(rooms.worksIn(current))
+    : process.env.NODE_ENV === "development"
+      ? FALLBACK_ARTWORKS
+      : [];
 
   const roomTitles = Object.fromEntries(
     [1, 2, 3, 4].map((n) => [n, blocks[`room_title_${n}`]?.value?.trim() || ""]),
   ) as Record<1 | 2 | 3 | 4, string>;
 
-  const countryLabel =
-    inCountry.length > 0 && countrySlug && getCountryBySlug(countrySlug)
-      ? getCountryDisplayName(countrySlug, lang)
-      : null;
+  // Only show room names once there is more than one room.
+  const multipleRooms = rooms.order.length > 1;
+  const roomLabel = (r: RoomSummary) =>
+    r.of > 1 ? t("{name} · Room {n} of {total}", { name: r.label, n: r.room, total: r.of }) : r.label;
+  const link = (r: RoomSummary | null, start = false) => (r ? { href: roomHref(r, { start }), label: roomLabel(r) } : null);
 
-  return <VirtualGallery artworks={artworks} roomTitles={roomTitles} hero={hero} countryLabel={countryLabel} />;
+  return (
+    <VirtualGallery
+      // A new room is a fresh visit: reset the tour and reload the 3D room.
+      key={current ? `${current.country}-${current.room}` : "empty"}
+      artworks={artworks}
+      roomTitles={roomTitles}
+      hero={hero}
+      countryLabel={current && multipleRooms ? roomLabel(current) : null}
+      autoStart={autoStart && artworks.length > 0}
+      rooms={
+        multipleRooms
+          ? {
+              current: current ? { country: current.country, room: current.room } : null,
+              featured: rooms.featured ? { href: roomHref(rooms.featured), label: rooms.featured.label, count: rooms.featured.count, cover: rooms.featured.cover } : null,
+              countries: rooms.countries.map((c) => ({
+                country: c.country,
+                label: c.label,
+                total: c.total,
+                cover: c.cover,
+                rooms: c.rooms.map((r) => ({ room: r.room, href: roomHref(r), count: r.count })),
+              })),
+              previous: link(previous),
+              next: link(next, true),
+            }
+          : null
+      }
+    />
+  );
 }
