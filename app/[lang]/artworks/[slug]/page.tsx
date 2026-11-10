@@ -6,7 +6,7 @@ import { ShareButton } from "@/components/artwork/ShareButton";
 import { CertificateButton } from "@/components/artwork/CertificateButton";
 import { ReviewsSection } from "@/components/artwork/ReviewsSection";
 import { getArtworkBySlug, getArtworksByArtistSlug } from "@/lib/sanity/queries";
-import { getPublishedArtworkBySlug, getPublishedArtworks } from "@/lib/data/supabase-artists-cached";
+import { getPublishedArtworkBySlug, listPublishedArtworks } from "@/lib/data/supabase-artists-cached";
 import { ARTWORKS as STATIC_ARTWORKS } from "@/lib/data/content";
 import { getArtistSlugByName } from "@/lib/data/artists";
 import Link from "@/components/i18n/Link";
@@ -106,9 +106,7 @@ async function resolveArtwork(slug: string, lang: Language, t: Translator): Prom
       artistLocation: [real.artistCity, real.artistCountry].filter(Boolean).join(", ") || null,
       artistTechnique: real.artistTechnique,
       dimensions: real.dimensions,
-      relatedWorks: (await getPublishedArtworks(lang))
-        .filter((work) => work.artistId === real.artistId && work.slug !== slug)
-        .slice(0, 3)
+      relatedWorks: (await listPublishedArtworks({ lang, artistSlug: real.artistSlug, excludeSlug: slug, limit: 3 })).items
         .map((work) => ({
           slug: work.slug,
           title: work.title,

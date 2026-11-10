@@ -11,13 +11,20 @@ import { F } from "./FormField";
 import { ListRowSkeleton } from "@/components/ui/Skeleton";
 
 type Collection = Database["public"]["Tables"]["collections"]["Row"];
-type Artwork = Database["public"]["Tables"]["artworks"]["Row"];
+type Artwork = Pick<Database["public"]["Tables"]["artworks"]["Row"], "id" | "title" | "image_url">;
+
+const PICKER_PAGE_SIZE = 30;
 
 export function CollectionsAdmin() {
   const { t } = useLanguage();
   const router = useRouter();
   const [collections, setCollections] = useState<Collection[]>([]);
+  // The picker loads one page of published works at a time, searched in the
+  // database, instead of every published artwork.
   const [artworks, setArtworks] = useState<Artwork[]>([]);
+  const [pickerQuery, setPickerQuery] = useState("");
+  const [pickerPage, setPickerPage] = useState(0);
+  const [pickerTotal, setPickerTotal] = useState(0);
   // collection id -> set of artwork ids currently in that collection
   const [membership, setMembership] = useState<Map<string, Set<string>>>(new Map());
   const [loading, setLoading] = useState(true);
@@ -30,14 +37,33 @@ export function CollectionsAdmin() {
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
+    if (!managing) return;
+    let cancelled = false;
+    let query = supabase
+      .from("artworks")
+      .select("id, title, image_url", { count: "exact" })
+      .eq("status", "published")
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false });
+    const q = pickerQuery.replace(/[,()*%\\]/g, " ").trim();
+    if (q) query = query.ilike("title", `%${q}%`);
+    void query.range(pickerPage * PICKER_PAGE_SIZE, (pickerPage + 1) * PICKER_PAGE_SIZE - 1).then(({ data, count }) => {
+      if (cancelled) return;
+      setArtworks((data ?? []) as Artwork[]);
+      setPickerTotal(count ?? 0);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [managing, pickerQuery, pickerPage]);
+
+  useEffect(() => {
     (async () => {
-      const [cRes, aRes, caRes] = await Promise.all([
+      const [cRes, caRes] = await Promise.all([
         supabase.from("collections").select("*").order("created_at", { ascending: false }),
-        supabase.from("artworks").select("*").eq("status", "published").order("created_at", { ascending: false }),
         supabase.from("collection_artworks").select("collection_id, artwork_id"),
       ]);
       setCollections(cRes.data ?? []);
-      setArtworks(aRes.data ?? []);
       const map = new Map<string, Set<string>>();
       (caRes.data ?? []).forEach((row) => {
         const set = map.get(row.collection_id) ?? new Set<string>();
@@ -218,8 +244,18 @@ export function CollectionsAdmin() {
               <h3 className="font-display-sm text-display-sm text-primary">{managingCollection.title}</h3>
               <button onClick={() => setManaging(null)} className="text-on-surface-variant">✕</button>
             </div>
+            <input
+              type="search"
+              value={pickerQuery}
+              onChange={(e) => {
+                setPickerQuery(e.target.value);
+                setPickerPage(0);
+              }}
+              placeholder={t("Search by title…")}
+              className="mb-5 w-full border-b border-primary/30 bg-transparent py-2 text-primary"
+            />
             {artworks.length === 0 ? (
-              <p className="text-on-surface-variant text-sm">{t("No published artworks yet.")}</p>
+              <p className="text-on-surface-variant text-sm">{pickerQuery ? t("No results.") : t("No published artworks yet.")}</p>
             ) : (
               <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
                 {artworks.map((a) => {
@@ -240,6 +276,29 @@ export function CollectionsAdmin() {
                     </button>
                   );
                 })}
+              </div>
+            )}
+            {pickerTotal > PICKER_PAGE_SIZE && (
+              <div className="mt-6 flex items-center justify-between text-sm">
+                <button
+                  type="button"
+                  disabled={pickerPage === 0}
+                  onClick={() => setPickerPage(pickerPage - 1)}
+                  className="border border-primary/20 px-4 py-2 disabled:opacity-40"
+                >
+                  {t("Previous page")}
+                </button>
+                <span className="text-on-surface-variant">
+                  {t("Page {n} of {total}", { n: pickerPage + 1, total: Math.ceil(pickerTotal / PICKER_PAGE_SIZE) })}
+                </span>
+                <button
+                  type="button"
+                  disabled={(pickerPage + 1) * PICKER_PAGE_SIZE >= pickerTotal}
+                  onClick={() => setPickerPage(pickerPage + 1)}
+                  className="border border-primary/20 px-4 py-2 disabled:opacity-40"
+                >
+                  {t("Next page")}
+                </button>
               </div>
             )}
           </div>

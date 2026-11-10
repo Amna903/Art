@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "@/components/i18n/Link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
@@ -10,51 +10,51 @@ import type { DirectoryArtwork } from "@/lib/data/directory";
 import { useLanguage, useRouter } from "@/lib/i18n";
 
 type Props = {
+  /** The query the results below are for (from the URL). */
+  q: string;
+  /** Matches found on the server (at most 12 of each). */
   artists: Artist[];
   artworks: DirectoryArtwork[];
 };
 
-function SearchPageInner({ artists, artworks }: Props) {
+function SearchPageInner({ q, artists: artistResults, artworks: artworkResults }: Props) {
   const { t, language } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialQ = searchParams.get("q") ?? "";
-  const [query, setQuery] = useState(initialQ);
+  const [query, setQuery] = useState(q);
 
-  useEffect(() => {
-    setQuery(searchParams.get("q") ?? "");
-  }, [searchParams]);
+  // Back/forward changed the URL: show that query in the box.
+  const [shownQ, setShownQ] = useState(q);
+  if (q !== shownQ) {
+    setShownQ(q);
+    if (q !== query.trim()) setQuery(q);
+  }
 
+  // Typing updates the URL (and so the server results) after a short pause.
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (timer.current) clearTimeout(timer.current);
+  }, []);
   const handleChange = (value: string) => {
     setQuery(value);
-    const params = new URLSearchParams(searchParams.toString());
-    if (value) params.set("q", value);
-    else params.delete("q");
-    router.replace(`/search${params.toString() ? `?${params.toString()}` : ""}`, { scroll: false });
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (value.trim()) params.set("q", value.trim());
+      else params.delete("q");
+      router.replace(`/search${params.toString() ? `?${params.toString()}` : ""}`, { scroll: false });
+    }, value ? 250 : 0);
   };
 
-  const needle = query.trim().toLowerCase();
+  const needle = q.trim().toLowerCase();
 
-  const artistResults = useMemo(() => {
-    if (!needle) return [];
-    return artists
-      .filter((a) => `${a.name} ${a.countryName} ${a.city} ${a.technique}`.toLowerCase().includes(needle))
-      .slice(0, 12);
-  }, [needle, artists]);
-
+  // Countries are a fixed list of 54, so they are matched right here.
   const countryResults = useMemo(() => {
     if (!needle) return [];
     return AFRICAN_COUNTRIES.filter(
       (c) => c.name.toLowerCase().includes(needle) || getCountryDisplayName(c, language).toLowerCase().includes(needle),
     ).slice(0, 8);
-  }, [needle]);
-
-  const artworkResults = useMemo(() => {
-    if (!needle) return [];
-    return artworks
-      .filter((w) => `${w.title} ${w.artist} ${w.country}`.toLowerCase().includes(needle))
-      .slice(0, 12);
-  }, [needle, artworks]);
+  }, [needle, language]);
 
   const totalCount = artistResults.length + countryResults.length + artworkResults.length;
 
@@ -87,8 +87,8 @@ function SearchPageInner({ artists, artworks }: Props) {
         {needle && (
           <p className="font-label-caps text-[11px] uppercase tracking-widest text-on-surface-variant mt-4">
             {totalCount === 1
-              ? t("1 result for “{query}”", { query })
-              : t("{count} results for “{query}”", { count: totalCount, query })}
+              ? t("1 result for “{query}”", { query: q })
+              : t("{count} results for “{query}”", { count: totalCount, query: q })}
           </p>
         )}
       </header>
@@ -96,7 +96,7 @@ function SearchPageInner({ artists, artworks }: Props) {
       {!needle ? (
         <p className="text-on-surface-variant">{t("Start typing to search across artists, countries, and artworks.")}</p>
       ) : totalCount === 0 ? (
-        <p className="text-on-surface-variant">{t("No results for “{query}”.", { query })} {t("Try a different term.")}</p>
+        <p className="text-on-surface-variant">{t("No results for “{query}”.", { query: q })} {t("Try a different term.")}</p>
       ) : (
         <div className="space-y-16">
           {artistResults.length > 0 && (

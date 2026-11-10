@@ -44,16 +44,11 @@ const fetchTracks = () =>
     .order("position")
     .order("created_at");
 
-/** Countries of the published artworks, as the gallery resolves them. */
+/** Countries of the published artworks, as the gallery resolves them —
+ * one GROUP BY in the database, not one row per artwork. */
 async function fetchGalleryCountries(): Promise<string[]> {
-  const [{ data: works }, { data: managed }] = await Promise.all([
-    supabase.from("artworks").select("country, managed_artist_id").eq("status", "published"),
-    supabase.from("managed_artists").select("id, country"),
-  ]);
-  const managedCountry = new Map((managed ?? []).map((m) => [m.id, m.country as string | null]));
-  const slugs = (works ?? []).map((w) =>
-    normalizeCountrySlug((w.managed_artist_id && managedCountry.get(w.managed_artist_id)) || w.country || ""),
-  );
+  const { data } = await supabase.rpc("published_artwork_country_counts");
+  const slugs = (data ?? []).map((r) => normalizeCountrySlug(r.country ?? ""));
   return [...new Set(slugs.filter(Boolean))];
 }
 

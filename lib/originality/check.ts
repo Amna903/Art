@@ -88,46 +88,52 @@ async function fetchImageBuffer(imageUrl: string): Promise<Buffer> {
   return buffer;
 }
 
+/** Artworks still missing a hash are hashed a few at a time, per check. */
+const HASH_BACKFILL_PER_CHECK = 25;
+
 async function compareAgainstPlatform(
   client: SupabaseClient<Database>,
   phash: string,
   excludeArtworkId?: string,
 ): Promise<OriginalityMatch[]> {
-  const { data, error } = await client
+  const match = (row: { id: string; title: string; slug: string }, dist: number): OriginalityMatch => ({
+    source: "platform",
+    artworkId: row.id,
+    title: row.title,
+    url: `/artworks/${row.slug}`,
+    similarity: similarityFromDistance(dist),
+    hammingDistance: dist,
+  });
+
+  // Near-duplicates among hashed artworks, found by the database (only the
+  // matches come back, not every artwork's hash).
+  const { data: near, error } = await client.rpc("similar_artworks_by_phash", {
+    target: phash,
+    max_distance: PLATFORM_REVIEW_DISTANCE,
+    exclude_id: excludeArtworkId ?? null,
+  });
+  if (error) throw new Error(error.message);
+  const matches = (near ?? []).map((row) => match(row, row.distance));
+
+  // Older artworks without a stored hash: hash a bounded batch now and
+  // compare those too, so the backlog shrinks without any single upload
+  // downloading the whole catalogue.
+  const { data: unhashed } = await client
     .from("artworks")
     .select("id, title, image_url, image_phash, slug")
-    .not("image_url", "eq", "");
-  if (error) throw new Error(error.message);
-
-  const rows = (data ?? []) as ArtworkHashRow[];
-  const matches: OriginalityMatch[] = [];
-
-  for (const row of rows) {
+    .is("image_phash", null)
+    .neq("image_url", "")
+    .limit(HASH_BACKFILL_PER_CHECK);
+  for (const row of (unhashed ?? []) as ArtworkHashRow[]) {
     if (excludeArtworkId && row.id === excludeArtworkId) continue;
-
-    let otherHash = row.image_phash;
-    if (!otherHash && row.image_url) {
-      try {
-        const buf = await fetchImageBuffer(row.image_url);
-        otherHash = await computeAverageHash(buf);
-        await client.from("artworks").update({ image_phash: otherHash }).eq("id", row.id);
-      } catch {
-        continue;
-      }
+    try {
+      const otherHash = await computeAverageHash(await fetchImageBuffer(row.image_url));
+      await client.from("artworks").update({ image_phash: otherHash }).eq("id", row.id);
+      const dist = hammingDistance(phash, otherHash);
+      if (dist <= PLATFORM_REVIEW_DISTANCE) matches.push(match(row, dist));
+    } catch {
+      continue;
     }
-    if (!otherHash) continue;
-
-    const dist = hammingDistance(phash, otherHash);
-    if (dist > PLATFORM_REVIEW_DISTANCE) continue;
-
-    matches.push({
-      source: "platform",
-      artworkId: row.id,
-      title: row.title,
-      url: `/artworks/${row.slug}`,
-      similarity: similarityFromDistance(dist),
-      hammingDistance: dist,
-    });
   }
 
   return matches.sort((a, b) => b.similarity - a.similarity);
