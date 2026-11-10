@@ -1,5 +1,5 @@
-import type { SupabaseArtwork } from "@/lib/data/supabase-artists";
 import { getCountryDisplayName, normalizeCountrySlug } from "@/lib/data/africa";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import type { Language } from "@/lib/i18n/config";
 
 /**
@@ -8,12 +8,17 @@ import type { Language } from "@/lib/i18n/config";
  * collection: each country gets its own room(s), split into "Room 1 of N"
  * when it has more works than one room holds, plus a "Featured" room with the
  * newest works across all countries.
+ *
+ * Rooms are worked out from per-country counts (one GROUP BY in the
+ * database); a room's works are then fetched as one 24-row page. The
+ * catalogue itself is never loaded.
  */
 export const ROOM_SIZE = 24;
 export const FEATURED = "featured";
+export const OTHER = "other";
 
 export type RoomRef = {
-  /** Country slug, or FEATURED. */
+  /** Country slug, FEATURED, or OTHER (works with no recognised country). */
   country: string;
   /** 1-based room number within the country. */
   room: number;
@@ -25,8 +30,6 @@ export type RoomSummary = RoomRef & {
   /** Rooms this country has. */
   of: number;
   count: number;
-  /** First work in the room, for the lobby card. */
-  cover: string | null;
 };
 
 export type CountryRooms = {
@@ -37,65 +40,71 @@ export type CountryRooms = {
   rooms: RoomSummary[];
 };
 
-const countryOf = (a: SupabaseArtwork) => normalizeCountrySlug(a.artistCountry ?? a.country ?? "") || "other";
+type CountryRow = { slug: string; works: number; covers: string[] };
 
-function chunk<T>(items: T[]): T[][] {
-  const out: T[][] = [];
-  for (let i = 0; i < items.length; i += ROOM_SIZE) out.push(items.slice(i, i + ROOM_SIZE));
-  return out;
+/** Per-country work counts and two newest cover images, from the database. */
+export async function fetchCountryRooms(): Promise<CountryRow[]> {
+  if (!isSupabaseConfigured()) return [];
+  const { data, error } = await supabase.rpc("published_country_rooms");
+  if (error || !data) {
+    if (error) console.error("[Supabase] country rooms:", error.message);
+    return [];
+  }
+  // Several stored spellings can map to one country ("Congo", "Republic of the Congo"…).
+  const bySlug = new Map<string, CountryRow>();
+  for (const row of data) {
+    const slug = normalizeCountrySlug(row.country ?? "") || OTHER;
+    const entry = bySlug.get(slug) ?? { slug, works: 0, covers: [] };
+    entry.works += Number(row.works);
+    entry.covers.push(...(row.covers ?? []));
+    bySlug.set(slug, entry);
+  }
+  return [...bySlug.values()];
 }
 
 /**
- * Splits the published works (newest first) into rooms. `featuredLabel` is
- * the translated "Featured" name.
+ * The room plan for the whole gallery, from per-country counts.
+ * `newestCover` is the newest work's image (the Featured room's cover).
  */
-export function buildRooms(published: SupabaseArtwork[], lang: Language, featuredLabel: string, otherLabel: string) {
-  const byCountry = new Map<string, SupabaseArtwork[]>();
-  for (const a of published) {
-    const key = countryOf(a);
-    byCountry.set(key, [...(byCountry.get(key) ?? []), a]);
-  }
+export function planRooms(
+  countries: CountryRow[],
+  lang: Language,
+  labels: { featured: string; other: string },
+  newestCover: string | null,
+) {
+  const total = countries.reduce((sum, c) => sum + c.works, 0);
+  const label = (slug: string) => (slug === OTHER ? labels.other : getCountryDisplayName(slug, lang));
+  const featuredCover = total > ROOM_SIZE ? newestCover : null;
 
-  // Country cards prefer a cover that differs from the Featured room's.
-  const featuredCover = published.length > ROOM_SIZE ? (published[0]?.imageUrl ?? null) : null;
-  const coverOf = (works: SupabaseArtwork[]) =>
-    (works.find((w) => w.imageUrl !== featuredCover) ?? works[0])?.imageUrl ?? null;
-
-  const label = (slug: string) => (slug === "other" ? otherLabel : getCountryDisplayName(slug, lang));
-  const countries: CountryRooms[] = [...byCountry.entries()]
-    .map(([slug, works]) => {
-      const chunks = chunk(works);
+  const byCountry: CountryRooms[] = countries
+    .filter((c) => c.works > 0)
+    .map((c) => {
+      const of = Math.ceil(c.works / ROOM_SIZE);
       return {
-        country: slug,
-        label: label(slug),
-        total: works.length,
-        cover: coverOf(works),
-        rooms: chunks.map((c, i) => ({
-          country: slug,
+        country: c.slug,
+        label: label(c.slug),
+        total: c.works,
+        // Prefer a cover that differs from the Featured card's.
+        cover: c.covers.find((u) => u !== featuredCover) ?? c.covers[0] ?? null,
+        rooms: Array.from({ length: of }, (_, i) => ({
+          country: c.slug,
           room: i + 1,
-          label: label(slug),
-          of: chunks.length,
-          count: c.length,
-          cover: coverOf(c),
+          label: label(c.slug),
+          of,
+          count: i < of - 1 ? ROOM_SIZE : c.works - ROOM_SIZE * (of - 1),
         })),
       };
     })
-    .sort((a, b) => (a.country === "other" ? 1 : b.country === "other" ? -1 : a.label.localeCompare(b.label, lang)));
+    .sort((a, b) => (a.country === OTHER ? 1 : b.country === OTHER ? -1 : a.label.localeCompare(b.label, lang)));
 
   // A Featured room only makes sense when the collection fills more than one room.
-  const featured: RoomSummary | null =
-    published.length > ROOM_SIZE
-      ? { country: FEATURED, room: 1, label: featuredLabel, of: 1, count: ROOM_SIZE, cover: featuredCover }
+  const featured: (RoomSummary & { cover: string | null }) | null =
+    total > ROOM_SIZE
+      ? { country: FEATURED, room: 1, label: labels.featured, of: 1, count: ROOM_SIZE, cover: featuredCover }
       : null;
 
   /** Rooms in visiting order: Featured, then every country's rooms. */
-  const order: RoomSummary[] = [...(featured ? [featured] : []), ...countries.flatMap((c) => c.rooms)];
-
-  /** The works hanging in one room. */
-  const worksIn = (ref: RoomRef): SupabaseArtwork[] => {
-    if (ref.country === FEATURED) return published.slice(0, ROOM_SIZE);
-    return chunk(byCountry.get(ref.country) ?? [])[ref.room - 1] ?? [];
-  };
+  const order: RoomSummary[] = [...(featured ? [featured] : []), ...byCountry.flatMap((c) => c.rooms)];
 
   /** Requested room, falling back to the first room of that country, then the first room. */
   const resolve = (country?: string, room?: number): RoomSummary | null => {
@@ -111,7 +120,13 @@ export function buildRooms(published: SupabaseArtwork[], lang: Language, feature
     return { previous: order[i - 1] ?? null, next: order[i + 1] ?? null };
   };
 
-  return { countries, featured, order, worksIn, resolve, neighbours };
+  return { countries: byCountry, featured, order, resolve, neighbours, total };
+}
+
+/** The page of works hanging in a room: newest first, ROOM_SIZE per room. */
+export function roomQuery(ref: RoomRef): { country?: string; offset: number; limit: number } {
+  if (ref.country === FEATURED) return { offset: 0, limit: ROOM_SIZE };
+  return { country: ref.country, offset: (ref.room - 1) * ROOM_SIZE, limit: ROOM_SIZE };
 }
 
 /** Query string for a room, e.g. "?country=angola&room=2". */

@@ -1,8 +1,7 @@
 // Server-only cached wrappers around lib/data/supabase-artists.ts's Supabase
 // reads. Kept in a separate module rather than caching inline there because
-// that file is also imported client-side (app/virtual-gallery/page.tsx calls
-// getPublishedArtworks() directly from a "use client" component), and
-// unstable_cache can't be bundled into client code. Server pages that list
+// that file is also imported client-side, and unstable_cache can't be
+// bundled into client code. Server pages that list
 // artists/artworks (discover, artists directory, artwork detail, homepage)
 // should import from here instead so repeat page views don't each re-hit
 // Supabase — same 60s window used for Sanity CMS reads elsewhere. The
@@ -11,7 +10,6 @@
 import { unstable_cache } from "next/cache";
 import type { Language } from "@/lib/i18n/config";
 import {
-  getPublishedArtworks as fetchPublishedArtworks,
   getPublishedArtworksByIds as fetchPublishedArtworksByIds,
   getMostRequestedArtworks as fetchMostRequestedArtworks,
   getPublishedArtworkBySlug as fetchPublishedArtworkBySlug,
@@ -27,10 +25,6 @@ import {
 // Tagged so an artist publishing/editing/deleting an artwork can invalidate
 // this instantly via revalidateTag("artworks") instead of waiting out the
 // 60s window — see app/api/revalidate/route.ts.
-/** @deprecated See lib/data/supabase-artists.ts — virtual gallery only. Not
- * cached: the whole catalogue would exceed the 2 MB cache entry limit. */
-export const getPublishedArtworks = fetchPublishedArtworks;
-
 // Each listing is cached per page/filter, so an entry is one page of works
 // (a few KB), never the catalogue. Free-text search is not cached: its keys
 // are unbounded and each query is a single indexed request anyway.

@@ -1,14 +1,22 @@
 import type { Metadata } from "next";
 import { VirtualGallery } from "@/components/gallery/VirtualGallery";
-import { getPublishedArtworks } from "@/lib/data/supabase-artists-cached";
+import { unstable_cache } from "next/cache";
+import { listPublishedArtworks } from "@/lib/data/supabase-artists-cached";
 import { getPageBlocks } from "@/lib/data/pageBlocks";
 import { getSiteHero } from "@/lib/data/site-heroes";
 import { layoutArtworks, FALLBACK_ARTWORKS } from "@/lib/data/museum-layout";
-import { buildRooms, FEATURED, roomHref, type RoomSummary } from "@/lib/data/gallery-rooms";
+import { fetchCountryRooms, FEATURED, planRooms, roomHref, roomQuery, type RoomSummary } from "@/lib/data/gallery-rooms";
 import { normalizeCountrySlug } from "@/lib/data/africa";
 import { getI18n } from "@/lib/i18n/server";
 
 export const revalidate = 60;
+
+// Per-country counts and covers for the room plan: one small GROUP BY result
+// (a row per country), cached like the other listings.
+const getCountryRooms = unstable_cache(fetchCountryRooms, ["gallery-country-rooms"], {
+  revalidate: 60,
+  tags: ["artworks"],
+});
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/virtual-gallery">): Promise<Metadata> {
   const { t } = await getI18n(params);
@@ -27,15 +35,17 @@ export default async function VirtualGalleryPage({ params, searchParams }: PageP
   // "Next room" links carry ?start=1 so the tour continues straight away.
   const autoStart = one(query.start) === "1";
 
-  const [published, blocks, hero] = await Promise.all([
-    getPublishedArtworks(lang),
+  const [countryRooms, newest, blocks, hero] = await Promise.all([
+    getCountryRooms(),
+    listPublishedArtworks({ lang, limit: 1 }),
     getPageBlocks("virtual-gallery", lang),
     getSiteHero("virtual-gallery", lang),
   ]);
 
   // Rooms of at most ROOM_SIZE works: per country (Room 1 of N…) plus a
-  // Featured room. Only the current room's works are sent to the browser.
-  const rooms = buildRooms(published, lang, t("Featured"), t("Other works"));
+  // Featured room, planned from counts. Only the current room's works are
+  // fetched — one 24-row page — and sent to the browser.
+  const rooms = planRooms(countryRooms, lang, { featured: t("Featured"), other: t("Other works") }, newest.items[0]?.imageUrl ?? null);
   const countrySlug =
     requestedCountry === FEATURED ? FEATURED : normalizeCountrySlug(requestedCountry ?? "") || requestedCountry;
   const current = rooms.resolve(countrySlug, requestedRoom);
@@ -44,8 +54,9 @@ export default async function VirtualGalleryPage({ params, searchParams }: PageP
   // Sample artworks only appear in local development (to work on the tour
   // before real works are published); a live site with nothing published
   // shows an empty state instead.
-  const artworks = current
-    ? layoutArtworks(rooms.worksIn(current))
+  const roomWorks = current ? (await listPublishedArtworks({ lang, ...roomQuery(current) })).items : [];
+  const artworks = roomWorks.length
+    ? layoutArtworks(roomWorks)
     : process.env.NODE_ENV === "development"
       ? FALLBACK_ARTWORKS
       : [];

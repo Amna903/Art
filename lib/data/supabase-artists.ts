@@ -178,39 +178,6 @@ async function attachArtistMeta(rows: ArtworkRow[], lang: Language): Promise<Sup
   );
 }
 
-/**
- * @deprecated Loads every published work. Only the virtual gallery still
- * uses it, until it moves to per-room queries; everything else uses the
- * paged helpers in lib/data/artwork-listing.ts. Pages through the results so
- * it never silently stops at Supabase's 1,000-row response limit.
- */
-export async function getPublishedArtworks(lang: Language = "en"): Promise<SupabaseArtwork[]> {
-  if (!isSupabaseConfigured()) return [];
-  const PAGE = 1000;
-  const rows: ArtworkRow[] = [];
-  try {
-    for (let from = 0; ; from += PAGE) {
-      const { data, error } = await supabase
-        .from("artworks")
-        .select(ARTWORK_SELECT)
-        .eq("status", "published")
-        .order("created_at", { ascending: false })
-        .order("id", { ascending: false })
-        .range(from, from + PAGE - 1);
-      if (error) {
-        console.error("[Supabase] Failed to fetch published artworks:", error.message);
-        return [];
-      }
-      rows.push(...((data ?? []) as ArtworkRow[]));
-      if (!data || data.length < PAGE) break;
-    }
-    return attachArtistMeta(rows, lang);
-  } catch (err) {
-    console.error("[Supabase] Failed to fetch published artworks:", err);
-    return [];
-  }
-}
-
 export async function getPublishedArtworksByIds(ids: string[], lang: Language = "en"): Promise<SupabaseArtwork[]> {
   if (!isSupabaseConfigured() || ids.length === 0) return [];
   try {
