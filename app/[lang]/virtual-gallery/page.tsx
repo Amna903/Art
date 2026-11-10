@@ -45,7 +45,7 @@ export default async function VirtualGalleryPage({ params, searchParams }: PageP
   // Rooms of at most ROOM_SIZE works: per country (Room 1 of N…) plus a
   // Featured room, planned from counts. Only the current room's works are
   // fetched — one 24-row page — and sent to the browser.
-  const rooms = planRooms(countryRooms, lang, { featured: t("Featured"), other: t("Other works") }, newest.items[0]?.imageUrl ?? null);
+  const rooms = planRooms(countryRooms, lang, { featured: t("Featured"), other: t("Other works") }, newest.items[0] ? (newest.items[0].thumbUrl ?? newest.items[0].imageUrl) : null);
   const countrySlug =
     requestedCountry === FEATURED ? FEATURED : normalizeCountrySlug(requestedCountry ?? "") || requestedCountry;
   const current = rooms.resolve(countrySlug, requestedRoom);

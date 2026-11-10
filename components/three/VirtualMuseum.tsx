@@ -24,6 +24,8 @@ export type Artwork = {
   slug?: string;
   /** Public artist route key (/artists/[slug]). */
   artistSlug?: string;
+  /** Pre-generated 1280px thumbnail (lists, the tour panel and the walls). */
+  thumb?: string;
   /** Country slug; picks the soundtrack that plays while this work is shown. */
   country?: string;
 };
@@ -963,7 +965,10 @@ type MoveKeys = Record<string, boolean>;
  * room loads quickly and stays light on GPU memory. The zoom view still
  * shows the original.
  */
-function wallTextureUrl(src: string): string {
+function wallTextureUrl(a: Artwork): string {
+  // Pre-generated 1280px WebP: no optimizer request at all.
+  if (a.thumb) return a.thumb;
+  const src = a.image;
   if (!src || src.startsWith("data:") || src.startsWith("blob:")) return src;
   return `/_next/image?url=${encodeURIComponent(src)}&w=1080&q=75`;
 }
@@ -1197,7 +1202,7 @@ export default function VirtualMuseum({
 
     artworks.forEach((a) => {
       loader.load(
-        wallTextureUrl(a.image),
+        wallTextureUrl(a),
         (tex) => {
           if (cancelled) {
             tex.dispose();

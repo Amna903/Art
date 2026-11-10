@@ -2,6 +2,7 @@
 
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { ArtworkImage } from "@/components/ui/ArtworkImage";
 import Link from "@/components/i18n/Link";
 import type { Artwork } from "@/components/three/VirtualMuseum";
 import { EnquiryModal } from "@/components/enquiry/EnquiryModal";
@@ -209,7 +210,7 @@ export function VirtualGallery({
   const entranceImage = hero
     ? null
     : artworks.find((a) => a.image)
-      ? { src: artworks[0].image, credit: `${artworks[0].title} — ${artworks[0].artist}` }
+      ? { src: artworks[0].thumb ?? artworks[0].image, credit: `${artworks[0].title} — ${artworks[0].artist}` }
       : null;
   const credit = hero?.credit ?? entranceImage?.credit ?? null;
 
@@ -221,7 +222,7 @@ export function VirtualGallery({
           {hero ? (
             <HeroPicture hero={hero} />
           ) : entranceImage ? (
-            <Image src={entranceImage.src} alt="" fill preload sizes="100vw" className="object-cover" />
+            <ArtworkImage src={entranceImage.src} alt="" fill preload sizes="100vw" className="object-cover" />
           ) : null}
           <div className="absolute inset-0 bg-[var(--overlay-scrim)]" aria-hidden="true" />
         </div>
@@ -375,9 +376,9 @@ export function VirtualGallery({
                   aria-label={t("Zoom into the artwork")}
                   className="relative block aspect-[4/5] w-full cursor-zoom-in bg-[var(--nua-white)] lg:aspect-square"
                 >
-                  <Image
+                  <ArtworkImage
                     key={current.id}
-                    src={current.image}
+                    src={current.thumb ?? current.image}
                     alt={current.title}
                     fill
                     sizes="(max-width: 1023px) 100vw, 440px"
@@ -462,7 +463,7 @@ export function VirtualGallery({
                     <li key={a.id}>
                       <button type="button" onClick={() => openTour(i)} className="group block w-full text-left">
                         <span className="relative block aspect-square bg-[var(--nua-paper)]">
-                          <Image src={a.image} alt={a.title} fill sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw" className="object-contain p-2" loading={i < 8 ? "eager" : "lazy"} />
+                          <ArtworkImage src={a.thumb ?? a.image} alt={a.title} fill sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw" className="object-contain p-2" loading={i < 8 ? "eager" : "lazy"} />
                           {i === index && <span className="absolute inset-x-0 bottom-0 h-[3px] bg-[var(--nua-red)]" aria-hidden="true" />}
                         </span>
                         <span className="mt-2 block text-base leading-snug group-hover:underline">{a.title}</span>
@@ -594,6 +595,8 @@ function ZoomView({ artwork, onClose }: { artwork: Artwork; onClose: () => void 
       >
         <Image
           src={artwork.image}
+          // Full size, served as-is: zooming never uses the optimizer quota.
+          unoptimized
           alt={artwork.title}
           fill
           sizes="100vw"
@@ -628,7 +631,7 @@ function RoomsLobby({ rooms }: { rooms: GalleryRooms }) {
       <Link href={href} className="group block" aria-current={current ? "page" : undefined}>
         <div className="relative aspect-[4/5] overflow-hidden bg-surface-container-low">
           {cover && (
-            <Image
+            <ArtworkImage
               src={cover}
               alt=""
               fill
