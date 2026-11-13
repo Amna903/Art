@@ -249,9 +249,23 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     if (readPrefs().paused) return;
     const audio = getAudio();
     if (stoppingRef.current) {
-      // Came back during the fade-out: keep playing.
+      // Came back during the fade-out (e.g. moved to another room). Keep
+      // playing only if it is still the right country's soundtrack.
       stoppingRef.current = false;
       cancelFade();
+      if (allTracksRef.current.length > 0) {
+        const changed = selectPlaylist();
+        if (tracksRef.current.length === 0) {
+          silencedRef.current = true; // this country has no music
+          audio.pause();
+          return;
+        }
+        silencedRef.current = false;
+        if (changed) {
+          playIndex(0, true);
+          return;
+        }
+      }
       audio.volume = VOLUME;
     }
     if (!audio.paused) return; // already playing: never restart
