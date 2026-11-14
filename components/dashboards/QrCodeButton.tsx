@@ -7,8 +7,13 @@ import { slugify } from "@/lib/utils/slugify";
 /** QR downloads are built but hidden until the client launches them — set to true to show the buttons. */
 export const QR_CODES_ENABLED = true;
 
-/** Printed codes always point at the live domain, whichever environment the admin is using. */
-export const QR_BASE_URL = "https://nua-arte.com/q/";
+/**
+ * Printed codes always point at the live domain, whichever environment the
+ * admin is using. Set NEXT_PUBLIC_QR_BASE_URL (e.g. "https://www.example.com")
+ * if the site is served from another address; codes already printed keep the
+ * address they were made with.
+ */
+export const QR_BASE_URL = `${(process.env.NEXT_PUBLIC_QR_BASE_URL?.trim() || "https://nua-arte.com").replace(/\/+$/, "").replace(/\/q$/, "")}/q/`;
 
 async function download(id: string, name: string, format: "png" | "svg") {
   const url = `${QR_BASE_URL}${id}`;

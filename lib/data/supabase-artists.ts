@@ -84,6 +84,35 @@ export type ManagedArtistRow = {
 
 const ARTWORK_SELECT =
   "id, slug, title, medium, year, country, description, dimensions, reference_number, image_url, thumb_base, artist_id, managed_artist_id, translations";
+/** ARTWORK_SELECT without columns added by recent migrations, used when the
+ * database has not had them applied yet (see selectPublishedArtworks). */
+const ARTWORK_SELECT_BASE =
+  "id, slug, title, medium, year, country, description, dimensions, image_url, thumb_base, artist_id, managed_artist_id, translations";
+
+/** Postgres "undefined_column" (42703), or PostgREST's schema-cache miss. */
+function isMissingColumn(error: { code?: string; message?: string } | null): boolean {
+  return !!error && (error.code === "42703" || error.code === "PGRST204" || /column .* does not exist/i.test(error.message ?? ""));
+}
+
+/**
+ * Published artworks with ARTWORK_SELECT, narrowed by `filter`. If a newer
+ * column (reference_number) is not in the database yet, the query is retried
+ * without it, so artwork pages and QR codes keep working while a migration is
+ * pending instead of every work resolving to "not found".
+ */
+const publishedArtworks = (columns: string) => supabase.from("artworks").select(columns).eq("status", "published");
+type ArtworkQuery = ReturnType<typeof publishedArtworks>;
+type QueryError = { code?: string; message: string } | null;
+
+async function selectPublishedArtworks(
+  filter: (query: ArtworkQuery) => PromiseLike<{ data: unknown; error: QueryError }>,
+): Promise<{ data: ArtworkRow[] | null; error: QueryError }> {
+  const first = await filter(publishedArtworks(ARTWORK_SELECT));
+  if (!isMissingColumn(first.error)) return first as { data: ArtworkRow[] | null; error: QueryError };
+  console.warn("[Supabase] artworks.reference_number is missing — run the latest migrations. Falling back.");
+  const retry = await filter(publishedArtworks(ARTWORK_SELECT_BASE));
+  return retry as { data: ArtworkRow[] | null; error: QueryError };
+}
 const PROFILE_SELECT = "id, display_name, bio, country, avatar_url, translations";
 export const MANAGED_SELECT = "id, slug, display_name, bio, country, city, technique, avatar_url, translations, created_at";
 
@@ -186,11 +215,7 @@ async function attachArtistMeta(rows: ArtworkRow[], lang: Language): Promise<Sup
 export async function getPublishedArtworksByIds(ids: string[], lang: Language = "en"): Promise<SupabaseArtwork[]> {
   if (!isSupabaseConfigured() || ids.length === 0) return [];
   try {
-    const { data, error } = await supabase
-      .from("artworks")
-      .select(ARTWORK_SELECT)
-      .eq("status", "published")
-      .in("id", ids);
+    const { data, error } = await selectPublishedArtworks((q) => q.in("id", ids));
 
     if (error || !data) {
       if (error) console.error("[Supabase] Failed to fetch artworks by ids:", error.message);
@@ -215,11 +240,7 @@ export async function getMostRequestedArtworks(limit = 6, lang: Language = "en")
     }
 
     const slugs = ranked.map((r) => r.artwork_slug);
-    const { data, error } = await supabase
-      .from("artworks")
-      .select(ARTWORK_SELECT)
-      .eq("status", "published")
-      .in("slug", slugs);
+    const { data, error } = await selectPublishedArtworks((q) => q.in("slug", slugs));
 
     if (error || !data) {
       if (error) console.error("[Supabase] Failed to fetch requested artworks:", error.message);
@@ -238,15 +259,11 @@ export async function getMostRequestedArtworks(limit = 6, lang: Language = "en")
 export async function getPublishedArtworkBySlug(slug: string, lang: Language = "en"): Promise<SupabaseArtwork | null> {
   if (!isSupabaseConfigured()) return null;
   try {
-    const { data, error } = await supabase
-      .from("artworks")
-      .select(ARTWORK_SELECT)
-      .eq("status", "published")
-      .eq("slug", slug)
-      .maybeSingle();
+    const { data, error } = await selectPublishedArtworks((q) => q.eq("slug", slug).limit(1));
 
-    if (error || !data) return null;
-    const [artwork] = await attachArtistMeta([data as ArtworkRow], lang);
+    if (error) console.error("[Supabase] Failed to fetch artwork by slug:", error.message);
+    if (error || !data?.[0]) return null;
+    const [artwork] = await attachArtistMeta([data[0]], lang);
     return artwork ?? null;
   } catch (err) {
     console.error("[Supabase] Failed to fetch artwork by slug:", err);
