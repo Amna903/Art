@@ -51,9 +51,14 @@ export default async function ArtistsPage({ params }: PageProps<"/[lang]/artists
           }))
         : ARTISTS;
 
+  // Artists with their own portrait come first; order is otherwise kept.
+  const hasPhoto = (a: (typeof sourceArtists)[number]) =>
+    "hasPortrait" in a && typeof a.hasPortrait === "boolean" ? a.hasPortrait : Boolean(a.image?.trim());
+  const sortedArtists = [...sourceArtists].sort((a, b) => Number(hasPhoto(b)) - Number(hasPhoto(a)));
+
   return (
     <Suspense>
-      <ArtistDirectory artists={sourceArtists} />
+      <ArtistDirectory artists={sortedArtists} />
     </Suspense>
   );
 }

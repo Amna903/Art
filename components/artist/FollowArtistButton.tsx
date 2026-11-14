@@ -79,7 +79,7 @@ export function FollowArtistButton({
       aria-pressed={followed}
       className={className ?? defaultClasses}
     >
-      {busy ? "…" : followed ? t("Following") : t("Follow Artist")}
+      {busy ? "…" : followed ? t("Following") : t("Follow the Artist Here")}
     </button>
   );
 }

@@ -23,6 +23,7 @@ export type Database = {
           created_at: string
           description: string | null
           dimensions: string | null
+          reference_number: string | null
           id: string
           image_phash: string | null
           image_url: string
@@ -47,6 +48,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           dimensions?: string | null
+          reference_number?: string | null
           id?: string
           image_phash?: string | null
           image_url?: string
@@ -71,6 +73,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           dimensions?: string | null
+          reference_number?: string | null
           id?: string
           image_phash?: string | null
           image_url?: string
@@ -581,6 +584,8 @@ export type Database = {
           slug: string
           display_name: string
           bio: string | null
+          intro: string | null
+          video_url: string | null
           country: string
           city: string | null
           technique: string | null
@@ -595,6 +600,8 @@ export type Database = {
           slug: string
           display_name: string
           bio?: string | null
+          intro?: string | null
+          video_url?: string | null
           country: string
           city?: string | null
           technique?: string | null
@@ -609,6 +616,8 @@ export type Database = {
           slug?: string
           display_name?: string
           bio?: string | null
+          intro?: string | null
+          video_url?: string | null
           country?: string
           city?: string | null
           technique?: string | null

@@ -207,6 +207,7 @@ export async function getRealArtists(lang: Language = "en"): Promise<Artist[]> {
       featuredWork: "",
       bio: localized(m.translations, "bio", lang, m.bio) ?? "",
       image: m.avatar_url ?? "",
+      hasPortrait: Boolean(m.avatar_url?.trim()),
     });
   }
   return artists;

@@ -58,6 +58,8 @@ type ResolvedWork = {
   artistAvatar?: string | null;
   artistLocation?: string | null;
   artistTechnique?: string | null;
+  /** Admin-assigned reference (e.g. NA-C1-001); also printed on the certificate. */
+  referenceNumber?: string | null;
   dimensions?: string | null;
 };
 
@@ -112,6 +114,7 @@ async function resolveArtwork(slug: string, lang: Language, t: Translator): Prom
       artistLocation: [real.artistCity, real.artistCountry].filter(Boolean).join(", ") || null,
       artistTechnique: real.artistTechnique,
       dimensions: real.dimensions,
+      referenceNumber: real.referenceNumber,
       relatedWorks: (await listPublishedArtworks({ lang, artistSlug: real.artistSlug, excludeSlug: slug, limit: 3 })).items
         .map((work) => ({
           slug: work.slug,
@@ -172,7 +175,7 @@ export default async function ArtworkDetailPage({ params }: Props) {
   const { lang, t } = await getI18n(params);
   const {
     title, artist, artistSlug, medium, year, image, displayImage, imageAlt, artistBio, artistStatement, relatedWorks,
-    artistAvatar, artistLocation, artistTechnique, dimensions,
+    artistAvatar, artistLocation, artistTechnique, dimensions, referenceNumber,
   } = await resolveArtwork(slug, lang, t);
 
   return (
@@ -263,6 +266,12 @@ export default async function ArtworkDetailPage({ params }: Props) {
               <p className="font-label-caps text-label-caps uppercase text-on-surface-variant mb-1">{t("Stock")}</p>
               <p className="font-body-md text-body-md text-secondary">{t("Unique Piece (1 available)")}</p>
             </div>
+            {referenceNumber ? (
+              <div className="col-span-2">
+                <p className="font-label-caps text-label-caps uppercase text-on-surface-variant mb-1">{t("Reference")}</p>
+                <p className="font-body-md text-body-md font-mono tracking-wider">{referenceNumber}</p>
+              </div>
+            ) : null}
           </div>
 
           <div className="mb-10">
@@ -305,7 +314,7 @@ export default async function ArtworkDetailPage({ params }: Props) {
             </div>
             <div className="flex gap-6 items-center">
               <ShareButton artworkTitle={title} artistName={artist} />
-              <CertificateButton artworkTitle={title} artistName={artist} medium={t(medium)} year={year} />
+              <CertificateButton artworkTitle={title} artistName={artist} medium={t(medium)} year={year} referenceNumber={referenceNumber} />
             </div>
           </div>
         </div>

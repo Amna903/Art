@@ -9,20 +9,11 @@ type Props = {
   artistName?: string;
   medium?: string;
   year?: string;
+  /** Admin-assigned reference (e.g. NA-C1-001), same as on the artwork page. */
+  referenceNumber?: string | null;
 };
 
-/** Deterministic-looking certificate number derived from the artwork's identity. */
-function certificateNumber(seed: string): string {
-  let h = 2166136261;
-  for (let i = 0; i < seed.length; i++) {
-    h ^= seed.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  const n = Math.abs(h) % 1000000;
-  return `NA-${String(n).padStart(6, "0")}`;
-}
-
-export function CertificateButton({ artworkTitle, artistName, medium, year }: Props) {
+export function CertificateButton({ artworkTitle, artistName, medium, year, referenceNumber }: Props) {
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
 
@@ -44,6 +35,7 @@ export function CertificateButton({ artworkTitle, artistName, medium, year }: Pr
           artistName={artistName}
           medium={medium}
           year={year}
+          referenceNumber={referenceNumber}
           onClose={() => setOpen(false)}
         />
       )}
@@ -56,10 +48,10 @@ function CertificateModal({
   artistName,
   medium,
   year,
+  referenceNumber,
   onClose,
 }: Props & { onClose: () => void }) {
   const { t, formatDate } = useLanguage();
-  const number = certificateNumber(`${artworkTitle}-${artistName ?? ""}`);
   const issued = formatDate(new Date());
 
   const modalContent = (
@@ -92,13 +84,19 @@ function CertificateModal({
           <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#5C5C5C]">{t("NUA-ARTE Collective")}</p>
         </div>
 
+        {/* Dedicated reference block: the admin-assigned number, exactly as
+            shown on the artwork page. Left blank to fill in by hand if unset. */}
+        <div className="mb-6 border border-[#333333]/40 px-4 py-3 text-center">
+          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#5C5C5C] mb-1">{t("Reference No.")}</p>
+          <p className="font-mono text-lg tracking-[0.15em] min-h-[1.75rem]">{referenceNumber ?? ""}</p>
+        </div>
+
         <div className="border-t border-b border-[#333333]/30 py-6 space-y-4 text-sm">
           <Row label={t("Title")} value={artworkTitle} emphasis />
           {artistName && <Row label={t("Artist")} value={artistName} />}
           {medium && <Row label={t("Medium")} value={medium} />}
           {year && <Row label={t("Year")} value={year} />}
           <Row label={t("Edition")} value={t("Unique piece (1 of 1)")} />
-          <Row label={t("Certificate No.")} value={number} />
           <Row label={t("Issued")} value={issued} />
         </div>
 
