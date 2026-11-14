@@ -11,6 +11,7 @@ import type { Json } from "@/lib/supabase/types";
 import {
   artistFromSummary,
   cleanPlace,
+  isRealPortrait,
   MANAGED_SELECT,
   splitArtistName,
   toArtwork,
@@ -207,7 +208,7 @@ export async function getRealArtists(lang: Language = "en"): Promise<Artist[]> {
       featuredWork: "",
       bio: localized(m.translations, "bio", lang, m.bio) ?? "",
       image: m.avatar_url ?? "",
-      hasPortrait: Boolean(m.avatar_url?.trim()),
+      hasPortrait: isRealPortrait(m.avatar_url),
     });
   }
   return artists;

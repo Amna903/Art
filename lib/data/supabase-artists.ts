@@ -291,8 +291,17 @@ export function artistFromSummary(first: SupabaseArtwork, worksCount: number, me
     featuredWork: first.title,
     bio: first.artistBio ?? "",
     image: first.artistAvatarUrl ?? first.imageUrl,
-    hasPortrait: Boolean(first.artistAvatarUrl?.trim()),
+    hasPortrait: isRealPortrait(first.artistAvatarUrl),
   };
+}
+
+/** Uploaded "Portrait coming soon" logo files: these are stand-ins, not
+ * photos, so such artists sort after those with a real portrait. */
+const PLACEHOLDER_PORTRAIT_FILES = ["WhatsApp_Image_2026_11_13_at_22.22.29__2_"];
+
+export function isRealPortrait(url: string | null | undefined): boolean {
+  const u = url?.trim();
+  return Boolean(u) && !PLACEHOLDER_PORTRAIT_FILES.some((f) => u!.includes(f));
 }
 
 /**
