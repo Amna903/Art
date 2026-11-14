@@ -37,8 +37,8 @@ type RelatedWork = {
   title: string;
   medium: string | null;
   image: string;
-  /** Smaller copy shown on the page (the original opens in the zoom view). */
-  displayImage?: string;
+  /** The original upload, shown if the thumbnail (image) can't be loaded. */
+  original?: string;
   imageAlt: string;
 };
 
@@ -121,6 +121,7 @@ async function resolveArtwork(slug: string, lang: Language, t: Translator): Prom
           title: work.title,
           medium: work.medium,
           image: work.thumbUrl ?? work.imageUrl,
+          original: work.imageUrl,
           imageAlt: t("{title} by {artist}", { title: work.title, artist: work.artistName }),
         })),
     };
@@ -194,7 +195,7 @@ export default async function ArtworkDetailPage({ params }: Props) {
                   href={`/artworks/${work.slug}`}
                   className="relative block w-24 h-24 border border-outline/20 hover:border-secondary transition-colors"
                 >
-                  <ArtworkImage fill sizes="96px" className="object-contain" alt={work.imageAlt} src={work.image} />
+                  <ArtworkImage fill sizes="96px" className="object-contain" alt={work.imageAlt} src={work.image} fallbackSrc={work.original} />
                 </Link>
               ))}
             </div>

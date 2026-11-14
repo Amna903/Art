@@ -33,6 +33,8 @@ type ArtistWork = {
   title: string;
   medium: string | null;
   imageUrl: string | null;
+  /** The original upload, shown if the thumbnail (imageUrl) can't be loaded. */
+  originalUrl?: string | null;
   imageAlt: string | null;
 };
 
@@ -92,6 +94,7 @@ async function resolveArtist(slug: string, lang: Language, t: Translator, page =
         title: work.title,
         medium: work.medium,
         imageUrl: work.thumbUrl ?? work.imageUrl,
+        originalUrl: work.imageUrl,
         imageAlt: t("Artwork by {name}", { name: realArtist.name }),
       })) satisfies ArtistWork[];
     return {
@@ -328,6 +331,7 @@ export default async function ArtistProfilePage({ params, searchParams }: Props)
                     className="object-contain p-3 transition-transform duration-700 group-hover:scale-[1.03]"
                     alt={w.imageAlt ?? w.title}
                     src={workImageFor(w.imageUrl)}
+                    fallbackSrc={w.originalUrl}
                   />
                   <div className="absolute inset-0 bg-tertiary/0 group-hover:bg-tertiary/10 transition-colors" />
                 </div>
@@ -372,6 +376,7 @@ export default async function ArtistProfilePage({ params, searchParams }: Props)
                   className="object-contain p-2"
                   alt={work.imageAlt ?? work.title}
                   src={workImageFor(work.imageUrl)}
+                  fallbackSrc={work.originalUrl}
                 />
               </div>
             ))}

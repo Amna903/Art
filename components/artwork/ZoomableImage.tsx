@@ -101,6 +101,7 @@ export function ZoomableImage({ src, displaySrc, alt, className }: Props) {
           className="object-contain transition-transform duration-700 ease-out"
           alt={alt}
           src={displaySrc ?? src}
+          fallbackSrc={displaySrc && displaySrc !== src ? src : undefined}
         />
         <button
           onClick={(e) => {

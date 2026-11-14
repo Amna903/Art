@@ -52,7 +52,16 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           .maybeSingle();
         if (managed) return go(`/artists/${managed.slug}?ref=qr`);
       }
-      return go(`/artists/${artwork.artist_id}?ref=qr`);
+      // An account artist's profile only exists while they have a published
+      // work; otherwise send the visitor to the directory, not "not found".
+      const { count } = await db
+        .from("artworks")
+        .select("id", { count: "exact", head: true })
+        .eq("artist_id", artwork.artist_id)
+        .is("managed_artist_id", null)
+        .eq("status", "published");
+      if (count) return go(`/artists/${artwork.artist_id}?ref=qr`);
+      return go("/artists");
     }
 
     const { data: artist } = await db.from("managed_artists").select("slug").eq("id", id).maybeSingle();

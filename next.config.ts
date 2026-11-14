@@ -13,6 +13,17 @@ const nextConfig: NextConfig = {
     // — an allowlist of specific hosts would break the next one an admin
     // pastes, so any https source is allowed instead.
     remotePatterns: [{ protocol: "https", hostname: "**" }],
+    // Vercel's image optimizer is OFF. On the Hobby plan it has a monthly
+    // quota, and once that runs out every optimized image fails (a broken
+    // image across the site until the month resets). It isn't needed:
+    //   - artwork lists use pre-generated 640/1280 WebP thumbnails
+    //     (lib/images/thumbnails.ts — generated with sharp in our own API
+    //     route, which does not count against the quota);
+    //   - artist portraits and hero images are compressed to WebP in the
+    //     browser before upload (lib/utils/compress-image.ts).
+    // Images are served exactly as stored. Remove this line to turn the
+    // optimizer back on (e.g. on a paid plan).
+    unoptimized: true,
     // AVIF first (smallest), WebP for browsers without AVIF.
     formats: ["image/avif", "image/webp"],
     // Keep optimized images for a year: on shared hosting re-encoding is the
