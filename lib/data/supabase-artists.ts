@@ -23,6 +23,8 @@ export type SupabaseArtwork = {
   country: string | null;
   description: string | null;
   dimensions: string | null;
+  /** Admin-assigned reference (e.g. NA-C1-001), shown on the certificate. */
+  referenceNumber: string | null;
   /** Original upload (detail page zoom). */
   imageUrl: string;
   /** Pre-generated 1280px WebP for lists, cards and the 3D walls (640px
@@ -50,6 +52,7 @@ export type ArtworkRow = {
   country: string | null;
   description: string | null;
   dimensions: string | null;
+  reference_number?: string | null;
   image_url: string;
   thumb_base?: string | null;
   artist_id: string;
@@ -80,7 +83,7 @@ export type ManagedArtistRow = {
 };
 
 const ARTWORK_SELECT =
-  "id, slug, title, medium, year, country, description, dimensions, image_url, thumb_base, artist_id, managed_artist_id, translations";
+  "id, slug, title, medium, year, country, description, dimensions, reference_number, image_url, thumb_base, artist_id, managed_artist_id, translations";
 const PROFILE_SELECT = "id, display_name, bio, country, avatar_url, translations";
 export const MANAGED_SELECT = "id, slug, display_name, bio, country, city, technique, avatar_url, translations, created_at";
 
@@ -102,6 +105,7 @@ export function toArtwork(
       country: row.country,
       description,
       dimensions: row.dimensions ?? null,
+      referenceNumber: row.reference_number?.trim() || null,
       imageUrl: row.image_url,
       thumbUrl: row.thumb_base ? `${row.thumb_base}/1280.webp` : null,
       artistId: managed.id,
@@ -125,6 +129,7 @@ export function toArtwork(
     country: row.country,
     description,
     dimensions: row.dimensions ?? null,
+    referenceNumber: row.reference_number?.trim() || null,
     imageUrl: row.image_url,
     thumbUrl: row.thumb_base ? `${row.thumb_base}/1280.webp` : null,
     artistId: row.artist_id,
@@ -286,6 +291,7 @@ export function artistFromSummary(first: SupabaseArtwork, worksCount: number, me
     featuredWork: first.title,
     bio: first.artistBio ?? "",
     image: first.artistAvatarUrl ?? first.imageUrl,
+    hasPortrait: Boolean(first.artistAvatarUrl?.trim()),
   };
 }
 
@@ -323,3 +329,23 @@ export function cleanPlace(place: string | null | undefined): string {
   return p ? p.charAt(0).toLocaleUpperCase() + p.slice(1) : "";
 }
 
+
+/** Profile-only fields of an admin-represented artist: the short intro shown
+ * beside the portrait and the studio video link. Null when not managed. */
+export async function getManagedArtistExtras(
+  slug: string,
+  lang: Language = "en",
+): Promise<{ intro: string | null; videoUrl: string | null } | null> {
+  if (!isSupabaseConfigured()) return null;
+  const { data, error } = await supabase
+    .from("managed_artists")
+    .select("intro, video_url, translations")
+    .eq("slug", slug)
+    .maybeSingle();
+  if (error || !data) return null;
+  return {
+    intro: localized(data.translations, "intro", lang, data.intro)?.trim() || null,
+    // Only a real web link: an empty or malformed value hides the button.
+    videoUrl: /^https?:\/\/\S+$/i.test(data.video_url?.trim() ?? "") ? data.video_url!.trim() : null,
+  };
+}

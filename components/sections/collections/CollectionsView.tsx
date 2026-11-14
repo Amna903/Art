@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "@/components/i18n/Link";
 import Image from "next/image";
 import { PriceUponRequest } from "@/components/enquiry/PriceUponRequest";
+import { EditableImage } from "@/components/editing/EditableImage";
 import { COLLECTIONS, type Collection } from "@/lib/data/collections";
 import type { SupabaseCollection } from "@/lib/data/supabase-collections";
 import { useLanguage } from "@/lib/i18n";
@@ -25,7 +26,18 @@ function fromSupabase(c: SupabaseCollection): Collection {
   };
 }
 
-export function CollectionsView({ initialItems = [] }: { initialItems?: SupabaseCollection[] }) {
+const DEFAULT_NEWSLETTER_IMAGE = {
+  src: "https://nu-artcollective.lovable.app/__l5e/assets-v1/8fb36909-f581-4701-9e44-3a179fcb76d5/afr-ceramic.jpg",
+  alt: "Contemporary African ceramic vessel curated for NUA-ARTE.",
+};
+
+export function CollectionsView({
+  initialItems = [],
+  newsletterImage = DEFAULT_NEWSLETTER_IMAGE,
+}: {
+  initialItems?: SupabaseCollection[];
+  newsletterImage?: { src: string; alt: string };
+}) {
   const { t, language } = useLanguage();
   // Oldest real collection takes slot 0, so a slot never jumps once filled —
   // the rest stay static until replaced by admin-created collections.
@@ -316,13 +328,14 @@ export function CollectionsView({ initialItems = [] }: { initialItems?: Supabase
               </button>
             </form>
           </div>
-          <div className="hidden md:block relative aspect-square">
-            <Image
-              fill
-              sizes="50vw"
-              className="object-cover opacity-80"
-              alt={t("Contemporary African ceramic vessel curated for NUA-ARTE.")}
-              src="https://nu-artcollective.lovable.app/__l5e/assets-v1/8fb36909-f581-4701-9e44-3a179fcb76d5/afr-ceramic.jpg"
+          <div className="hidden md:block">
+            <EditableImage
+              page="collections"
+              blockKey="newsletter_image"
+              bucket="collections"
+              src={newsletterImage.src}
+              alt={newsletterImage.alt}
+              className="w-full aspect-square"
             />
           </div>
         </div>

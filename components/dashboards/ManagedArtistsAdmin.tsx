@@ -34,6 +34,8 @@ type ArtistDraft = {
   id?: string;
   display_name: string;
   bio: string;
+  intro: string;
+  video_url: string;
   country: string;
   city: string;
   technique: string;
@@ -48,6 +50,8 @@ function emptyArtistDraft(): ArtistDraft {
   return {
     display_name: "",
     bio: "",
+    intro: "",
+    video_url: "",
     country: "",
     city: "",
     technique: "",
@@ -119,6 +123,8 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
       id: artist.id,
       display_name: artist.display_name,
       bio: artist.bio ?? "",
+      intro: artist.intro ?? "",
+      video_url: artist.video_url ?? "",
       country: artist.country,
       city: artist.city ?? "",
       technique: artist.technique ?? "",
@@ -143,6 +149,8 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
     const payload = {
       display_name: artistDraft.display_name.trim(),
       bio: artistDraft.bio.trim() || null,
+      intro: artistDraft.intro.trim() || null,
+      video_url: artistDraft.video_url.trim() || null,
       country: artistDraft.country,
       city: artistDraft.city.trim() || null,
       technique: artistDraft.technique.trim() || null,
@@ -282,6 +290,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
       year: artworkDraft.year ?? null,
       medium: mediumValue || null,
       dimensions: artworkDraft.dimensions?.trim() || null,
+      reference_number: artworkDraft.reference_number?.trim().toUpperCase() || null,
       country: selected.country,
       image_url: artworkDraft.image_url,
       status: (artworkDraft.status as Artwork["status"]) ?? "published",
@@ -489,15 +498,29 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                 />
               </div>
               <F
-                label={t("Bio")}
+                label={t("Intro (beside the portrait)")}
+                value={artistDraft.intro}
+                onChange={(v) => setArtistDraft({ ...artistDraft, intro: v })}
+                textarea
+              />
+              <F
+                label={t("Narrative (full bio)")}
                 value={artistDraft.bio}
                 onChange={(v) => setArtistDraft({ ...artistDraft, bio: v })}
                 textarea
               />
               <TranslationFields
-                fields={[{ name: "bio", label: "Bio", textarea: true }]}
+                fields={[
+                  { name: "intro", label: "Intro", textarea: true },
+                  { name: "bio", label: "Narrative", textarea: true },
+                ]}
                 value={artistDraft.translations}
                 onChange={(translations) => setArtistDraft({ ...artistDraft, translations })}
+              />
+              <F
+                label={t("Studio video URL (button hidden when empty)")}
+                value={artistDraft.video_url}
+                onChange={(v) => setArtistDraft({ ...artistDraft, video_url: v })}
               />
 
               <div className="flex flex-wrap gap-3 pt-2">
@@ -591,6 +614,11 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                       label={t("Dimensions")}
                       value={artworkDraft.dimensions ?? ""}
                       onChange={(v) => setArtworkDraft({ ...artworkDraft, dimensions: v })}
+                    />
+                    <F
+                      label={t("Reference number (e.g. NA-C1-001)")}
+                      value={artworkDraft.reference_number ?? ""}
+                      onChange={(v) => setArtworkDraft({ ...artworkDraft, reference_number: v })}
                     />
                     <F
                       label={t("Price (USD, internal)")}

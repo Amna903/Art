@@ -6,6 +6,7 @@ import { SaveArtistButton } from "@/components/artist/SaveArtistButton";
 import { getArtistBySlug, getArtworksByArtistSlug } from "@/lib/sanity/queries";
 import { getCountryBySlug, getCountryDisplayName } from "@/lib/data/africa";
 import { getRealArtists, listPublishedArtworks } from "@/lib/data/supabase-artists-cached";
+import { getManagedArtistExtras } from "@/lib/data/supabase-artists";
 import { Pagination, pageFrom } from "@/components/ui/Pagination";
 import { getArtistBySlug as getStaticArtistBySlug } from "@/lib/data/artists";
 import { getDirectoryArtists } from "@/lib/data/directory";
@@ -45,6 +46,9 @@ type ResolvedArtist = {
     city: string | null;
     technique: string | null;
     bio: string | null;
+    /** Short text beside the portrait; distinct from the narrative bio. */
+    intro?: string | null;
+    videoUrl?: string | null;
     featuredWork: string | null;
     imageUrl: string | null;
     imageAlt: string | null;
@@ -76,13 +80,13 @@ async function resolveArtist(slug: string, lang: Language, t: Translator, page =
 
   const realArtist = (await getRealArtists(lang)).find((artist) => artist.slug === slug);
   if (realArtist) {
-    const worksPage = await listPublishedArtworks({
+    const [worksPage, extras] = await Promise.all([listPublishedArtworks({
       lang,
       artistSlug: slug,
       offset: (page - 1) * WORKS_PER_PAGE,
       limit: WORKS_PER_PAGE,
       withTotal: true,
-    });
+    }), getManagedArtistExtras(slug, lang)]);
     const works = worksPage.items.map((work) => ({
         slug: work.slug,
         title: work.title,
@@ -100,6 +104,8 @@ async function resolveArtist(slug: string, lang: Language, t: Translator, page =
         city: realArtist.city,
         technique: realArtist.technique,
         bio: realArtist.bio,
+        intro: extras?.intro ?? null,
+        videoUrl: extras?.videoUrl ?? null,
         featuredWork: realArtist.featuredWork,
         imageUrl: realArtist.image,
         imageAlt: t("Portrait of {name}", { name: realArtist.name }),
@@ -229,11 +235,13 @@ export default async function ArtistProfilePage({ params, searchParams }: Props)
               ) : null}
             </h1>
             <div className="h-1 w-24 bg-tertiary mb-8" />
-            {/* The bio is curatorial copy, not the artist's words: no quotation
-                marks. Only its opening paragraph appears here. */}
-            <p className="text-body-lg text-on-surface max-w-md leading-relaxed mb-8">
-              {artist.bio?.split(/\n\s*\n/)[0] || t("A contemporary practice rooted in {place}.", { place: getCountryDisplayName(country ?? artist.countryName, lang) || t("Africa") })}
-            </p>
+            {/* The intro is its own text, set by the admin; the narrative
+                below carries the full bio. Nothing is repeated. */}
+            {artist.intro ? (
+              <p className="text-body-lg text-on-surface max-w-md leading-relaxed mb-8 whitespace-pre-line">
+                {artist.intro}
+              </p>
+            ) : null}
             <p className="text-body-md font-semibold text-tertiary uppercase tracking-widest">
               {t("Featured work:")}{" "}{featuredWork}
             </p>
@@ -277,17 +285,24 @@ export default async function ArtistProfilePage({ params, searchParams }: Props)
                 ? t("Featured work: {featuredWork}.", { featuredWork: artist.featuredWork })
                 : t("This artist profile is sourced from Sanity and will expand as more studio notes are added.")}
             </p>
-            <div className="mt-8">
-              <button className="inline-flex items-center gap-4 bg-surface-container-high hover:bg-secondary-container hover:text-on-secondary-container px-6 py-4 rounded-full transition-all group">
-                <span
-                  className="material-symbols-outlined text-secondary-container group-hover:text-on-secondary-container"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
+            {artist.videoUrl ? (
+              <div className="mt-8">
+                <a
+                  href={artist.videoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-4 bg-surface-container-high hover:bg-secondary-container hover:text-on-secondary-container px-6 py-4 rounded-full transition-all group"
                 >
-                  play_circle
-                </span>
-                <span className="text-label-caps">{t("Watch: Studio Walkthrough")}</span>
-              </button>
-            </div>
+                  <span
+                    className="material-symbols-outlined text-secondary-container group-hover:text-on-secondary-container"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  >
+                    play_circle
+                  </span>
+                  <span className="text-label-caps">{t("Watch: Studio Walkthrough")}</span>
+                </a>
+              </div>
+            ) : null}
           </div>
         </div>
       </section>

@@ -72,7 +72,11 @@ export async function POST(req: Request) {
     // Never trust status or originality fields supplied by the browser.
     const submitted = { ...input };
     delete submitted.id;
-    if (!isAdmin) delete submitted.managed_artist_id;
+    if (!isAdmin) {
+      delete submitted.managed_artist_id;
+      // Reference numbers are assigned by the admin only.
+      delete submitted.reference_number;
+    }
     const payload: ArtworkInput = {
       ...submitted,
       artist_id: isAdmin ? input.artist_id ?? user.id : user.id,

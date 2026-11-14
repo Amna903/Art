@@ -29,6 +29,8 @@ export type Artist = {
   featuredWork: string;
   bio: string;
   image: string;
+  /** True when `image` is the artist's own portrait (not an artwork fallback). */
+  hasPortrait?: boolean;
   /** Set on generated fixture artists so the bio can be re-rendered in the
    * visitor's language (see fixtureBio). */
   fixture?: { first: string; countrySlug: string };
