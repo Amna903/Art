@@ -5,7 +5,7 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { isLocale, localizePath, DEFAULT_LOCALE } from "@/lib/i18n/config";
 
 /**
- * Permanent QR entry point: nua-arte.com/q/<id>.
+ * Permanent QR entry point: www.nua-arte.com/q/<id>.
  *
  * Printed QR codes encode the record's id (never its slug), so a label keeps
  * working when a title, slug or page layout changes. The id may be an artwork
