@@ -13,7 +13,7 @@ export const QR_CODES_ENABLED = true;
  * if the site is served from another address; codes already printed keep the
  * address they were made with.
  */
-export const QR_BASE_URL = `${(process.env.NEXT_PUBLIC_QR_BASE_URL?.trim() || "https://nua-arte.com").replace(/\/+$/, "").replace(/\/q$/, "")}/q/`;
+export const QR_BASE_URL = `${(process.env.NEXT_PUBLIC_QR_BASE_URL?.trim() || "https://www.nua-arte.com").replace(/\/+$/, "").replace(/\/q$/, "")}/q/`;
 
 async function download(id: string, name: string, format: "png" | "svg") {
   const url = `${QR_BASE_URL}${id}`;
@@ -30,7 +30,7 @@ async function download(id: string, name: string, format: "png" | "svg") {
   if (format === "svg") setTimeout(() => URL.revokeObjectURL(href), 1000);
 }
 
-/** Download links for a print-ready QR code that opens nua-arte.com/q/<id>. */
+/** Download links for a print-ready QR code that opens www.nua-arte.com/q/<id>. */
 export function QrCodeButton({ id, name, label }: { id: string; name: string; label?: string }) {
   const { t } = useLanguage();
   if (!QR_CODES_ENABLED) return null;
