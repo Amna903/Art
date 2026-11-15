@@ -6,28 +6,14 @@ import { useCallback, useState } from "react";
 /**
  * next/image for artwork pictures. Artwork thumbnails are pre-generated at
  * upload (640 / 1280 px WebP, lib/images/thumbnails.ts) and served straight
- * from storage, so lists, cards and the 3D walls never spend Vercel's
- * per-image optimization quota (Hobby: 5,000 a month). Anything that is not a
- * thumbnail goes through the normal optimizer.
+ * from storage; the site-wide loader (lib/images/loader.ts) picks the size.
  *
  * A picture that fails to load never stays a broken-image icon. It steps down:
- *   1. the thumbnail, or the optimized original;
- *   2. `fallbackSrc` (the original upload) or the same picture without the
- *      optimizer — covers a missing thumbnail file, an optimizer error or an
- *      exhausted optimization quota, and very large or unusual uploads the
- *      optimizer refuses;
+ *   1. `src` (usually the thumbnail);
+ *   2. `fallbackSrc` (the original upload), e.g. when a thumbnail file is
+ *      missing;
  *   3. a neutral paper-coloured box.
  */
-const THUMB = /\/artwork-thumbs\/.+\/(640|1280)\.webp(\?.*)?$/;
-
-export function isThumbnail(src: unknown): src is string {
-  return typeof src === "string" && THUMB.test(src);
-}
-
-/** The smallest pre-generated size that covers the requested width. */
-function thumbLoader({ src, width }: { src: string; width: number }): string {
-  return src.replace(/\/(640|1280)\.webp/, `/${width <= 640 ? 640 : 1280}.webp`);
-}
 
 type Props = ImageProps & {
   /** The original upload, tried when the thumbnail (src) cannot be loaded. */
@@ -58,9 +44,7 @@ export function ArtworkImage({ fallbackSrc, ...props }: Props) {
   };
 
   const retry = fallbackSrc?.trim() && fallbackSrc !== srcKey ? fallbackSrc.trim() : null;
-  const canRetry = !!retry || !isThumbnail(props.src);
-
-  if (stage >= 2 || (stage === 1 && !canRetry) || !srcKey.trim()) {
+  if (stage >= 2 || (stage === 1 && !retry) || !srcKey.trim()) {
     return (
       <span
         role="img"
@@ -72,16 +56,11 @@ export function ArtworkImage({ fallbackSrc, ...props }: Props) {
   }
 
   if (stage === 1) {
-    // Straight from storage, no optimizer and no thumbnail loader.
+    // The fallback picture, exactly as stored.
     // eslint-disable-next-line jsx-a11y/alt-text -- alt is passed through in props
-    return <Image key="retry" {...props} src={retry ?? props.src} unoptimized loader={undefined} ref={refFor(1)} onError={() => failAt(1)} />;
+    return <Image key="retry" {...props} src={retry!} unoptimized ref={refFor(1)} onError={() => failAt(1)} />;
   }
 
-  return isThumbnail(props.src) ? (
-    // eslint-disable-next-line jsx-a11y/alt-text -- alt is passed through in props
-    <Image key="first" {...props} loader={thumbLoader} ref={refFor(0)} onError={() => failAt(0)} />
-  ) : (
-    // eslint-disable-next-line jsx-a11y/alt-text -- alt is passed through in props
-    <Image key="first" {...props} ref={refFor(0)} onError={() => failAt(0)} />
-  );
+  // eslint-disable-next-line jsx-a11y/alt-text -- alt is passed through in props
+  return <Image key="first" {...props} ref={refFor(0)} onError={() => failAt(0)} />;
 }
