@@ -17,8 +17,12 @@ export const QR_BASE_URL = `${(process.env.NEXT_PUBLIC_QR_BASE_URL?.trim() || "h
 
 async function download(id: string, name: string, format: "png" | "svg") {
   const url = `${QR_BASE_URL}${id}`;
-  // High error correction ("H") so a scuffed or partly covered label still scans.
-  const options = { errorCorrectionLevel: "H" as const, margin: 2 };
+  // Medium error correction ("M"): still recovers ~15% damage, but the code
+  // needs 37 squares across instead of 45 at "H", so each square prints
+  // larger and phones read small labels far more reliably. margin: 4 is the
+  // white border (quiet zone) the QR standard requires; scanners often fail
+  // to find a code with less, especially on a coloured label or wall.
+  const options = { errorCorrectionLevel: "M" as const, margin: 4 };
   const href =
     format === "png"
       ? await QRCode.toDataURL(url, { ...options, width: 1200 })
