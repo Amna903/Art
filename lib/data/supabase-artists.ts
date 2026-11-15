@@ -4,6 +4,7 @@ import { TECHNIQUES, type Artist, type Technique } from "@/lib/data/artists";
 import type { Json } from "@/lib/supabase/types";
 import type { Language } from "@/lib/i18n/config";
 import { localized } from "@/lib/i18n/content";
+import { siteThumbUrl } from "@/lib/images/thumb-url";
 
 // Real artist/artwork data from Supabase:
 //   - Self-service artists → artworks.artist_id + profiles
@@ -136,7 +137,7 @@ export function toArtwork(
       dimensions: row.dimensions ?? null,
       referenceNumber: row.reference_number?.trim() || null,
       imageUrl: row.image_url,
-      thumbUrl: row.thumb_base ? `${row.thumb_base}/1280.webp` : null,
+      thumbUrl: row.thumb_base ? siteThumbUrl(`${row.thumb_base}/1280.webp`) : null,
       artistId: managed.id,
       artistSlug: managed.slug,
       artistName: splitArtistName(managed.display_name ?? "").name || "Artist",
@@ -160,7 +161,7 @@ export function toArtwork(
     dimensions: row.dimensions ?? null,
     referenceNumber: row.reference_number?.trim() || null,
     imageUrl: row.image_url,
-    thumbUrl: row.thumb_base ? `${row.thumb_base}/1280.webp` : null,
+    thumbUrl: row.thumb_base ? siteThumbUrl(`${row.thumb_base}/1280.webp`) : null,
     artistId: row.artist_id,
     artistSlug: row.artist_id,
     artistName: splitArtistName(profile?.display_name ?? "").name || "Artist",
