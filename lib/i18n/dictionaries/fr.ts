@@ -1381,7 +1381,7 @@ const fr: Record<string, string> = {
   "{artists} artists from {countries}": "{artists} artistes · {countries}",
   "{artists} artists across {count} countries": "{artists} artistes dans {count} pays",
   "All countries": "Tous les pays",
-  "The first collection is coming soon.": "La première collection arrive bientôt.",
+  "The works from the first collection will be shown here soon.": "Les œuvres de la première collection seront bientôt présentées ici.",
   "NUA-ARTE exists to close the distance between contemporary African artists and the collectors, curators, and institutions who should already know their work. We built a curated, country-by-country platform — not an algorithmic marketplace — because discovery should feel like travel, not scrolling.": "NUA-ARTE existe pour rapprocher les artistes africains contemporains des collectionneurs, commissaires et institutions qui devraient déjà connaître leur travail. Nous avons construit une plateforme organisée pays par pays — pas une place de marché algorithmique — parce que la découverte doit ressembler à un voyage, pas à un défilement.",
   "Artists are paid when their work is acquired and earn a commission when it sells. Our first collection was made in Luanda, and the circle is growing from Angola and the Congo.": "Les artistes sont payés à l'acquisition de leur œuvre et touchent une commission à la vente. Notre première collection a été réalisée à Luanda, et le cercle s'agrandit depuis l'Angola et le Congo.",
   "Today NUA-ARTE represents {count} artists.": "Aujourd'hui, NUA-ARTE représente {count} artistes.",

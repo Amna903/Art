@@ -193,7 +193,7 @@ export function CollectionsView({
       {filtered.length === 0 ? (
         <section className="py-24 text-center">
           <p className="font-body-lg text-on-surface-variant mb-6">
-            {allItems.length === 0 ? t("The first collection is coming soon.") : t("No collections match your filters.")}
+            {allItems.length === 0 ? t("The works from the first collection will be shown here soon.") : t("No collections match your filters.")}
           </p>
           <button
             onClick={resetAll}
