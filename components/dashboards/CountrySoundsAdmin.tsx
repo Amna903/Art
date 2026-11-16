@@ -214,7 +214,7 @@ export function CountrySoundsAdmin() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="px-3 py-2 bg-transparent border border-primary/20 text-sm text-primary placeholder:text-on-surface-variant/50 focus:outline-none focus:border-secondary w-full md:w-64"
-        />
+ />
       </div>
 
       {message && (
@@ -251,7 +251,7 @@ export function CountrySoundsAdmin() {
                       <h3 className="font-display text-base text-primary">{getCountryDisplayName(c, language)}</h3>
                     </div>
                     <span
-                      className={`text-[9px] uppercase tracking-widest px-2 py-0.5 border ${
+                      className={`text-micro uppercase tracking-widest px-2 py-0.5 border ${
                         hasSound
                           ? "bg-secondary/10 border-secondary text-secondary"
                           : "border-primary/20 text-on-surface-variant"
@@ -278,14 +278,14 @@ export function CountrySoundsAdmin() {
                       {isPlaying ? t("Playing…") : t("Preview")}
                     </button>
                   ) : (
-                    <span className="text-[10px] uppercase tracking-widest text-on-surface-variant">
+                    <span className="text-tiny uppercase tracking-widest text-on-surface-variant">
                       {t("No custom audio")}
                     </span>
                   )}
 
                   <div className="flex items-center gap-2">
                     <label
-                      className={`cursor-pointer inline-flex items-center gap-1 px-2.5 py-1.5 border text-[10px] uppercase tracking-widest transition-colors ${
+                      className={`cursor-pointer inline-flex items-center gap-1 px-2.5 py-1.5 border text-tiny uppercase tracking-widest transition-colors ${
                         isUploading
                           ? "opacity-50 pointer-events-none border-primary/20 text-on-surface-variant"
                           : "border-primary/30 text-primary hover:border-secondary hover:text-secondary"
@@ -301,7 +301,7 @@ export function CountrySoundsAdmin() {
                           const file = e.target.files?.[0];
                           if (file) handleFileUpload(c, file);
                         }}
-                      />
+ />
                     </label>
 
                     {hasSound && (

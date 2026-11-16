@@ -318,7 +318,7 @@ export function VirtualGallery({
                   focus={view === "tour" ? current : null}
                   focusOffset={desktop ? 0.9 : 0}
                   onSelectArtwork={(a) => openTour(artworks.findIndex((x) => x.id === a.id))}
-                />
+ />
               </Suspense>
             </div>
           )}
@@ -395,7 +395,7 @@ export function VirtualGallery({
                     sizes="(max-width: 1023px) 100vw, 440px"
                     className="object-contain"
                     preload
-                  />
+ />
                 </button>
 
                 <div className="px-5 pb-8 pt-6 sm:px-7">
@@ -547,7 +547,7 @@ export function VirtualGallery({
                   ? "bottom-4 right-4 items-end"
                   : undefined
             }
-          />
+ />
         </div>
       )}
 
@@ -559,7 +559,7 @@ export function VirtualGallery({
           artworkTitle={current.title}
           artistName={current.artist}
           artworkImage={current.image}
-        />
+ />
       )}
 
       {editingRooms && <RoomTitlesEditor initial={roomTitles} onClose={() => setEditingRooms(false)} />}
@@ -613,7 +613,7 @@ function ZoomView({ artwork, onClose }: { artwork: Artwork; onClose: () => void 
           sizes="100vw"
           className="object-contain transition-transform duration-300"
           style={{ transform: origin ? "scale(2.2)" : undefined, transformOrigin: origin ?? undefined }}
-        />
+ />
       </button>
       <button
         type="button"
@@ -648,10 +648,10 @@ function RoomsLobby({ rooms }: { rooms: GalleryRooms }) {
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               className="object-contain p-3 transition-transform duration-700 group-hover:scale-[1.03]"
-            />
+ />
           )}
           {current && (
-            <span className="absolute left-3 top-3 bg-[var(--nua-charcoal-deep)]/85 px-2.5 py-1 text-[11px] uppercase tracking-[0.18em] text-[var(--nua-white)]">
+            <span className="absolute left-3 top-3 bg-[var(--nua-charcoal-deep)]/85 px-2.5 py-1 text-small uppercase tracking-[0.18em] text-[var(--nua-white)]">
               {t("You are here")}
             </span>
           )}

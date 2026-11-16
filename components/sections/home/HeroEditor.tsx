@@ -1,5 +1,7 @@
 "use client";
 
+import { Select } from "@/components/ui/Field";
+import { Modal } from "@/components/ui/Modal";
 import { buttonClass } from "@/components/ui/Button";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -95,14 +97,7 @@ export function HeroEditor({ initial, onClose }: { initial: HeroContent; onClose
     });
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center overflow-auto bg-black/60 p-4">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-auto bg-background p-8 text-on-surface">
-        <div className="mb-6 flex items-center justify-between">
-          <h3 className="font-display text-2xl text-primary">{t("Edit hero")}</h3>
-          <button type="button" onClick={onClose} aria-label={t("Close")} className="text-on-surface-variant">
-            ✕
-          </button>
-        </div>
+    <Modal title={t("Edit hero")} onClose={onClose} overlayClassName="z-[70] overflow-auto" panelClassName="max-h-[90vh] max-w-2xl overflow-auto text-on-surface" titleClassName="font-display text-2xl">
 
         {languageNote && <p className="mb-5 text-xs text-on-surface-variant">{languageNote}</p>}
 
@@ -113,14 +108,14 @@ export function HeroEditor({ initial, onClose }: { initial: HeroContent; onClose
             <span className="mb-2 block font-label-caps text-label-caps uppercase text-on-surface-variant">
               {t("Title colour")}
             </span>
-            <select
+            <Select
               value={draft.titleColor}
               onChange={(e) => set("titleColor", e.target.value === "red" ? "red" : "white")}
-              className="w-full border-b border-primary/30 bg-transparent py-2 text-primary"
+
             >
               <option value="white">{t("Charcoal (light mode) / white (dark mode)")}</option>
               <option value="red">{t("Poster red")}</option>
-            </select>
+            </Select>
           </label>
           <F label={t("Subtitle — line 1")} value={draft.subLine1} onChange={(v) => set("subLine1", v)} />
           <F label={t("Subtitle — line 2")} value={draft.subLine2} onChange={(v) => set("subLine2", v)} />
@@ -145,7 +140,6 @@ export function HeroEditor({ initial, onClose }: { initial: HeroContent; onClose
             {saving ? t("Saving…") : t("Save")}
           </button>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

@@ -217,7 +217,7 @@ export function ClayAtlasMap() {
             onChange={(e) => setSearch(e.target.value)}
             className="bg-transparent font-mono text-xs uppercase tracking-widest focus:outline-none w-full"
             style={{ color: "var(--atlas-fg)" }}
-          />
+ />
           {search && (
             <button
               onClick={() => setSearch("")}
@@ -234,7 +234,7 @@ export function ClayAtlasMap() {
             type="button"
             onClick={toggleSound}
             aria-label={soundOn ? t("Mute sound") : t("Unmute sound")}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 border rounded text-[10px] font-mono tracking-[0.2em] uppercase transition-all shadow-2xs"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 border rounded text-tiny font-mono tracking-[0.2em] uppercase transition-all shadow-2xs"
             style={{
               borderColor: "var(--atlas-border)",
               color: soundOn ? "var(--atlas-accent)" : "var(--atlas-fg-muted)",
@@ -379,7 +379,7 @@ export function ClayAtlasMap() {
                     strokeWidth="1.6"
                     strokeLinejoin="round"
                     pointerEvents="none"
-                  />
+ />
                   <path
                     d={shard.path}
                     transform="translate(0, 4)"
@@ -388,7 +388,7 @@ export function ClayAtlasMap() {
                     strokeWidth="1.6"
                     strokeLinejoin="round"
                     pointerEvents="none"
-                  />
+ />
                   <path
                     d={shard.path}
                     transform="translate(0, 2)"
@@ -397,7 +397,7 @@ export function ClayAtlasMap() {
                     strokeWidth="1.6"
                     strokeLinejoin="round"
                     pointerEvents="none"
-                  />
+ />
                   <path
                     d={shard.path}
                     transform="translate(0, 1)"
@@ -406,7 +406,7 @@ export function ClayAtlasMap() {
                     strokeWidth="1.6"
                     strokeLinejoin="round"
                     pointerEvents="none"
-                  />
+ />
 
                   {/* Main Top Face */}
                   <path
@@ -416,7 +416,7 @@ export function ClayAtlasMap() {
                     strokeWidth={isHovered ? 2.2 : 1.2}
                     strokeLinejoin="round"
                     className="nu-clay-top"
-                  />
+ />
 
                   {/* Chamfered Top Bevel Highlight */}
                   <path
@@ -426,7 +426,7 @@ export function ClayAtlasMap() {
                     strokeWidth={0.75}
                     strokeLinejoin="round"
                     pointerEvents="none"
-                  />
+ />
 
                   <title>{getCountryDisplayName(country, language)}</title>
                 </g>
@@ -474,14 +474,14 @@ export function ClayAtlasMap() {
                     fill={palette.topBase}
                     stroke={isHovered ? "var(--atlas-accent)" : "rgba(42, 14, 12, 0.75)"}
                     strokeWidth={isHovered ? 1.4 : 1}
-                  />
+ />
                   <circle
                     cx={isle.x - (isHovered ? 1.8 : 1.3)}
                     cy={isle.y - (isHovered ? 1.8 : 1.3)}
                     r={isHovered ? 1.8 : 1.3}
                     fill="rgba(255, 255, 255, 0.65)"
                     pointerEvents="none"
-                  />
+ />
                   <title>{getCountryDisplayName(country, language)}</title>
                 </g>
               );
@@ -507,14 +507,14 @@ export function ClayAtlasMap() {
                   {getCountryDisplayName(hoveredCountry, language)}
                 </h3>
               </div>
-              <span className="text-[10px] font-mono tracking-widest uppercase font-semibold text-[color:var(--atlas-accent)]">
+              <span className="text-tiny font-mono tracking-widest uppercase font-semibold text-[color:var(--atlas-accent)]">
                 {t(hoveredCountry.region)}
               </span>
             </div>
             <p className="text-xs italic leading-relaxed mb-3" style={{ color: "var(--atlas-fg-muted)" }}>
               “{t(hoveredCountry.blurb)}”
             </p>
-            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest pt-2.5 border-t" style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-accent)" }}>
+            <div className="flex items-center justify-between text-tiny font-mono uppercase tracking-widest pt-2.5 border-t" style={{ borderColor: "var(--atlas-border)", color: "var(--atlas-accent)" }}>
               <span className="font-semibold">{hoveredStats?.artistsCount} {t("Artists")}</span>
               <span className="font-semibold">{hoveredStats?.worksCount} {t("Works")}</span>
             </div>
@@ -524,12 +524,12 @@ export function ClayAtlasMap() {
 
       {/* Medium Quick Filters Bar */}
       <div className="flex flex-wrap items-center gap-2 pt-2">
-        <span className="font-mono text-[10px] tracking-widest uppercase mr-2" style={{ color: "var(--atlas-fg-muted)" }}>
+        <span className="font-mono text-tiny tracking-widest uppercase mr-2" style={{ color: "var(--atlas-fg-muted)" }}>
           {t("Filter by Medium:")}
         </span>
         <button
           onClick={() => setActiveFilter(null)}
-          className={`px-3.5 py-2 text-[10px] font-mono uppercase tracking-widest border rounded transition-all cursor-pointer ${
+          className={`px-3.5 py-2 text-tiny font-mono uppercase tracking-widest border rounded transition-all cursor-pointer ${
             !activeFilter
               ? "bg-[#D7141E] text-[#FFFFFF] border-[#D7141E] shadow-xs font-semibold"
               : "border-[color:var(--atlas-border)] hover:border-[color:var(--atlas-accent)] hover:opacity-80"
@@ -542,7 +542,7 @@ export function ClayAtlasMap() {
           <button
             key={tech}
             onClick={() => setActiveFilter(activeFilter === tech ? null : tech)}
-            className={`px-3.5 py-2 text-[10px] font-mono uppercase tracking-widest border rounded transition-all cursor-pointer ${
+            className={`px-3.5 py-2 text-tiny font-mono uppercase tracking-widest border rounded transition-all cursor-pointer ${
               activeFilter === tech
                 ? "bg-[#D7141E] text-[#FFFFFF] border-[#D7141E] shadow-xs font-semibold"
                 : "border-[color:var(--atlas-border)] hover:border-[color:var(--atlas-accent)] hover:opacity-80"

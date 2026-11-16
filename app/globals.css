@@ -52,6 +52,11 @@
   --text-navigation--letter-spacing: 0.18em;
   --text-navigation--font-weight: 400;
 
+  /* Small print — tags, counts, captions. Size only, like the old text-[Npx] */
+  --text-micro: 9px;
+  --text-tiny: 10px;
+  --text-small: 11px;
+
   /* Spacing — fluid for responsive proportion */
   --spacing-container-max: 1320px;
   --spacing-header-h: 64px;

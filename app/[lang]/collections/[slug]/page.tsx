@@ -144,7 +144,7 @@ export default async function CollectionDetailPage({ params }: Props) {
           {collection.medium && <Meta label={t("Medium")} value={collection.medium} />}
           <Meta label={t("Artworks")} value={collection.artists ?? `${artworks.length}`} />
           <div>
-            <p className="font-label-caps text-[10px] uppercase text-primary/40">{t("Pricing")}</p>
+            <p className="font-label-caps text-tiny uppercase text-primary/40">{t("Pricing")}</p>
             <PriceUponRequest className="font-body-md text-primary" />
           </div>
         </div>
@@ -158,7 +158,7 @@ export default async function CollectionDetailPage({ params }: Props) {
             className="object-cover"
             alt={collection.imageAlt}
             src={collection.image}
-          />
+ />
         </div>
 
         {artworks.length === 0 ? (
@@ -182,7 +182,7 @@ export default async function CollectionDetailPage({ params }: Props) {
                       className="object-contain p-4 transition-transform duration-700 ease-out group-hover/card:scale-[1.03]"
                       alt={artwork.title}
                       src={artwork.image}
-                    />
+ />
                   </Link>
                   <SaveButton
                     artworkSlug={artwork.slug}
@@ -190,14 +190,14 @@ export default async function CollectionDetailPage({ params }: Props) {
                     artistName={artwork.artist}
                     artworkImage={artwork.image}
                     className="absolute top-4 right-4 z-10 p-2.5 bg-background/90 backdrop-blur rounded-full hover:bg-secondary group/heart transition-colors"
-                  />
+ />
                 </div>
                 <Link href={`/artworks/${artwork.slug}`} className="block">
                   <h2 className="font-headline-sm text-headline-sm mb-1 group-hover:text-secondary transition-colors">
                     {artwork.title}
                   </h2>
                   <p className="font-body-md text-on-surface-variant italic mb-1">{artwork.artist}</p>
-                  <p className="font-label-caps text-[11px] uppercase text-on-surface-variant/60">
+                  <p className="font-label-caps text-small uppercase text-on-surface-variant/60">
                     {[t(artwork.medium), artwork.year].filter(Boolean).join(" · ")}
                   </p>
                 </Link>
@@ -207,8 +207,8 @@ export default async function CollectionDetailPage({ params }: Props) {
                     artworkTitle={artwork.title}
                     artistName={artwork.artist}
                     artworkImage={artwork.image}
-                    className="font-navigation text-[11px] uppercase tracking-widest text-secondary hover:text-primary border-b border-secondary/30 hover:border-primary transition-all pb-0.5"
-                  />
+                    className="font-navigation text-small uppercase tracking-widest text-secondary hover:text-primary border-b border-secondary/30 hover:border-primary transition-all pb-0.5"
+ />
                 </div>
               </article>
             ))}
@@ -222,7 +222,7 @@ export default async function CollectionDetailPage({ params }: Props) {
 function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="font-label-caps text-[10px] uppercase text-primary/40">{label}</p>
+      <p className="font-label-caps text-tiny uppercase text-primary/40">{label}</p>
       <p className="font-body-md text-primary">{value}</p>
     </div>
   );

@@ -164,7 +164,7 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
     <main className="fixed inset-0 bg-primary text-beige overflow-hidden z-[100]">
       {/* Mini-map */}
       <div className="absolute top-4 right-4 z-30 bg-black/80 backdrop-blur-md border border-beige/10 p-3 shadow-2xl">
-        <div className="font-label-caps text-[9px] tracking-widest opacity-50 mb-2">{t("MAP")} · {gallery.country.flag} {countryName.toUpperCase()}</div>
+        <div className="font-label-caps text-micro tracking-widest opacity-50 mb-2">{t("MAP")} · {gallery.country.flag} {countryName.toUpperCase()}</div>
         <div className="flex gap-1">
           {gallery.rooms.map((r, i) => (
             <button
@@ -172,10 +172,10 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
               onClick={() => gotoRoom(i)}
               className={`h-2 w-12 transition-all ${i === currentRoom ? "bg-secondary" : "bg-beige/20 hover:bg-beige/40"}`}
               title={roomTitle(r)}
-            />
+ />
           ))}
         </div>
-        <div className="font-label-caps text-[9px] tracking-widest mt-2 opacity-80">
+        <div className="font-label-caps text-micro tracking-widest mt-2 opacity-80">
           {currentRoom + 1}/{gallery.rooms.length} · {roomTitle(gallery.rooms[currentRoom]).toUpperCase()}
         </div>
       </div>
@@ -183,7 +183,7 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
       {/* Exit */}
       <button
         onClick={exit}
-        className="absolute top-4 left-4 z-30 bg-black/80 backdrop-blur-md border border-beige/10 px-4 py-2 font-label-caps text-[10px] tracking-widest hover:bg-secondary transition-colors"
+        className="absolute top-4 left-4 z-30 bg-black/80 backdrop-blur-md border border-beige/10 px-4 py-2 font-label-caps text-tiny tracking-widest hover:bg-secondary transition-colors"
       >
         {t("← EXIT GALLERY")}
       </button>
@@ -215,7 +215,7 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
                   transform: "perspective(800px) rotateX(60deg)",
                   transformOrigin: "top",
                 }}
-              />
+ />
               {/* Red thread on floor */}
               <svg className="absolute bottom-0 left-0 w-full h-1/3 pointer-events-none" viewBox="0 0 1000 200" preserveAspectRatio="none">
                 <line x1="0" y1="100" x2="1000" y2="100" stroke="var(--red-blood)" strokeWidth="2" strokeDasharray="12 8" opacity="0.7" />
@@ -251,7 +251,7 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
                           style={{
                             background: "radial-gradient(ellipse at center, rgba(220, 220, 220, 0.25) 0%, transparent 70%)",
                           }}
-                        />
+ />
                         {/* Frame */}
                         <div
                           className="relative bg-beige border-[10px] border-[#1A1A1A] shadow-2xl"
@@ -274,15 +274,15 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
                             <span
                               className="absolute -inset-6 rounded-full border-2 border-secondary opacity-70 pointer-events-none"
                               style={{ animation: "pulse-ring 3s ease-in-out infinite" }}
-                            />
+ />
                           )}
                         </div>
                         {/* Plaque */}
                         <div className="mt-4 bg-beige text-primary px-3 py-2 border-l-2 border-secondary max-w-[280px]">
-                          <p className="font-label-caps text-[9px] tracking-widest opacity-60">{a.year} · {t(a.technique)}</p>
+                          <p className="font-label-caps text-micro tracking-widest opacity-60">{a.year} · {t(a.technique)}</p>
                           <p className="font-navigation text-sm uppercase truncate">{a.title}</p>
                           <p className="font-body-md text-xs opacity-70 truncate">{a.artist}</p>
-                          <p className="font-label-caps text-[9px] tracking-widest mt-1 text-secondary">
+                          <p className="font-label-caps text-micro tracking-widest mt-1 text-secondary">
                             {a.price !== null ? t("PRICE UPON REQUEST") : t("FOR EXHIBITION ONLY")}
                           </p>
                         </div>
@@ -301,13 +301,13 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
         <button
           onClick={() => gotoRoom(Math.max(currentRoom - 1, 0))}
           disabled={currentRoom === 0}
-          className="px-4 py-2 font-label-caps text-[10px] tracking-widest hover:bg-beige/10 disabled:opacity-30 transition-colors"
+          className="px-4 py-2 font-label-caps text-tiny tracking-widest hover:bg-beige/10 disabled:opacity-30 transition-colors"
         >
           {t("◀ PREV")}
         </button>
         <button
           onClick={() => setAutoWalk((v) => !v)}
-          className={`px-4 py-2 font-label-caps text-[10px] tracking-widest transition-colors ${
+          className={`px-4 py-2 font-label-caps text-tiny tracking-widest transition-colors ${
             autoWalk ? "bg-secondary text-beige" : "hover:bg-beige/10"
           }`}
         >
@@ -316,14 +316,14 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
         <button
           onClick={() => gotoRoom(Math.min(currentRoom + 1, gallery.rooms.length - 1))}
           disabled={currentRoom === gallery.rooms.length - 1}
-          className="px-4 py-2 font-label-caps text-[10px] tracking-widest hover:bg-beige/10 disabled:opacity-30 transition-colors"
+          className="px-4 py-2 font-label-caps text-tiny tracking-widest hover:bg-beige/10 disabled:opacity-30 transition-colors"
         >
           {t("NEXT ▶")}
         </button>
         <span className="w-px h-6 bg-beige/20 mx-1" />
         <Link
           href="/#atlas"
-          className="px-4 py-2 font-label-caps text-[10px] tracking-widest hover:bg-beige/10 transition-colors"
+          className="px-4 py-2 font-label-caps text-tiny tracking-widest hover:bg-beige/10 transition-colors"
         >
           {t("CHANGE COUNTRY")}
         </Link>
@@ -363,12 +363,12 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
               </div>
 
               <dl className="grid grid-cols-2 gap-4 font-body-md text-sm mb-6">
-                <div><dt className="font-label-caps text-[9px] tracking-widest opacity-60">{t("COUNTRY")}</dt><dd>{countryName}</dd></div>
-                <div><dt className="font-label-caps text-[9px] tracking-widest opacity-60">{t("CITY")}</dt><dd>{active.city}</dd></div>
-                <div><dt className="font-label-caps text-[9px] tracking-widest opacity-60">{t("YEAR")}</dt><dd>{active.year}</dd></div>
-                <div><dt className="font-label-caps text-[9px] tracking-widest opacity-60">{t("DIMENSIONS")}</dt><dd>{active.dimensions}</dd></div>
-                <div className="col-span-2"><dt className="font-label-caps text-[9px] tracking-widest opacity-60">{t("TECHNIQUE")}</dt><dd>{t(active.technique)}</dd></div>
-                <div className="col-span-2"><dt className="font-label-caps text-[9px] tracking-widest opacity-60">{t("PRICE")}</dt>
+                <div><dt className="font-label-caps text-micro tracking-widest opacity-60">{t("COUNTRY")}</dt><dd>{countryName}</dd></div>
+                <div><dt className="font-label-caps text-micro tracking-widest opacity-60">{t("CITY")}</dt><dd>{active.city}</dd></div>
+                <div><dt className="font-label-caps text-micro tracking-widest opacity-60">{t("YEAR")}</dt><dd>{active.year}</dd></div>
+                <div><dt className="font-label-caps text-micro tracking-widest opacity-60">{t("DIMENSIONS")}</dt><dd>{active.dimensions}</dd></div>
+                <div className="col-span-2"><dt className="font-label-caps text-micro tracking-widest opacity-60">{t("TECHNIQUE")}</dt><dd>{t(active.technique)}</dd></div>
+                <div className="col-span-2"><dt className="font-label-caps text-micro tracking-widest opacity-60">{t("PRICE")}</dt>
                   <dd>{active.price !== null ? <PriceUponRequest /> : <span className="text-on-surface-variant">{t("For exhibition only")}</span>}</dd>
                 </div>
               </dl>
@@ -378,19 +378,19 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
               <div className="grid grid-cols-2 gap-2 mb-3">
                 <button
                   onClick={() => handleRequestPrice(active)}
-                  className="bg-primary text-beige py-3 font-label-caps text-[10px] tracking-widest hover:bg-secondary transition-colors"
+                  className="bg-primary text-beige py-3 font-label-caps text-tiny tracking-widest hover:bg-secondary transition-colors"
                 >
                   {active.price !== null ? t("REQUEST PRICE") : t("EXHIBITION ONLY")}
                 </button>
                 <Link
                   href="/artworks/ethereal-resilience"
-                  className="border border-primary py-3 text-center font-label-caps text-[10px] tracking-widest hover:bg-primary hover:text-beige transition-colors"
+                  className="border border-primary py-3 text-center font-label-caps text-tiny tracking-widest hover:bg-primary hover:text-beige transition-colors"
                 >
                   {t("VIEW ARTWORK")}
                 </Link>
                 <button
                   onClick={() => toast(t("Saved to your collection (demo)"))}
-                  className="border border-primary/30 py-3 font-label-caps text-[10px] tracking-widest hover:border-primary transition-colors"
+                  className="border border-primary/30 py-3 font-label-caps text-tiny tracking-widest hover:border-primary transition-colors"
                 >
                   {t("♥ SAVE")}
                 </button>
@@ -399,14 +399,14 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
                     navigator.clipboard?.writeText(window.location.href);
                     toast(t("Gallery link copied"));
                   }}
-                  className="border border-primary/30 py-3 font-label-caps text-[10px] tracking-widest hover:border-primary transition-colors"
+                  className="border border-primary/30 py-3 font-label-caps text-tiny tracking-widest hover:border-primary transition-colors"
                 >
                   {t("↗ SHARE")}
                 </button>
               </div>
               <Link
                 href="/artists/amara-diop"
-                className="block text-center py-3 font-label-caps text-[10px] tracking-widest underline decoration-secondary underline-offset-4 hover:text-secondary"
+                className="block text-center py-3 font-label-caps text-tiny tracking-widest underline decoration-secondary underline-offset-4 hover:text-secondary"
               >
                 {t("MEET THE ARTIST →")}
               </Link>
@@ -421,7 +421,7 @@ function GalleryPage({ gallery }: { gallery: CountryGallery }) {
         artworkSlug={enquiryTarget?.id ?? ""}
         artworkTitle={enquiryTarget?.title ?? ""}
         artistName={enquiryTarget?.artist}
-      />
+ />
     </main>
   );
 }

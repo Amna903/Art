@@ -120,7 +120,7 @@ export function ReviewsSection({ artworkSlug }: Props) {
             <div key={r.id} className="border-b border-outline/10 pb-4">
               <div className="flex items-center justify-between mb-2">
                 <Stars value={r.rating} />
-                <span className="text-[10px] uppercase tracking-widest text-on-surface-variant">
+                <span className="text-tiny uppercase tracking-widest text-on-surface-variant">
                   {formatShortDate(r.created_at)}
                 </span>
               </div>
@@ -168,7 +168,7 @@ export function ReviewsSection({ artworkSlug }: Props) {
           rows={3}
           placeholder={t("Share your experience with this piece…")}
           className="w-full bg-surface-container-low border border-outline/20 px-3 py-2 text-sm focus:outline-none focus:border-secondary transition-colors resize-none"
-        />
+ />
         <button
           type="submit"
           disabled={submitting}

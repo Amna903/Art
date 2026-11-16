@@ -23,7 +23,7 @@ export function MissionStats() {
           <h2 className="max-w-[15ch] font-display text-[clamp(1.25rem,2vw,1.75rem)] font-normal leading-[1.1]">
             {t("Quantifying Global Visibility")}
           </h2>
-          <p className="mt-2 text-[10px] leading-snug text-on-surface-variant">
+          <p className="mt-2 text-tiny leading-snug text-on-surface-variant">
             {t("The Visibility We Are Building")}
           </p>
         </div>
@@ -35,7 +35,7 @@ export function MissionStats() {
                 {formatNumber(stat.value, stat.compact ? { notation: "compact" } : undefined)}
                 {stat.value !== 54 ? "+" : ""}
               </span>
-              <p className="text-[8px] uppercase leading-tight tracking-[0.12em] text-on-surface-variant sm:text-[9px]">
+              <p className="text-[8px] uppercase leading-tight tracking-[0.12em] text-on-surface-variant sm:text-micro">
                 {t(stat.label)}
               </p>
             </div>

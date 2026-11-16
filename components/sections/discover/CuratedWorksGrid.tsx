@@ -50,7 +50,7 @@ export function CuratedWorksGrid({ works }: { works: CuratedWork[] }) {
             <button
               key={m}
               onClick={() => changeMedium(m)}
-              className={`px-4 py-2 min-h-[40px] font-label-caps tracking-widest text-[10px] uppercase border transition-colors ${
+              className={`px-4 py-2 min-h-[40px] font-label-caps tracking-widest text-tiny uppercase border transition-colors ${
                 medium === m
                   ? "bg-primary text-beige border-primary"
                   : "border-outline/30 text-on-surface-variant hover:border-primary hover:text-primary"
@@ -76,9 +76,9 @@ export function CuratedWorksGrid({ works }: { works: CuratedWork[] }) {
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="object-contain p-3 transition-transform duration-700 group-hover:scale-[1.03]"
-                  />
+ />
                   {w.price !== null && (
-                    <span className="absolute top-4 left-4 bg-beige text-primary px-3 py-1 font-label-caps tracking-widest text-[10px]">
+                    <span className="absolute top-4 left-4 bg-beige text-primary px-3 py-1 font-label-caps tracking-widest text-tiny">
                       {t("AVAILABLE")}
                     </span>
                   )}

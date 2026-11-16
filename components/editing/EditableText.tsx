@@ -62,20 +62,20 @@ export function EditableText({
             onChange={(e) => setDraft(e.target.value)}
             rows={4}
             className={`${className ?? ""} w-full bg-secondary/5 border border-secondary outline-none resize-y p-2`}
-          />
+ />
         ) : (
           <input
             ref={ref as React.RefObject<HTMLInputElement>}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             className={`${className ?? ""} w-full bg-secondary/5 border border-secondary outline-none p-2`}
-          />
+ />
         )}
         <span className="flex gap-2 mt-1">
           <button
             onClick={save}
             disabled={saving}
-            className="text-[10px] uppercase tracking-widest bg-secondary text-on-primary px-2 py-1 disabled:opacity-60"
+            className="text-tiny uppercase tracking-widest bg-secondary text-on-primary px-2 py-1 disabled:opacity-60"
           >
             {saving ? t("Saving…") : t("Save")}
           </button>
@@ -84,7 +84,7 @@ export function EditableText({
               setDraft(shown);
               setEditing(false);
             }}
-            className="text-[10px] uppercase tracking-widest border border-primary/20 px-2 py-1"
+            className="text-tiny uppercase tracking-widest border border-primary/20 px-2 py-1"
           >
             {t("Cancel")}
           </button>

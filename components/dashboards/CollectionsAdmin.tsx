@@ -1,5 +1,7 @@
 "use client";
 
+import { Input } from "@/components/ui/Field";
+import { Modal } from "@/components/ui/Modal";
 import { buttonClass } from "@/components/ui/Button";
 import { useRouter, useLanguage } from "@/lib/i18n";
 import { useEffect, useState } from "react";
@@ -221,13 +223,13 @@ export function CollectionsAdmin() {
                 <div className="flex gap-2 shrink-0">
                   <button
                     onClick={() => setManaging(c.id)}
-                    className="text-[10px] uppercase tracking-widest px-3 py-2 border border-primary/20 hover:border-primary"
+                    className="text-tiny uppercase tracking-widest px-3 py-2 border border-primary/20 hover:border-primary"
                   >
                     {t("Manage Artworks")}
                   </button>
                   <button
                     onClick={() => deleteCollection(c.id)}
-                    className="text-[10px] uppercase tracking-widest px-3 py-2 border border-secondary text-secondary hover:bg-secondary hover:text-on-primary"
+                    className="text-tiny uppercase tracking-widest px-3 py-2 border border-secondary text-secondary hover:bg-secondary hover:text-on-primary"
                   >
                     {t("Delete")}
                   </button>
@@ -239,13 +241,8 @@ export function CollectionsAdmin() {
       </div>
 
       {managingCollection && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-background w-full max-w-4xl p-8 max-h-[85vh] overflow-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-display-sm text-display-sm text-primary">{managingCollection.title}</h3>
-              <button onClick={() => setManaging(null)} className="text-on-surface-variant">✕</button>
-            </div>
-            <input
+        <Modal title={managingCollection.title} onClose={() => setManaging(null)} overlayClassName="z-50" panelClassName="max-w-4xl max-h-[85vh] overflow-auto">
+            <Input
               type="search"
               value={pickerQuery}
               onChange={(e) => {
@@ -253,8 +250,8 @@ export function CollectionsAdmin() {
                 setPickerPage(0);
               }}
               placeholder={t("Search by title…")}
-              className="mb-5 w-full border-b border-primary/30 bg-transparent py-2 text-primary"
-            />
+              className="mb-5"
+ />
             {artworks.length === 0 ? (
               <p className="text-on-surface-variant text-sm">{pickerQuery ? t("No results.") : t("No published artworks yet.")}</p>
             ) : (
@@ -302,8 +299,7 @@ export function CollectionsAdmin() {
                 </button>
               </div>
             )}
-          </div>
-        </div>
+        </Modal>
       )}
     </section>
   );

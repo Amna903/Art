@@ -56,7 +56,7 @@ export async function JournalArticle({
           <span className="font-label-caps text-label-caps uppercase text-secondary mb-4 block md:hidden">{post.tag}</span>
           <h1 className="font-headline-md text-headline-md mb-6">{post.title}</h1>
           {post.date && (
-            <p className="font-label-caps text-[10px] uppercase tracking-widest text-on-surface-variant">{post.date}</p>
+            <p className="font-label-caps text-tiny uppercase tracking-widest text-on-surface-variant">{post.date}</p>
           )}
         </div>
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { Input, Select } from "@/components/ui/Field";
+import { Modal } from "@/components/ui/Modal";
 import { buttonClass } from "@/components/ui/Button";
 import { useCallback, useEffect, useState } from "react";
 import { useLanguage, useRouter } from "@/lib/i18n";
@@ -352,14 +354,7 @@ export function ArtistDashboard({ userId }: { userId: string }) {
       </section>
 
       {editing && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-auto">
-          <div className="bg-background w-full max-w-2xl p-8 max-h-[90vh] overflow-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-display-sm text-display-sm text-primary">
-                {editing.id ? t("Edit artwork") : t("New artwork")}
-              </h3>
-              <button onClick={closeEditor} className="text-on-surface-variant">✕</button>
-            </div>
+        <Modal title={editing.id ? t("Edit artwork") : t("New artwork")} onClose={closeEditor}>
             <div className="space-y-4">
               <F label={t("Title")} value={editing.title ?? ""} onChange={(v) => setEditing({ ...editing, title: v })} />
               <F label={t("Description")} textarea value={editing.description ?? ""} onChange={(v) => setEditing({ ...editing, description: v })} />
@@ -370,12 +365,12 @@ export function ArtistDashboard({ userId }: { userId: string }) {
                 ]}
                 value={editing.translations}
                 onChange={(translations) => setEditing({ ...editing, translations })}
-              />
+ />
               <div className="grid grid-cols-2 gap-4">
                 <F label={t("Year")} type="number" value={String(editing.year ?? "")} onChange={(v) => setEditing({ ...editing, year: Number(v) || null })} />
                 <label className="block">
                   <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">{t("Medium")}</span>
-                  <select
+                  <Select
                     value={mediumSelectValue}
                     onChange={(e) => {
                       const nextValue = e.target.value;
@@ -386,7 +381,7 @@ export function ArtistDashboard({ userId }: { userId: string }) {
                       setEditing({ ...editing, medium: nextValue });
                       setCustomMedium("");
                     }}
-                    className="w-full bg-transparent border-b border-primary/30 py-2 text-primary"
+
                   >
                     <option value="">{t("Select medium")}</option>
                     {RESERVED_MEDIA.map((medium) => (
@@ -395,7 +390,7 @@ export function ArtistDashboard({ userId }: { userId: string }) {
                       </option>
                     ))}
                     <option value="Other">{t("Other")}</option>
-                  </select>
+                  </Select>
                 </label>
                 <F label={t("Dimensions")} value={editing.dimensions ?? ""} onChange={(v) => setEditing({ ...editing, dimensions: v })} />
                 <div>
@@ -404,8 +399,8 @@ export function ArtistDashboard({ userId }: { userId: string }) {
                     type="number"
                     value={editing.price_usd != null && editing.price_usd !== 0 ? String(editing.price_usd) : ""}
                     onChange={(v) => setEditing({ ...editing, price_usd: v ? Number(v) : 0 })}
-                  />
-                  <p className="mt-1 text-[11px] text-on-surface-variant">
+ />
+                  <p className="mt-1 text-small text-on-surface-variant">
                     {t("For the gallery's reference only — never shown publicly. Collectors always see \"Price Upon Request.\"")}
                   </p>
                 </div>
@@ -415,7 +410,7 @@ export function ArtistDashboard({ userId }: { userId: string }) {
                       label={t("Other medium")}
                       value={customMedium}
                       onChange={(v) => setCustomMedium(v)}
-                    />
+ />
                   </div>
                 )}
                 <div>
@@ -424,17 +419,17 @@ export function ArtistDashboard({ userId }: { userId: string }) {
                 </div>
                 <label className="block">
                   <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">{t("Status")}</span>
-                  <select
+                  <Select
                     value={editing.status === "blocked" ? "blocked" : editing.status ?? "draft"}
                     onChange={(e) => setEditing({ ...editing, status: e.target.value as Artwork["status"] })}
-                    className="w-full bg-transparent border-b border-primary/30 py-2 text-primary"
+
                     disabled={editing.status === "blocked"}
                   >
                     <option value="draft">{t("Draft")}</option>
                     <option value="pending_review">{t("Submit for admin review")}</option>
                     {editing.status === "blocked" ? <option value="blocked">{t("Blocked (originality match)")}</option> : null}
-                  </select>
-                  <p className="mt-1 text-[11px] text-on-surface-variant">
+                  </Select>
+                  <p className="mt-1 text-small text-on-surface-variant">
                     {t("Every save runs an originality check against platform works and publicly indexed images.")}
                   </p>
                 </label>
@@ -449,7 +444,7 @@ export function ArtistDashboard({ userId }: { userId: string }) {
                     accept="image/*"
                     onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])}
                     className="sr-only"
-                  />
+ />
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <div className="font-navigation text-navigation uppercase tracking-[0.18em] text-primary">
@@ -466,12 +461,12 @@ export function ArtistDashboard({ userId }: { userId: string }) {
                   </div>
                 </label>
                 {uploading && <div className="mt-2 text-xs text-secondary">{t("Uploading…")}</div>}
-                <input
+                <Input
                   placeholder={t("…or paste an image URL")}
                   value={editing.image_url ?? ""}
                   onChange={(e) => setEditing({ ...editing, image_url: e.target.value })}
-                  className="mt-3 w-full bg-transparent border-b border-primary/30 py-2 text-primary text-sm"
-                />
+                  className="mt-3 text-sm"
+ />
                 {editing.image_url ? (
                   <img src={editing.image_url} alt="" className="mt-3 max-h-40 object-cover" />
                 ) : (
@@ -502,17 +497,11 @@ export function ArtistDashboard({ userId }: { userId: string }) {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
+        </Modal>
       )}
 
       {profileEditorOpen && profileDraft && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-auto">
-          <div className="bg-background w-full max-w-2xl p-8 max-h-[90vh] overflow-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-display-sm text-display-sm text-primary">{t("Edit profile")}</h3>
-              <button onClick={closeProfileEditor} className="text-on-surface-variant">✕</button>
-            </div>
+        <Modal title={t("Edit profile")} onClose={closeProfileEditor}>
 
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row gap-5">
@@ -532,7 +521,7 @@ export function ArtistDashboard({ userId }: { userId: string }) {
                       accept="image/*"
                       className="sr-only"
                       onChange={(e) => e.target.files?.[0] && uploadProfileAvatar(e.target.files[0])}
-                    />
+ />
                     {profileUploading ? t("Uploading…") : t("Change photo")}
                   </label>
                 </div>
@@ -542,15 +531,15 @@ export function ArtistDashboard({ userId }: { userId: string }) {
                     label={t("Display name")}
                     value={profileDraft.display_name ?? ""}
                     onChange={(v) => setProfileDraft((p) => (p ? { ...p, display_name: v } : p))}
-                  />
+ />
                   <label className="block">
                     <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">
                       {t("Location")}
                     </span>
-                    <select
+                    <Select
                       value={profileDraft.country ?? ""}
                       onChange={(e) => setProfileDraft((p) => (p ? { ...p, country: e.target.value } : p))}
-                      className="w-full bg-transparent border-b border-primary/30 py-2 text-primary"
+
                     >
                       <option value="">{t("Select your country")}</option>
                       {AFRICAN_COUNTRIES.map((country) => (
@@ -558,24 +547,24 @@ export function ArtistDashboard({ userId }: { userId: string }) {
                           {getCountryDisplayName(country, language)}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </label>
                   <F
                     label={t("Bio")}
                     textarea
                     value={profileDraft.bio ?? ""}
                     onChange={(v) => setProfileDraft((p) => (p ? { ...p, bio: v } : p))}
-                  />
+ />
                   <TranslationFields
                     fields={[{ name: "bio", label: "Bio", textarea: true }]}
                     value={profileDraft.translations}
                     onChange={(translations) => setProfileDraft((p) => (p ? { ...p, translations } : p))}
-                  />
+ />
                   <F
                     label={t("Profile photo URL")}
                     value={profileDraft.avatar_url ?? ""}
                     onChange={(v) => setProfileDraft((p) => (p ? { ...p, avatar_url: v } : p))}
-                  />
+ />
                 </div>
               </div>
 
@@ -588,8 +577,7 @@ export function ArtistDashboard({ userId }: { userId: string }) {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

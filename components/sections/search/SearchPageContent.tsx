@@ -74,7 +74,7 @@ function SearchPageInner({ q, artists: artistResults, artworks: artworkResults }
             onChange={(e) => handleChange(e.target.value)}
             placeholder={t("Search artists, countries, artworks…")}
             className="w-full bg-transparent border-b border-primary/30 focus:border-secondary outline-none py-4 pl-9 font-display text-2xl md:text-3xl text-primary placeholder:text-on-surface-variant/40 transition-colors"
-          />
+ />
           {query && (
             <button
               onClick={() => handleChange("")}
@@ -86,7 +86,7 @@ function SearchPageInner({ q, artists: artistResults, artworks: artworkResults }
           )}
         </div>
         {needle && (
-          <p className="font-label-caps text-[11px] uppercase tracking-widest text-on-surface-variant mt-4">
+          <p className="font-label-caps text-small uppercase tracking-widest text-on-surface-variant mt-4">
             {totalCount === 1
               ? t("1 result for “{query}”", { query: q })
               : t("{count} results for “{query}”", { count: totalCount, query: q })}
@@ -115,16 +115,16 @@ function SearchPageInner({ q, artists: artistResults, artworks: artworkResults }
                         fill
                         sizes="80px"
                         className="object-contain p-3 group-hover:scale-[1.03] transition-transform duration-500"
-                      />
+ />
                     </div>
                     <div>
                       <p className="font-headline-sm text-headline-sm group-hover:text-secondary transition-colors">
                         {a.name}
                       </p>
-                      <p className="font-label-caps text-[11px] uppercase text-on-surface-variant">
+                      <p className="font-label-caps text-small uppercase text-on-surface-variant">
                         {a.city}, {a.countryName}
                       </p>
-                      <p className="font-label-caps text-[11px] uppercase text-secondary mt-1">{a.technique}</p>
+                      <p className="font-label-caps text-small uppercase text-secondary mt-1">{a.technique}</p>
                     </div>
                   </Link>
                 ))}
@@ -145,7 +145,7 @@ function SearchPageInner({ q, artists: artistResults, artworks: artworkResults }
                     className="flex items-center gap-3 p-4 border border-outline-variant hover:border-secondary transition-colors"
                   >
                     <span className="text-2xl">{c.flag}</span>
-                    <span className="font-label-caps text-[11px] uppercase tracking-widest">{getCountryDisplayName(c, language)}</span>
+                    <span className="font-label-caps text-small uppercase tracking-widest">{getCountryDisplayName(c, language)}</span>
                   </Link>
                 ))}
               </div>
@@ -167,12 +167,12 @@ function SearchPageInner({ q, artists: artistResults, artworks: artworkResults }
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
+ />
                     </div>
                     <p className="font-headline-sm text-headline-sm group-hover:text-secondary transition-colors">
                       {w.title}
                     </p>
-                    <p className="font-label-caps text-[11px] uppercase text-on-surface-variant">{w.artist}</p>
+                    <p className="font-label-caps text-small uppercase text-on-surface-variant">{w.artist}</p>
                   </Link>
                 ))}
               </div>

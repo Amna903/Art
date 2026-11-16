@@ -99,7 +99,7 @@ export function EditableImage({
               accept="image/*"
               className="sr-only"
               onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])}
-            />
+ />
             {uploading ? t("Uploading…") : t("Upload image")}
           </label>
           <input
@@ -107,18 +107,18 @@ export function EditableImage({
             value={draftSrc}
             onChange={(e) => setDraftSrc(e.target.value)}
             className="w-full bg-white/10 border border-white/30 text-white placeholder-white/50 text-xs p-2"
-          />
+ />
           <input
             placeholder={t("Alt text")}
             value={draftAlt}
             onChange={(e) => setDraftAlt(e.target.value)}
             className="w-full bg-white/10 border border-white/30 text-white placeholder-white/50 text-xs p-2"
-          />
+ />
           <div className="flex gap-2 justify-center">
             <button
               onClick={save}
               disabled={saving}
-              className="text-[10px] uppercase tracking-widest bg-secondary text-on-primary px-3 py-1.5 disabled:opacity-60"
+              className="text-tiny uppercase tracking-widest bg-secondary text-on-primary px-3 py-1.5 disabled:opacity-60"
             >
               {saving ? t("Saving…") : t("Save")}
             </button>
@@ -128,7 +128,7 @@ export function EditableImage({
                 setDraftAlt(shownAlt);
                 setEditing(false);
               }}
-              className="text-[10px] uppercase tracking-widest border border-white/40 text-white px-3 py-1.5"
+              className="text-tiny uppercase tracking-widest border border-white/40 text-white px-3 py-1.5"
             >
               {t("Cancel")}
             </button>

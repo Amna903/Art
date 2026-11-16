@@ -50,10 +50,10 @@ export function CollectorPicks({ picks }: CollectorPicksProps) {
                   className="object-contain p-4 transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                   alt={pick.title}
                   src={pick.image}
-                />
+ />
                 {/* Subtle hover pill badge at bottom right instead of heavy full-image cover */}
                 <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                  <span className="bg-primary text-on-primary text-[10px] font-navigation uppercase tracking-widest px-4 py-2 shadow-lg">
+                  <span className="bg-primary text-on-primary text-tiny font-navigation uppercase tracking-widest px-4 py-2 shadow-lg">
                     {t("Request Price")}
                   </span>
                 </div>
@@ -61,7 +61,7 @@ export function CollectorPicks({ picks }: CollectorPicksProps) {
 
               <div className="flex justify-between items-start gap-4">
                 <div>
-                  <p className="font-label-caps text-[10px] text-secondary mb-1">{t(pick.collection)}</p>
+                  <p className="font-label-caps text-tiny text-secondary mb-1">{t(pick.collection)}</p>
                   <h3
                     onClick={() => setActive(pick)}
                     className="font-headline-sm text-headline-sm cursor-pointer hover:text-secondary transition-colors"
@@ -78,7 +78,7 @@ export function CollectorPicks({ picks }: CollectorPicksProps) {
                 <div className="text-right shrink-0">
                   <button
                     onClick={() => setActive(pick)}
-                    className="font-navigation text-[11px] uppercase tracking-widest text-secondary hover:text-primary border-b border-secondary/30 hover:border-primary transition-all pb-0.5"
+                    className="font-navigation text-small uppercase tracking-widest text-secondary hover:text-primary border-b border-secondary/30 hover:border-primary transition-all pb-0.5"
                   >
                     {t("Request Price")}
                   </button>
@@ -96,7 +96,7 @@ export function CollectorPicks({ picks }: CollectorPicksProps) {
         artworkTitle={active?.title ?? ""}
         artistName={active?.artist}
         artworkImage={active?.image}
-      />
+ />
     </section>
   );
 }

@@ -45,7 +45,7 @@ export function ArtistCard({ artist, index }: { artist: Artist; index: number })
             className="object-cover object-[50%_30%] transition-transform duration-500 group-hover:scale-[1.03]"
             ref={ref}
             onError={onError}
-          />
+ />
         ) : (
           <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center font-display text-5xl text-[var(--nua-grey)]">
             {initials(artist.name)}
@@ -57,9 +57,9 @@ export function ArtistCard({ artist, index }: { artist: Artist; index: number })
       <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
         <p className="font-label-caps text-xs uppercase tracking-wider text-on-surface-variant">{t(artist.technique)}</p>
         {artist.newDiscovery ? (
-          <span className="whitespace-nowrap text-[10px] font-bold text-secondary">{t("NEW DISCOVERY")}</span>
+          <span className="whitespace-nowrap text-tiny font-bold text-secondary">{t("NEW DISCOVERY")}</span>
         ) : artist.worksCount > 0 ? (
-          <span className="whitespace-nowrap text-[10px] font-bold text-on-surface-variant">
+          <span className="whitespace-nowrap text-tiny font-bold text-on-surface-variant">
             {t("{count} WORKS", { count: artist.worksCount })}
           </span>
         ) : null}

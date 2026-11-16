@@ -105,7 +105,7 @@ function ShareModal({
         </button>
 
         <div className="p-6 sm:p-8">
-          <span className="text-[9px] font-mono tracking-widest text-[#FF4D57] uppercase font-semibold block mb-1">
+          <span className="text-micro font-mono tracking-widest text-[#FF4D57] uppercase font-semibold block mb-1">
             {t("Share")}
           </span>
           <h3 className="font-serif text-xl font-medium text-[#F0F0EE] leading-tight mb-6">{artworkTitle}</h3>

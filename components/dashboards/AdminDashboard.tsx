@@ -204,7 +204,7 @@ export function AdminDashboard() {
                           <button
                             key={r}
                             onClick={() => revokeRole(p.id, r)}
-                            className="text-[10px] uppercase tracking-widest px-2 py-1 border border-secondary/40 text-secondary hover:bg-secondary/10"
+                            className="text-tiny uppercase tracking-widest px-2 py-1 border border-secondary/40 text-secondary hover:bg-secondary/10"
                             title={t("Click to revoke")}
                           >
                             {r} ✕
@@ -222,14 +222,14 @@ export function AdminDashboard() {
                             <button
                               key={r}
                               onClick={() => grantRole(p.id, r)}
-                              className="text-[10px] uppercase tracking-widest px-2 py-1 border border-primary/20 hover:border-primary"
+                              className="text-tiny uppercase tracking-widest px-2 py-1 border border-primary/20 hover:border-primary"
                             >
                               + {r}
                             </button>
                           ))}
                         <button
                           onClick={() => deleteUser(p.id, p.display_name)}
-                          className="text-[10px] uppercase tracking-widest px-2 py-1 border border-secondary text-secondary hover:bg-secondary hover:text-on-primary"
+                          className="text-tiny uppercase tracking-widest px-2 py-1 border border-secondary text-secondary hover:bg-secondary hover:text-on-primary"
                         >
                           {t("Delete")}
                         </button>

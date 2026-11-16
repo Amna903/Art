@@ -1,5 +1,7 @@
 "use client";
 
+import { Input, Select } from "@/components/ui/Field";
+import { Modal } from "@/components/ui/Modal";
 import { buttonClass } from "@/components/ui/Button";
 import { useRouter, useLanguage } from "@/lib/i18n";
 import { useCallback, useState } from "react";
@@ -138,7 +140,7 @@ export function ExhibitionsGrid({
                 className="object-cover transition-all duration-500"
                 alt={t(ev.alt)}
                 src={ev.img}
-              />
+ />
               <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 to-transparent translate-y-full group-hover:translate-y-0 transition-transform">
                 <button className={buttonClass({variant: "inverse",size: "sm",full: true})}>{t("Remind Me")}</button>
               </div>
@@ -154,18 +156,13 @@ export function ExhibitionsGrid({
             className="border border-dashed border-primary/25 hover:border-secondary flex flex-col items-center justify-center gap-2 min-h-[280px] text-on-surface-variant hover:text-secondary transition-colors"
           >
             <span className="text-3xl">+</span>
-            <span className="font-label-caps text-[10px] uppercase tracking-widest">{t("Add exhibition")}</span>
+            <span className="font-label-caps text-tiny uppercase tracking-widest">{t("Add exhibition")}</span>
           </button>
         )}
       </div>
 
       {editing && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-auto">
-          <div className="bg-background w-full max-w-2xl p-8 max-h-[90vh] overflow-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-display-sm text-display-sm text-primary">{editing.id ? t("Edit exhibition") : t("New exhibition")}</h3>
-              <button onClick={() => setEditing(null)} className="text-on-surface-variant">✕</button>
-            </div>
+        <Modal title={editing.id ? t("Edit exhibition") : t("New exhibition")} onClose={() => setEditing(null)}>
             <div className="space-y-4">
               <F label={t("Title")} value={editing.title ?? ""} onChange={(v) => setEditing({ ...editing, title: v })} />
               <F label={t("Description")} textarea value={editing.description ?? ""} onChange={(v) => setEditing({ ...editing, description: v })} />
@@ -174,15 +171,15 @@ export function ExhibitionsGrid({
                 <F label={t("Date label")} value={editing.date_label ?? ""} onChange={(v) => setEditing({ ...editing, date_label: v })} />
                 <label className="block">
                   <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">{t("Status")}</span>
-                  <select
+                  <Select
                     value={editing.status ?? "upcoming"}
                     onChange={(e) => setEditing({ ...editing, status: e.target.value as ExhibitionStatus })}
-                    className="w-full bg-transparent border-b border-primary/30 py-2 text-primary"
+
                   >
                     {STATUSES.map((s) => (
                       <option key={s} value={s}>{t(STATUS_LABELS[s])}</option>
                     ))}
-                  </select>
+                  </Select>
                 </label>
                 <TranslationFields
                   fields={[
@@ -193,21 +190,21 @@ export function ExhibitionsGrid({
                   ]}
                   value={editing.translations}
                   onChange={(translations) => setEditing({ ...editing, translations })}
-                />
+ />
                 <label className="block">
                   <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">
                     {t("Country")}{" "}<span className="normal-case text-on-surface-variant/60">{t("(optional — links to /discover)")}</span>
                   </span>
-                  <select
+                  <Select
                     value={editing.country ?? ""}
                     onChange={(e) => setEditing({ ...editing, country: e.target.value || null })}
-                    className="w-full bg-transparent border-b border-primary/30 py-2 text-primary"
+
                   >
                     <option value="">{t("— None (not country-specific) —")}</option>
                     {AFRICAN_COUNTRIES.map((c) => (
                       <option key={c.slug} value={c.name}>{c.flag} {getCountryDisplayName(c, language)}</option>
                     ))}
-                  </select>
+                  </Select>
                 </label>
               </div>
               <div>
@@ -220,12 +217,12 @@ export function ExhibitionsGrid({
                   </div>
                 </label>
                 {uploading && <div className="mt-2 text-xs text-secondary">{t("Uploading…")}</div>}
-                <input
+                <Input
                   placeholder={t("…or paste an image URL")}
                   value={editing.cover_image_url ?? ""}
                   onChange={(e) => setEditing({ ...editing, cover_image_url: e.target.value })}
-                  className="mt-3 w-full bg-transparent border-b border-primary/30 py-2 text-primary text-sm"
-                />
+                  className="mt-3 text-sm"
+ />
                 {editing.cover_image_url && <img src={editing.cover_image_url} alt="" className="mt-3 max-h-40 object-cover" />}
               </div>
               <div className="flex justify-end gap-3 pt-4">
@@ -233,8 +230,7 @@ export function ExhibitionsGrid({
                 <button onClick={save} className={buttonClass({size: "sm"})}>{t("Publish")}</button>
               </div>
             </div>
-          </div>
-        </div>
+        </Modal>
       )}
     </>
   );

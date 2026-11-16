@@ -223,7 +223,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
       <div
         aria-hidden
         className="absolute inset-0 pointer-events-none nu-atlas-bg"
-      />
+ />
 
       {/* Main Container */}
       <div className="relative max-w-[1440px] mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-[260px_1fr_340px] gap-8 lg:gap-12 items-center min-h-0 lg:min-h-[700px]">
@@ -240,7 +240,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
               {t("NUA")}{" "}<span className="inline-block mx-1 text-xs opacity-40 font-sans">—</span> {t("ARTE")}
             </h2>
             <span
-              className="block font-mono text-[9px] tracking-[0.45em] uppercase mt-1 font-semibold"
+              className="block font-mono text-micro tracking-[0.45em] uppercase mt-1 font-semibold"
               style={{ color: "var(--atlas-accent)" }}
             >
               {t("CURATED AFRICAN ART")}
@@ -252,13 +252,13 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
             <div
               className="absolute left-[7.5px] top-2 bottom-2 w-px pointer-events-none"
               style={{ backgroundColor: "var(--atlas-border-strong)" }}
-            />
+ />
 
             {NAV_ITEMS.map((item) => (
               <a
                 key={item.label}
                 href={item.href}
-                className="group flex items-center gap-3.5 text-[11px] tracking-[0.24em] uppercase font-mono transition-all relative z-10"
+                className="group flex items-center gap-3.5 text-small tracking-[0.24em] uppercase font-mono transition-all relative z-10"
               >
                 {/* Dot Indicator */}
                 <span
@@ -292,7 +292,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
               backgroundColor: "var(--atlas-card-bg)",
             }}
           >
-            <div className="flex items-center justify-between text-[11px] font-mono tracking-[0.22em] uppercase mb-2" style={{ color: "var(--atlas-accent)" }}>
+            <div className="flex items-center justify-between text-small font-mono tracking-[0.22em] uppercase mb-2" style={{ color: "var(--atlas-accent)" }}>
               <div className="flex items-center gap-2 font-bold">
                 <span className="text-base leading-none">⤤</span>
                 <span>{getCountryDisplayName(activeCountry, language)}</span>
@@ -305,14 +305,14 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
             <button
               type="button"
               onClick={() => enterCountry(activeCountry.slug)}
-              className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-mono tracking-[0.2em] uppercase font-semibold transition-colors hover:underline"
+              className="mt-3 inline-flex items-center gap-1.5 text-tiny font-mono tracking-[0.2em] uppercase font-semibold transition-colors hover:underline"
               style={{ color: "var(--atlas-accent)" }}
             >
               {t("Explore Artists & Works →")}
             </button>
             <Link
               href={`/virtual-gallery?country=${activeCountry.slug}`}
-              className="mt-2 block text-[10px] font-mono tracking-[0.2em] uppercase font-semibold transition-colors hover:underline"
+              className="mt-2 block text-tiny font-mono tracking-[0.2em] uppercase font-semibold transition-colors hover:underline"
               style={{ color: "var(--atlas-fg-muted)" }}
             >
               {t("Visit Virtual Museum")}
@@ -327,7 +327,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
             type="button"
             onClick={toggleSound}
             aria-label={soundOn ? t("Mute audio") : t("Unmute audio")}
-            className="absolute top-0 right-0 z-20 flex items-center gap-2 px-3.5 py-1.5 border rounded text-[10px] font-mono tracking-[0.2em] uppercase transition-all shadow-xs backdrop-blur-sm"
+            className="absolute top-0 right-0 z-20 flex items-center gap-2 px-3.5 py-1.5 border rounded text-tiny font-mono tracking-[0.2em] uppercase transition-all shadow-xs backdrop-blur-sm"
             style={{
               backgroundColor: "var(--atlas-card-bg)",
               borderColor: "var(--atlas-border)",
@@ -388,7 +388,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                   strokeWidth="1.4"
                   strokeDasharray="4 4"
                   opacity={0.8}
-                />
+ />
                 <circle cx={activePoint.x} cy={activePoint.y} r={4} fill="var(--atlas-accent)" />
                 <circle cx={activePoint.x} cy={activePoint.y} r={7.5} fill="none" stroke="var(--atlas-accent)" strokeWidth="1" opacity={0.5} />
               </g>
@@ -434,7 +434,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                     strokeWidth="1.6"
                     strokeLinejoin="round"
                     pointerEvents="none"
-                  />
+ />
                   <path
                     d={shard.path}
                     transform="translate(0, 4)"
@@ -443,7 +443,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                     strokeWidth="1.6"
                     strokeLinejoin="round"
                     pointerEvents="none"
-                  />
+ />
                   <path
                     d={shard.path}
                     transform="translate(0, 2)"
@@ -452,7 +452,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                     strokeWidth="1.6"
                     strokeLinejoin="round"
                     pointerEvents="none"
-                  />
+ />
                   <path
                     d={shard.path}
                     transform="translate(0, 1)"
@@ -461,7 +461,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                     strokeWidth="1.6"
                     strokeLinejoin="round"
                     pointerEvents="none"
-                  />
+ />
 
                   {/* Main Top Face with Reference Matte Finish */}
                   <path
@@ -471,7 +471,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                     strokeWidth={isActive ? 2.2 : 1.2}
                     strokeLinejoin="round"
                     className="nu-clay-top"
-                  />
+ />
 
                   {/* Top Bevel Highlight (Reflective Rim) */}
                   <path
@@ -481,7 +481,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                     strokeWidth={0.75}
                     strokeLinejoin="round"
                     pointerEvents="none"
-                  />
+ />
 
                   <title>{getCountryDisplayName(country, language)}</title>
                 </g>
@@ -523,7 +523,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                     fill={palette.topBase}
                     stroke={isActive ? "var(--atlas-accent)" : "rgba(42, 14, 12, 0.75)"}
                     strokeWidth={isActive ? 1.4 : 1}
-                  />
+ />
                   {/* Specular highlight */}
                   <circle
                     cx={isle.x - (isActive ? 1.8 : 1.3)}
@@ -531,7 +531,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                     r={isActive ? 1.8 : 1.3}
                     fill="rgba(255, 255, 255, 0.65)"
                     pointerEvents="none"
-                  />
+ />
                   <title>{getCountryDisplayName(country, language)}</title>
                 </g>
               );
@@ -589,7 +589,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                       style={{
                         backgroundColor: isActive ? "var(--atlas-accent)" : "var(--atlas-border-strong)",
                       }}
-                    />
+ />
 
                     {/* Mini 3D Badge Shape */}
                     {shard ? (
@@ -600,7 +600,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                             fill={isActive ? "var(--atlas-accent)" : shard.palette.topBase}
                             stroke="rgba(42, 14, 12, 0.65)"
                             strokeWidth={4}
-                          />
+ />
                         </svg>
                       </div>
                     ) : (
@@ -608,7 +608,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
                     )}
 
                     <span
-                      className="font-mono text-[11px] tracking-[0.2em] uppercase truncate transition-colors"
+                      className="font-mono text-small tracking-[0.2em] uppercase truncate transition-colors"
                       style={{
                         color: isActive ? "var(--atlas-fg)" : "var(--atlas-fg-muted)",
                         fontWeight: isActive ? 600 : 400,
@@ -634,7 +634,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
           {/* Bottom link: View All Countries */}
           <Link
             href="/map"
-            className="inline-flex items-center gap-2 font-mono text-[11px] tracking-[0.25em] uppercase transition-colors pt-2 font-semibold hover:underline"
+            className="inline-flex items-center gap-2 font-mono text-small tracking-[0.25em] uppercase transition-colors pt-2 font-semibold hover:underline"
             style={{ color: "var(--atlas-accent)" }}
           >
             {t("VIEW ALL COUNTRIES")}
@@ -658,7 +658,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
             <span className="material-symbols-outlined text-[20px]">person</span>
           </div>
           <div>
-            <div className="font-mono text-[9px] tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
+            <div className="font-mono text-micro tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
               {t("ARTISTS REPRESENTED")}
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
@@ -677,7 +677,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
             <span className="material-symbols-outlined text-[20px]">crop_square</span>
           </div>
           <div>
-            <div className="font-mono text-[9px] tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
+            <div className="font-mono text-micro tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
               {t("ARTWORKS AVAILABLE")}
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
@@ -696,7 +696,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
             <span className="material-symbols-outlined text-[20px]">language</span>
           </div>
           <div>
-            <div className="font-mono text-[9px] tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
+            <div className="font-mono text-micro tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
               {t("COUNTRIES")}
             </div>
             <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
@@ -716,7 +716,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
               <span className="material-symbols-outlined text-[20px]">public</span>
             </div>
             <div>
-              <div className="font-mono text-[9px] tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
+              <div className="font-mono text-micro tracking-[0.25em] uppercase font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
                 {t("VISITS WORLDWIDE")}
               </div>
               <div className="font-serif text-2xl md:text-3xl font-light mt-0.5" style={{ color: "var(--atlas-fg)" }}>
@@ -734,7 +734,7 @@ export function AfricaMapSection({ stats }: { stats: AtlasStats }) {
           >
             <span className="material-symbols-outlined text-[18px]">arrow_downward</span>
           </div>
-          <div className="font-mono text-[9px] tracking-[0.25em] uppercase text-left leading-tight font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
+          <div className="font-mono text-micro tracking-[0.25em] uppercase text-left leading-tight font-medium" style={{ color: "var(--atlas-fg-muted)" }}>
             {t("SCROLL TO EXPLORE")}
           </div>
         </div>

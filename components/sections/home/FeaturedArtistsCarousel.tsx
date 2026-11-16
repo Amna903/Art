@@ -126,7 +126,7 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
             <div className="aspect-[4/5] overflow-hidden mb-6 relative bg-surface-container">
               <CardPhoto name={artist.name} src={artist.image} />
               {artist.badge && (
-                <div className="absolute bottom-4 left-4 bg-primary text-on-primary px-3 py-1 font-label-caps text-[10px]">
+                <div className="absolute bottom-4 left-4 bg-primary text-on-primary px-3 py-1 font-label-caps text-tiny">
                   {t(artist.badge)}
                 </div>
               )}
@@ -167,6 +167,6 @@ function CardPhoto({ name, src }: { name: string; src: string }) {
       src={src}
       ref={ref}
       onError={onError}
-    />
+ />
   );
 }

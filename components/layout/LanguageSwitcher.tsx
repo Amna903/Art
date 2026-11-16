@@ -73,7 +73,7 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
                   }`}
                 >
                   <span>{LOCALE_NATIVE_NAMES[lang]}</span>
-                  <span className="text-[11px] font-semibold tracking-widest opacity-60">{LOCALE_LABELS[lang]}</span>
+                  <span className="text-small font-semibold tracking-widest opacity-60">{LOCALE_LABELS[lang]}</span>
                 </button>
               </li>
             );

@@ -1,5 +1,6 @@
 "use client";
 
+import { Input, Select } from "@/components/ui/Field";
 import { buttonClass } from "@/components/ui/Button";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -221,18 +222,18 @@ export function GalleryMusicAdmin() {
         </label>
         <label className="block">
           <span className="mb-2 block font-label-caps text-label-caps uppercase text-on-surface-variant">{t("Track title")}</span>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full border-b border-primary/30 bg-transparent py-2 text-primary" />
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} />
         </label>
         <label className="block">
           <span className="mb-2 block font-label-caps text-label-caps uppercase text-on-surface-variant">{t("Country")}</span>
-          <select value={country} onChange={(e) => setCountry(e.target.value)} className="w-full border-b border-primary/30 bg-transparent py-2 text-primary">
+          <Select value={country} onChange={(e) => setCountry(e.target.value)}>
             <option value="">{t("General (all countries)")}</option>
             {AFRICAN_COUNTRIES.map((c) => (
               <option key={c.slug} value={c.slug}>
                 {getCountryDisplayName(c, language)}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
         <button type="button" onClick={upload} disabled={!file || !title.trim() || busy} className={buttonClass({variant: "accent",size: "sm"})}>
           {busy ? t("Uploading…") : t("Add track")}

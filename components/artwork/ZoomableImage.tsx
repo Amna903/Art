@@ -102,7 +102,7 @@ export function ZoomableImage({ src, displaySrc, alt, className }: Props) {
           alt={alt}
           src={displaySrc ?? src}
           fallbackSrc={displaySrc && displaySrc !== src ? src : undefined}
-        />
+ />
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -136,7 +136,7 @@ export function ZoomableImage({ src, displaySrc, alt, className }: Props) {
           <button
             onClick={reset}
             aria-label={t("Reset zoom")}
-            className="absolute top-4 left-4 z-10 flex items-center gap-1.5 px-3 h-11 text-white/80 hover:text-white font-label-caps text-[10px] uppercase tracking-widest"
+            className="absolute top-4 left-4 z-10 flex items-center gap-1.5 px-3 h-11 text-white/80 hover:text-white font-label-caps text-tiny uppercase tracking-widest"
           >
             <span className="material-symbols-outlined text-[18px]">restart_alt</span>
             {t("Reset")}
@@ -155,7 +155,7 @@ export function ZoomableImage({ src, displaySrc, alt, className }: Props) {
               transition: dragStart.current ? "none" : "transform 0.15s ease-out",
             }}
             onClick={(e) => e.stopPropagation()}
-          />
+ />
           <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/50 text-xs font-label-caps uppercase tracking-widest">
             {t("Scroll or pinch to zoom · drag to pan")}
           </p>

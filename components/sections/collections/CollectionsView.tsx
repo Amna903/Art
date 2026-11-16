@@ -149,7 +149,7 @@ export function CollectionsView({
                 setCountry(v);
                 setOpenMenu(null);
               }}
-            />
+ />
             <FilterButton
               label={t("Medium")}
               value={medium}
@@ -160,7 +160,7 @@ export function CollectionsView({
                 setMedium(v);
                 setOpenMenu(null);
               }}
-            />
+ />
             {(country !== "All" || medium !== "All") && (
               <button
                 onClick={resetAll}
@@ -217,7 +217,7 @@ export function CollectionsView({
                   className="object-cover transition-all duration-700"
                   alt={c.imageAlt}
                   src={c.image}
-                />
+ />
               </div>
               <div className="md:col-span-8 flex flex-col justify-center">
                 {c.tag && (
@@ -234,7 +234,7 @@ export function CollectionsView({
                   {c.medium && <Meta label={t("Medium")} value={c.medium} />}
                   <Meta label={t("Artists")} value={c.artists} />
                   <div>
-                    <p className="font-label-caps text-[10px] uppercase text-on-surface-variant/60 mb-1">{t("Price")}</p>
+                    <p className="font-label-caps text-tiny uppercase text-on-surface-variant/60 mb-1">{t("Price")}</p>
                     <PriceUponRequest className="text-sm" />
                   </div>
                 </div>
@@ -261,7 +261,7 @@ export function CollectionsView({
                     className="object-cover transition-all duration-700 scale-100 group-hover:scale-105"
                     alt={c.imageAlt}
                     src={c.image}
-                  />
+ />
                   {c.tag && (
                     <div className="absolute top-8 left-8">
                       <Badge>
@@ -282,10 +282,10 @@ export function CollectionsView({
                   </p>
                   <div className="mt-auto pt-6 border-t border-primary/10">
                     <div className="flex justify-between items-center">
-                      <span className="font-label-caps text-[11px] uppercase tracking-widest">
+                      <span className="font-label-caps text-small uppercase tracking-widest">
                         {c.artists}
                       </span>
-                      <PriceUponRequest className="text-[11px]" />
+                      <PriceUponRequest className="text-small" />
                     </div>
                   </div>
                 </div>
@@ -326,7 +326,7 @@ export function CollectionsView({
                   required
                   value={news.email}
                   onChange={(e) => news.setEmail(e.target.value)}
-                />
+ />
                 <div className="absolute bottom-0 left-0 h-[2px] bg-secondary w-0 group-focus-within:w-full transition-all duration-500"></div>
               </div>
               <button type="submit" disabled={news.status === "busy"} className="text-left font-label-caps text-label-caps uppercase tracking-widest flex items-center gap-4 group">
@@ -344,7 +344,7 @@ export function CollectionsView({
               src={newsletterImage.src}
               alt={newsletterImage.alt}
               className="w-full aspect-square"
-            />
+ />
           </div>
         </div>
         <div className="absolute -top-12 -right-12 opacity-10 pointer-events-none">
@@ -364,7 +364,7 @@ export function CollectionsView({
 function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="font-label-caps text-[10px] uppercase text-primary/40">{label}</p>
+      <p className="font-label-caps text-tiny uppercase text-primary/40">{label}</p>
       <p className="font-body-md text-primary">{value}</p>
     </div>
   );

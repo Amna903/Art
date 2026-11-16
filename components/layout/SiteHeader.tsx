@@ -78,7 +78,7 @@ export function SiteHeader() {
               unoptimized
               loading="eager"
               className={`w-auto object-contain transition-all duration-300 ${scrolled ? "h-8" : "h-10"}`}
-            />
+ />
           </Link>
         </div>
 
@@ -138,12 +138,12 @@ export function SiteHeader() {
                   {role === "admin" ? (
                     <Link
                       href="/admin"
-                      className="font-label-caps text-[9px] uppercase tracking-widest text-secondary hover:text-primary"
+                      className="font-label-caps text-micro uppercase tracking-widest text-secondary hover:text-primary"
                     >
                       {t("Admin")}
                     </Link>
                   ) : role ? (
-                    <span className="font-label-caps text-[9px] uppercase tracking-widest text-on-surface-variant">
+                    <span className="font-label-caps text-micro uppercase tracking-widest text-on-surface-variant">
                       {t(role)}
                     </span>
                   ) : null}
@@ -196,7 +196,7 @@ export function SiteHeader() {
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t("Search artists, countries, artworks…")}
               className="flex-1 bg-transparent border-b border-primary/30 focus:border-secondary outline-none py-2 font-body-md text-lg text-primary placeholder:text-on-surface-variant/40 transition-colors"
-            />
+ />
             <button
               type="submit"
               className="font-navigation text-navigation uppercase tracking-widest text-secondary hover:text-primary shrink-0"
@@ -258,12 +258,12 @@ export function SiteHeader() {
                       <Link
                         href="/admin"
                         onClick={() => setMobileOpen(false)}
-                        className="min-h-[36px] flex items-center pl-4 font-label-caps text-[10px] uppercase tracking-widest text-secondary hover:text-primary"
+                        className="min-h-[36px] flex items-center pl-4 font-label-caps text-tiny uppercase tracking-widest text-secondary hover:text-primary"
                       >
                         {t("Admin")}
                       </Link>
                     ) : role ? (
-                      <span className="min-h-[36px] flex items-center pl-4 font-label-caps text-[10px] uppercase tracking-widest text-on-surface-variant">
+                      <span className="min-h-[36px] flex items-center pl-4 font-label-caps text-tiny uppercase tracking-widest text-on-surface-variant">
                         {t(role)}
                       </span>
                     ) : null}

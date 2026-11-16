@@ -38,7 +38,7 @@ async function download(id: string, name: string, format: "png" | "svg") {
 export function QrCodeButton({ id, name, label }: { id: string; name: string; label?: string }) {
   const { t } = useLanguage();
   if (!QR_CODES_ENABLED) return null;
-  const cls = "text-[10px] uppercase tracking-widest border border-primary/20 px-2 py-1 hover:border-secondary hover:text-secondary";
+  const cls = "text-tiny uppercase tracking-widest border border-primary/20 px-2 py-1 hover:border-secondary hover:text-secondary";
   return (
     <span className="inline-flex gap-1 items-center" title={`${QR_BASE_URL}${id}`}>
       <button type="button" className={cls} onClick={() => download(id, name, "png")}>

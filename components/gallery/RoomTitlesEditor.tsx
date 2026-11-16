@@ -1,5 +1,6 @@
 "use client";
 
+import { Modal } from "@/components/ui/Modal";
 import { buttonClass } from "@/components/ui/Button";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -49,14 +50,7 @@ export function RoomTitlesEditor({ initial, onClose }: { initial: RoomTitles; on
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4">
-      <div className="w-full max-w-lg bg-background p-8 text-on-surface">
-        <div className="mb-2 flex items-center justify-between">
-          <h3 className="font-display text-2xl text-primary">{t("Edit room titles")}</h3>
-          <button type="button" onClick={onClose} aria-label={t("Close")} className="text-on-surface-variant">
-            ✕
-          </button>
-        </div>
+    <Modal title={t("Edit room titles")} onClose={onClose} overlayClassName="z-[70]" panelClassName="max-w-lg text-on-surface" headerClassName="mb-2" titleClassName="font-display text-2xl">
         <p className="mb-6 text-sm text-on-surface-variant">
           {language === "en"
             ? t("Shown above each artwork in the tour. Leave a title empty to show “Room 1”, “Room 2”…")
@@ -69,7 +63,7 @@ export function RoomTitlesEditor({ initial, onClose }: { initial: RoomTitles; on
               label={t("Room {n}", { n })}
               value={draft[n]}
               onChange={(v) => setDraft((d) => ({ ...d, [n]: v }))}
-            />
+ />
           ))}
         </div>
         <div className="mt-8 flex justify-end gap-3">
@@ -85,7 +79,6 @@ export function RoomTitlesEditor({ initial, onClose }: { initial: RoomTitles; on
             {saving ? t("Saving…") : t("Save")}
           </button>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

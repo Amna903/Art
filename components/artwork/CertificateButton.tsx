@@ -37,7 +37,7 @@ export function CertificateButton({ artworkTitle, artistName, medium, year, refe
           year={year}
           referenceNumber={referenceNumber}
           onClose={() => setOpen(false)}
-        />
+ />
       )}
     </>
   );
@@ -81,13 +81,13 @@ function CertificateModal({
         <div className="text-center mb-8">
           <span className="material-symbols-outlined text-3xl text-[#D7141E]">verified_user</span>
           <h3 className="font-serif text-2xl mt-2 mb-1 tracking-wide">{t("Certificate of Authenticity")}</h3>
-          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#5C5C5C]">{t("NUA-ARTE Collective")}</p>
+          <p className="text-tiny font-mono uppercase tracking-[0.2em] text-[#5C5C5C]">{t("NUA-ARTE Collective")}</p>
         </div>
 
         {/* Dedicated reference block: the admin-assigned number, exactly as
             shown on the artwork page. Left blank to fill in by hand if unset. */}
         <div className="mb-6 border border-[#333333]/40 px-4 py-3 text-center">
-          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#5C5C5C] mb-1">{t("Reference No.")}</p>
+          <p className="text-tiny font-mono uppercase tracking-[0.2em] text-[#5C5C5C] mb-1">{t("Reference No.")}</p>
           <p className="font-mono text-lg tracking-[0.15em] min-h-[1.75rem]">{referenceNumber ?? ""}</p>
         </div>
 
@@ -121,7 +121,7 @@ function CertificateModal({
 function Row({ label, value, emphasis }: { label: string; value: string; emphasis?: boolean }) {
   return (
     <div className="flex items-baseline justify-between gap-4">
-      <span className="text-[10px] font-mono uppercase tracking-widest text-[#5C5C5C] shrink-0">{label}</span>
+      <span className="text-tiny font-mono uppercase tracking-widest text-[#5C5C5C] shrink-0">{label}</span>
       <span className={emphasis ? "font-serif text-base text-right" : "text-right"}>{value}</span>
     </div>
   );

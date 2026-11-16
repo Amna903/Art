@@ -128,7 +128,7 @@ export function OriginalityReviewAdmin() {
                       onClick={() =>
                         resolve(a, { status: "published", originality_status: "clear" })
                       }
-                      className="text-[10px] uppercase tracking-widest px-3 py-2 border border-primary/20 hover:border-primary disabled:opacity-50"
+                      className="text-tiny uppercase tracking-widest px-3 py-2 border border-primary/20 hover:border-primary disabled:opacity-50"
                     >
                       {t("Approve & publish")}
                     </button>
@@ -137,7 +137,7 @@ export function OriginalityReviewAdmin() {
                       onClick={() =>
                         resolve(a, { status: "draft", originality_status: "clear" })
                       }
-                      className="text-[10px] uppercase tracking-widest px-3 py-2 border border-primary/20 hover:border-primary disabled:opacity-50"
+                      className="text-tiny uppercase tracking-widest px-3 py-2 border border-primary/20 hover:border-primary disabled:opacity-50"
                     >
                       {t("Clear flag")}
                     </button>
@@ -146,7 +146,7 @@ export function OriginalityReviewAdmin() {
                       onClick={() =>
                         resolve(a, { status: "blocked", originality_status: "blocked" })
                       }
-                      className="text-[10px] uppercase tracking-widest px-3 py-2 border border-secondary text-secondary hover:bg-secondary hover:text-on-primary disabled:opacity-50"
+                      className="text-tiny uppercase tracking-widest px-3 py-2 border border-secondary text-secondary hover:bg-secondary hover:text-on-primary disabled:opacity-50"
                     >
                       {t("Keep blocked")}
                     </button>
@@ -161,7 +161,7 @@ export function OriginalityReviewAdmin() {
                   <ul className="text-sm space-y-1">
                     {(report.matches ?? []).slice(0, 6).map((m, i) => (
                       <li key={`${m.url ?? m.title ?? i}`} className="text-on-surface-variant">
-                        <span className="uppercase tracking-widest text-[10px] text-secondary mr-2">
+                        <span className="uppercase tracking-widest text-tiny text-secondary mr-2">
                           {m.source}
                         </span>
                         {m.url ? (

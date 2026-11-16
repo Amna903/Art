@@ -57,7 +57,7 @@ function Preview({
   return (
     <div className="flex items-end gap-4">
       <div>
-        <span className="mb-1 block text-[10px] uppercase tracking-widest text-on-surface-variant">{t("Desktop")}</span>
+        <span className="mb-1 block text-tiny uppercase tracking-widest text-on-surface-variant">{t("Desktop")}</span>
         <button
           type="button"
           disabled={!onFocal}
@@ -75,12 +75,12 @@ function Preview({
               className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow"
               style={{ left: fx, top: fy, background: "var(--nua-red)" }}
               aria-hidden="true"
-            />
+ />
           )}
         </button>
       </div>
       <div>
-        <span className="mb-1 block text-[10px] uppercase tracking-widest text-on-surface-variant">{t("Mobile")}</span>
+        <span className="mb-1 block text-tiny uppercase tracking-widest text-on-surface-variant">{t("Mobile")}</span>
         <div className="aspect-[4/5] w-28 overflow-hidden bg-surface-container">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={mobile ?? desktop} alt="" className="h-full w-full object-cover" style={{ objectPosition: mobile ? undefined : focal }} />
@@ -278,7 +278,7 @@ export function HeroImagesAdmin() {
             <li key={row.id} className="flex flex-wrap items-end gap-6 border-b border-primary/10 pb-6">
               <Preview desktop={row.image_desktop} mobile={row.image_mobile} focal={row.focal_point} />
               <div className="min-w-[200px] flex-1 space-y-1 text-sm">
-                {row.active && <span className="inline-block bg-[var(--nua-charcoal)] px-2 py-0.5 text-[10px] uppercase tracking-widest text-[var(--nua-white)]">{t("Live")}</span>}
+                {row.active && <span className="inline-block bg-[var(--nua-charcoal)] px-2 py-0.5 text-tiny uppercase tracking-widest text-[var(--nua-white)]">{t("Live")}</span>}
                 <p className="text-primary">{row.alt_text}</p>
                 {row.credit && <p className="text-on-surface-variant">{t("Artwork: {credit}", { credit: row.credit })}</p>}
               </div>

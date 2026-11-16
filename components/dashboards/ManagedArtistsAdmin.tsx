@@ -1,5 +1,6 @@
 "use client";
 
+import { Select } from "@/components/ui/Field";
 import { buttonClass } from "@/components/ui/Button";
 import { useRouter, useLanguage } from "@/lib/i18n";
 import { useCallback, useEffect, useState } from "react";
@@ -404,14 +405,14 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                     {artist.avatar_url ? (
                       <Image src={artist.avatar_url} alt="" fill sizes="48px" className="object-cover" />
                     ) : (
-                      <span className="absolute inset-0 flex items-center justify-center text-[10px] uppercase tracking-widest text-on-surface-variant">
+                      <span className="absolute inset-0 flex items-center justify-center text-tiny uppercase tracking-widest text-on-surface-variant">
                         —
                       </span>
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-headline-sm text-sm text-primary truncate">{artist.display_name}</p>
-                    <p className="text-[11px] uppercase tracking-widest text-on-surface-variant">
+                    <p className="text-small uppercase tracking-widest text-on-surface-variant">
                       {getCountryDisplayName(artist.country, language)}
                       {artist.city ? ` · ${artist.city}` : ""} · {count === 1 ? t("1 work") : t("{count} works", { count })}
                     </p>
@@ -434,7 +435,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                   <QrCodeButton id={selected.id} name={selected.display_name} label={t("Artist QR")} />
                   <Link
                     href={`/artists/${selected.slug}`}
-                    className="text-[10px] uppercase tracking-widest text-secondary hover:underline"
+                    className="text-tiny uppercase tracking-widest text-secondary hover:underline"
                     target="_blank"
                   >
                     {t("View public page →")}
@@ -460,7 +461,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                       const file = e.target.files?.[0];
                       if (file) uploadAvatar(file);
                     }}
-                  />
+ />
                 </label>
               </div>
 
@@ -469,15 +470,15 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                   label={t("Display name")}
                   value={artistDraft.display_name}
                   onChange={(v) => setArtistDraft({ ...artistDraft, display_name: v })}
-                />
+ />
                 <label className="block">
                   <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">
                     {t("Country")}
                   </span>
-                  <select
+                  <Select
                     value={artistDraft.country}
                     onChange={(e) => setArtistDraft({ ...artistDraft, country: e.target.value })}
-                    className="w-full bg-transparent border-b border-primary/30 py-2 text-primary"
+
                   >
                     <option value="">{t("Select country")}</option>
                     {AFRICAN_COUNTRIES.map((c) => (
@@ -485,31 +486,31 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                         {getCountryDisplayName(c, language)}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </label>
                 <F
                   label={t("City")}
                   value={artistDraft.city}
                   onChange={(v) => setArtistDraft({ ...artistDraft, city: v })}
-                />
+ />
                 <F
                   label={t("Technique")}
                   value={artistDraft.technique}
                   onChange={(v) => setArtistDraft({ ...artistDraft, technique: v })}
-                />
+ />
               </div>
               <F
                 label={t("Intro (beside the portrait)")}
                 value={artistDraft.intro}
                 onChange={(v) => setArtistDraft({ ...artistDraft, intro: v })}
                 textarea
-              />
+ />
               <F
                 label={t("Narrative (full bio)")}
                 value={artistDraft.bio}
                 onChange={(v) => setArtistDraft({ ...artistDraft, bio: v })}
                 textarea
-              />
+ />
               <TranslationFields
                 fields={[
                   { name: "intro", label: "Intro", textarea: true },
@@ -517,12 +518,12 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                 ]}
                 value={artistDraft.translations}
                 onChange={(translations) => setArtistDraft({ ...artistDraft, translations })}
-              />
+ />
               <F
                 label={t("Studio video URL (button hidden when empty)")}
                 value={artistDraft.video_url}
                 onChange={(v) => setArtistDraft({ ...artistDraft, video_url: v })}
-              />
+ />
 
               <div className="flex flex-wrap gap-3 pt-2">
                 <button
@@ -565,7 +566,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
 
               {artworkDraft && (
                 <div className="bg-surface-container-low p-4 space-y-3 border border-primary/10">
-                  <p className="text-[10px] uppercase tracking-widest text-secondary">
+                  <p className="text-tiny uppercase tracking-widest text-secondary">
                     {artworkDraft.id ? t("Edit artwork") : t("New artwork")}
                   </p>
                   <div className="grid sm:grid-cols-2 gap-3">
@@ -573,18 +574,18 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                       label={t("Title")}
                       value={artworkDraft.title ?? ""}
                       onChange={(v) => setArtworkDraft({ ...artworkDraft, title: v })}
-                    />
+ />
                     <F
                       label={t("Year")}
                       type="number"
                       value={String(artworkDraft.year ?? "")}
                       onChange={(v) => setArtworkDraft({ ...artworkDraft, year: Number(v) || null })}
-                    />
+ />
                     <label className="block">
                       <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">
                         {t("Medium")}
                       </span>
-                      <select
+                      <Select
                         value={mediumSelectValue}
                         onChange={(e) =>
                           setArtworkDraft({
@@ -593,7 +594,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                             customMedium: e.target.value === "Other" ? artworkDraft.customMedium : "",
                           })
                         }
-                        className="w-full bg-transparent border-b border-primary/30 py-2 text-primary text-sm"
+                        className="text-sm"
                       >
                         <option value="">{t("Select")}</option>
                         {RESERVED_MEDIA.map((m) => (
@@ -602,36 +603,36 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                           </option>
                         ))}
                         <option value="Other">{t("Other")}</option>
-                      </select>
+                      </Select>
                     </label>
                     {mediumSelectValue === "Other" && (
                       <F
                         label={t("Custom medium")}
                         value={artworkDraft.customMedium ?? ""}
                         onChange={(v) => setArtworkDraft({ ...artworkDraft, customMedium: v })}
-                      />
+ />
                     )}
                     <F
                       label={t("Dimensions")}
                       value={artworkDraft.dimensions ?? ""}
                       onChange={(v) => setArtworkDraft({ ...artworkDraft, dimensions: v })}
-                    />
+ />
                     <F
                       label={t("Reference number (e.g. NA-C1-001)")}
                       value={artworkDraft.reference_number ?? ""}
                       onChange={(v) => setArtworkDraft({ ...artworkDraft, reference_number: v })}
-                    />
+ />
                     <F
                       label={t("Price (USD, internal)")}
                       type="number"
                       value={String(artworkDraft.price_usd ?? 0)}
                       onChange={(v) => setArtworkDraft({ ...artworkDraft, price_usd: Number(v) || 0 })}
-                    />
+ />
                     <label className="block">
                       <span className="block font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">
                         {t("Status")}
                       </span>
-                      <select
+                      <Select
                         value={artworkDraft.status ?? "published"}
                         onChange={(e) =>
                           setArtworkDraft({
@@ -639,7 +640,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                             status: e.target.value as Artwork["status"],
                           })
                         }
-                        className="w-full bg-transparent border-b border-primary/30 py-2 text-primary text-sm"
+                        className="text-sm"
                       >
                         <option value="draft">{t("Draft")}</option>
                         <option value="pending_review">{t("Pending review")}</option>
@@ -647,7 +648,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                         <option value="published">{t("Published")}</option>
                         <option value="sold">{t("Sold")}</option>
                         <option value="archived">{t("Archived")}</option>
-                      </select>
+                      </Select>
                     </label>
                   </div>
                   <F
@@ -655,7 +656,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                     value={artworkDraft.description ?? ""}
                     onChange={(v) => setArtworkDraft({ ...artworkDraft, description: v })}
                     textarea
-                  />
+ />
                   <TranslationFields
                     fields={[
                       { name: "title", label: "Title" },
@@ -663,7 +664,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                     ]}
                     value={artworkDraft.translations}
                     onChange={(translations) => setArtworkDraft({ ...artworkDraft, translations })}
-                  />
+ />
                   <div className="flex flex-wrap items-center gap-4 border-2 border-dashed border-secondary/40 bg-surface p-4">
                     {artworkDraft.image_url ? (
                       <div className="relative w-24 h-24 shrink-0 bg-surface-container overflow-hidden">
@@ -689,7 +690,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                           if (file) uploadArtworkImage(file);
                           e.currentTarget.value = "";
                         }}
-                      />
+ />
                     </label>
                     <span className="text-xs text-on-surface-variant">{t("JPEG, PNG, or WebP")}</span>
                   </div>
@@ -726,7 +727,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm text-primary truncate">{work.title}</p>
-                        <p className="text-[10px] uppercase tracking-widest text-on-surface-variant">
+                        <p className="text-tiny uppercase tracking-widest text-on-surface-variant">
                           {t(ARTWORK_STATUS_LABELS[work.status] ?? work.status)}
                           {work.medium ? ` · ${t(work.medium)}` : ""}
                           {work.year ? ` · ${work.year}` : ""}
@@ -746,14 +747,14 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                                 : work.medium ?? "",
                             })
                           }
-                          className="text-[10px] uppercase tracking-widest border border-primary/20 px-2 py-1"
+                          className="text-tiny uppercase tracking-widest border border-primary/20 px-2 py-1"
                         >
                           {t("Edit")}
                         </button>
                         <button
                           type="button"
                           onClick={() => removeArtwork(work.id)}
-                          className="text-[10px] uppercase tracking-widest border border-secondary text-secondary px-2 py-1"
+                          className="text-tiny uppercase tracking-widest border border-secondary text-secondary px-2 py-1"
                         >
                           {t("Delete")}
                         </button>

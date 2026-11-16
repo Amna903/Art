@@ -1,5 +1,6 @@
 "use client";
 
+import { Input } from "@/components/ui/Field";
 export function F({
   label,
   value,
@@ -22,14 +23,14 @@ export function F({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className="w-full bg-transparent border border-primary/20 p-2 text-primary text-sm"
-        />
+ />
       ) : (
-        <input
+        <Input
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full bg-transparent border-b border-primary/30 py-2 text-primary"
-        />
+
+ />
       )}
     </label>
   );
