@@ -1317,6 +1317,10 @@ const es: Record<string, string> = {
   "Followed Artists": "Artistas seguidos",
   "Order History": "Historial de pedidos",
   "3 Minutes": "3 minutos",
+  "Thank you — you're on the list.": "Gracias — ya estás en la lista.",
+  "Please enter a valid email address.": "Introduce una dirección de correo válida.",
+  "Could not sign you up. Please try again.": "No se pudo completar la suscripción. Inténtalo de nuevo.",
+  "Sign-up is not available right now.": "La suscripción no está disponible en este momento.",
 };
 
 export default es;

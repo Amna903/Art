@@ -1317,6 +1317,10 @@ const it: Record<string, string> = {
   "Followed Artists": "Artisti seguiti",
   "Order History": "Cronologia ordini",
   "3 Minutes": "3 minuti",
+  "Thank you — you're on the list.": "Grazie — sei nella lista.",
+  "Please enter a valid email address.": "Inserisci un indirizzo email valido.",
+  "Could not sign you up. Please try again.": "Impossibile completare l’iscrizione. Riprova.",
+  "Sign-up is not available right now.": "L’iscrizione non è disponibile al momento.",
 };
 
 export default it;

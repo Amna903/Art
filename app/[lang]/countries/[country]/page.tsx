@@ -1,4 +1,5 @@
 import { buttonClass } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 import type { Metadata } from "next";
 import { getI18n } from "@/lib/i18n/server";
 import { formatNumber } from "@/lib/i18n/translate";
@@ -120,7 +121,7 @@ export default async function Page({ params }: Props) {
       <div className="relative overflow-hidden aspect-[3/4] mb-8">
       <img className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt={t("A striking portrait of a contemporary Nigerian artist with a serious gaze, shot against a deep red minimalist wall. The lighting is soft but directed, highlighting the artist's features. The aesthetic is clean, premium, and reminiscent of a high-end fashion or art editorial. No shadows, just pure color contrast.")} src="https://nu-artcollective.lovable.app/__l5e/assets-v1/04f8502e-a9bb-4275-9ace-a1f2f752eae2/afr-mixedmedia.jpg" />
       <div className="absolute top-6 left-6 flex flex-col gap-2">
-      <span className="bg-primary text-beige font-label-caps text-[10px] px-3 py-1 uppercase tracking-widest">{t("New Discovery")}</span>
+      <Badge>{t("New Discovery")}</Badge>
       </div>
       <div className="absolute bottom-6 right-6">
       <div className="w-12 h-12 bg-beige flex items-center justify-center translate-y-20 group-hover:translate-y-0 transition-transform duration-500">
@@ -155,7 +156,7 @@ export default async function Page({ params }: Props) {
       <div className="relative overflow-hidden aspect-[3/4] mb-8 border border-primary/5">
       <img className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt={t("Close-up of a textile artist weaving traditional Nigerian patterns into a modern tapestry. The colors are rich indigos and burnt oranges. The lighting is intimate and warm, focusing on the texture of the threads. The overall style is editorial and human-centric, emphasizing the tactile nature of the work.")} src="https://nu-artcollective.lovable.app/__l5e/assets-v1/962ca422-ea96-4526-86bf-114414bf21e6/afr-culture-portrait.jpg" />
       <div className="absolute top-6 left-6 flex flex-col gap-2">
-      <span className="bg-primary text-beige font-label-caps text-[10px] px-3 py-1 uppercase tracking-widest">{t("New Discovery")}</span>
+      <Badge>{t("New Discovery")}</Badge>
       </div>
       <div className="absolute bottom-6 right-6">
       <div className="w-12 h-12 bg-beige flex items-center justify-center translate-y-20 group-hover:translate-y-0 transition-transform duration-500">
@@ -190,7 +191,7 @@ export default async function Page({ params }: Props) {
       <div className="relative overflow-hidden aspect-[3/4] mb-8">
       <img className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt={t("A portrait of a young digital artist in a high-tech studio environment in Lagos. Glowing screens reflect colors on their face. The aesthetic is futuristic yet minimalist, with clean lines and high-contrast lighting. The mood is innovative and forward-looking, showcasing the new wave of Nigerian digital creativity.")} src="https://nu-artcollective.lovable.app/__l5e/assets-v1/dc981581-67cc-4c92-881e-bbb825d6b9c6/afr-street-lagos.jpg" />
       <div className="absolute top-6 left-6 flex flex-col gap-2">
-      <span className="bg-primary text-beige font-label-caps text-[10px] px-3 py-1 uppercase tracking-widest">{t("New Discovery")}</span>
+      <Badge>{t("New Discovery")}</Badge>
       </div>
       <div className="absolute bottom-6 right-6">
       <div className="w-12 h-12 bg-beige flex items-center justify-center translate-y-20 group-hover:translate-y-0 transition-transform duration-500">

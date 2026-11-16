@@ -2,9 +2,11 @@
 
 import Link from "@/components/i18n/Link";
 import { useLanguage } from "@/lib/i18n";
+import { useNewsletter, NewsletterStatus } from "@/lib/newsletter";
 
 export function SiteFooter() {
   const { t } = useLanguage();
+  const news = useNewsletter("footer");
 
   return (
     <footer className="bg-inverse-surface text-inverse-on-surface mt-section-gap relative">
@@ -16,14 +18,19 @@ export function SiteFooter() {
           <p className="text-[13px] leading-relaxed opacity-70 mb-7">
             {t("Editorials, new artist drops, and private viewing invites — delivered with intention.")}
           </p>
-          <form className="flex">
+          <form onSubmit={news.onSubmit} className="flex">
             <input
               type="email"
               placeholder={t("Your email address")}
+              aria-label={t("Your email address")}
+              required
+              value={news.email}
+              onChange={(e) => news.setEmail(e.target.value)}
               className="bg-transparent flex-1 py-3 outline-none text-sm placeholder:text-inverse-on-surface/50"
             />
             <button
-              type="button"
+              type="submit"
+              disabled={news.status === "busy"}
               className="material-symbols-outlined w-11 h-11 flex items-center justify-center shrink-0 hover:text-secondary-fixed-dim transition-colors"
               aria-label={t("Subscribe")}
               style={{ fontSize: "20px" }}
@@ -31,6 +38,7 @@ export function SiteFooter() {
               arrow_forward
             </button>
           </form>
+          <NewsletterStatus status={news.status} error={news.error} />
         </div>
 
         <div>

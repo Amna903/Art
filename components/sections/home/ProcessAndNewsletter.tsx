@@ -2,6 +2,7 @@
 
 import { buttonClass } from "@/components/ui/Button";
 import { useLanguage } from "@/lib/i18n";
+import { useNewsletter, NewsletterStatus } from "@/lib/newsletter";
 
 const STEPS = [
   { n: "01", title: "Discover", body: "Browse a curated selection of contemporary artists from Angola and the Congo." },
@@ -38,6 +39,7 @@ export function ProcessSteps() {
 
 export function Newsletter() {
   const { t } = useLanguage();
+  const news = useNewsletter("home");
 
   return (
     <section className="py-section-gap px-gutter-page">
@@ -48,7 +50,7 @@ export function Newsletter() {
             {t("Let the discovery continue. Receive artists’ stories, new collection arrivals and invitations to experience NUA-ARTE in person.")}
           </p>
         </div>
-        <form className="flex flex-col md:flex-row gap-4 items-end">
+        <form onSubmit={news.onSubmit} className="flex flex-col md:flex-row gap-4 items-end">
           <div className="flex-grow w-full">
             <label htmlFor="newsletter-email" className="font-label-caps text-left block mb-2">
               {t("EMAIL ADDRESS")}
@@ -58,12 +60,16 @@ export function Newsletter() {
               className="w-full bg-transparent border-0 border-b border-primary p-4 focus:ring-0 focus:border-secondary transition-all outline-none"
               placeholder={t("Your email address")}
               type="email"
+              required
+              value={news.email}
+              onChange={(e) => news.setEmail(e.target.value)}
             />
           </div>
-          <button className={buttonClass({className: "w-full md:w-auto"})}>
+          <button type="submit" disabled={news.status === "busy"} className={buttonClass({className: "w-full md:w-auto"})}>
             {t("Keep me connected")}
           </button>
         </form>
+        <NewsletterStatus status={news.status} error={news.error} />
       </div>
     </section>
   );

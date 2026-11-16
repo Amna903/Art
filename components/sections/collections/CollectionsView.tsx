@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Badge } from "@/components/ui/Badge";
 import Link from "@/components/i18n/Link";
 import Image from "next/image";
 import { PriceUponRequest } from "@/components/enquiry/PriceUponRequest";
@@ -8,6 +9,7 @@ import { EditableImage } from "@/components/editing/EditableImage";
 import { COLLECTIONS, type Collection } from "@/lib/data/collections";
 import type { SupabaseCollection } from "@/lib/data/supabase-collections";
 import { useLanguage } from "@/lib/i18n";
+import { useNewsletter, NewsletterStatus } from "@/lib/newsletter";
 import { getCountryBySlug, getCountryDisplayName, normalizeCountrySlug } from "@/lib/data/africa";
 
 type ViewMode = "grid" | "list";
@@ -39,6 +41,7 @@ export function CollectionsView({
   newsletterImage?: { src: string; alt: string };
 }) {
   const { t, language } = useLanguage();
+  const news = useNewsletter("collections");
   // Oldest real collection takes slot 0, so a slot never jumps once filled —
   // the rest stay static until replaced by admin-created collections.
   // Real collections arrive already in this language; the built-in demo
@@ -261,9 +264,9 @@ export function CollectionsView({
                   />
                   {c.tag && (
                     <div className="absolute top-8 left-8">
-                      <span className="bg-primary text-beige font-label-caps text-[10px] px-3 py-1 uppercase tracking-widest">
+                      <Badge>
                         {c.tag}
-                      </span>
+                      </Badge>
                     </div>
                   )}
                 </div>
@@ -313,20 +316,25 @@ export function CollectionsView({
             <p className="font-body-lg text-on-surface-variant mb-8 max-w-sm">
               {t("Be the first to receive our curated catalogues and invitations to private artist viewings.")}
             </p>
-            <form className="flex flex-col gap-6 max-w-md" onSubmit={(e) => e.preventDefault()}>
+            <form className="flex flex-col gap-6 max-w-md" onSubmit={news.onSubmit}>
               <div className="border-b border-primary py-2 relative group">
                 <input
                   className="bg-transparent border-none w-full focus:ring-0 font-label-caps placeholder:text-primary/30 text-primary"
                   placeholder={t("EMAIL ADDRESS")}
                   type="email"
+                  aria-label={t("Email address")}
+                  required
+                  value={news.email}
+                  onChange={(e) => news.setEmail(e.target.value)}
                 />
                 <div className="absolute bottom-0 left-0 h-[2px] bg-secondary w-0 group-focus-within:w-full transition-all duration-500"></div>
               </div>
-              <button className="text-left font-label-caps text-label-caps uppercase tracking-widest flex items-center gap-4 group">
+              <button type="submit" disabled={news.status === "busy"} className="text-left font-label-caps text-label-caps uppercase tracking-widest flex items-center gap-4 group">
                 {t("Subscribe")}{" "}
                 <span className="w-12 h-[1px] bg-secondary group-hover:w-24 transition-all duration-300"></span>
               </button>
             </form>
+            <NewsletterStatus status={news.status} error={news.error} />
           </div>
           <div className="hidden md:block">
             <EditableImage

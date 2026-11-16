@@ -1477,6 +1477,10 @@ const fr: Record<string, string> = {
   "Saved Artworks": "Œuvres enregistrées",
   "Order History": "Historique des commandes",
   "3 Minutes": "3 minutes",
+  "Thank you — you're on the list.": "Merci — vous êtes inscrit(e).",
+  "Please enter a valid email address.": "Veuillez saisir une adresse e-mail valide.",
+  "Could not sign you up. Please try again.": "L’inscription n’a pas abouti. Veuillez réessayer.",
+  "Sign-up is not available right now.": "L’inscription n’est pas disponible pour le moment.",
 };
 
 export default fr;
