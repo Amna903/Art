@@ -16,7 +16,8 @@ import Image from "next/image";
 import { ArtworkImage } from "@/components/ui/ArtworkImage";
 import { ArtistPhoto } from "@/components/artist/ArtistPhoto";
 import { getI18n } from "@/lib/i18n/server";
-import type { Language } from "@/lib/i18n/config";
+import { localizePath, type Language } from "@/lib/i18n/config";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Translator } from "@/lib/i18n/translate";
 
 export const revalidate = 60;
@@ -122,6 +123,16 @@ async function resolveArtist(slug: string, lang: Language, t: Translator, page =
     };
   }
 
+  // Old or hand-typed addresses ("/artists/tony-wemba") name a real artist
+  // without their unique suffix: send visitors to that artist's real page.
+  const nameSlug = (name: string) => name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const byName = (await getRealArtists(lang)).find((artist) => nameSlug(artist.name) === slug);
+  if (byName) permanentRedirect(localizePath(`/artists/${byName.slug}`, lang));
+
+  // The sample directory (with made-up profiles for any address) is only for
+  // local development; the live site never shows an invented artist.
+  if (process.env.NODE_ENV !== "development") return null;
+
   const staticArtist = getStaticArtistBySlug(slug);
   if (staticArtist) {
     return {
@@ -166,9 +177,7 @@ export default async function ArtistProfilePage({ params, searchParams }: Props)
   const { lang, t } = await getI18n(params);
   const page = pageFrom((await searchParams).page);
   const resolved = await resolveArtist(slug, lang, t, page);
-  if (!resolved) {
-    return <main className="max-w-container-max mx-auto px-gutter-page py-24">{t("Artist not found.")}</main>;
-  }
+  if (!resolved) notFound();
 
   const { artist, works } = resolved;
   const worksTotal = resolved.source === "supabase" ? resolved.worksTotal : works.length;

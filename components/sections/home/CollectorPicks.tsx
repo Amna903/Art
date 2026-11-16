@@ -11,6 +11,8 @@ export type CollectorPick = {
   slug: string;
   title: string;
   artist: string;
+  /** The artist's real profile address (from the artwork record). */
+  artistSlug: string;
   collection: string;
   image: string;
 };
@@ -67,7 +69,7 @@ export function CollectorPicks({ picks }: CollectorPicksProps) {
                     {pick.title}
                   </h3>
                   <Link
-                    href={`/artists/${getArtistSlugByName(pick.artist)}`}
+                    href={`/artists/${pick.artistSlug || getArtistSlugByName(pick.artist)}`}
                     className="font-body-md text-on-surface-variant italic hover:text-secondary hover:underline transition-colors block mt-0.5"
                   >
                     {pick.artist}
