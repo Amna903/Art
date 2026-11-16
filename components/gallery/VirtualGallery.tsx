@@ -119,6 +119,16 @@ export function VirtualGallery({
   const wantsMuseum = view === "free" || (desktop && view !== "entrance");
   if (wantsMuseum && !museumMounted) setMuseumMounted(true);
 
+  // Choosing a room from the lobby only changes the query string, so the
+  // browser keeps its scroll position at the bottom of the page and the new
+  // room loads out of sight. This component is keyed by room, so it remounts
+  // on every switch: bring the visitor back up to the room they chose.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).has("country")) {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+  }, []);
+
   const inExperience = view !== "entrance";
   useEffect(() => {
     if (!inExperience) return;

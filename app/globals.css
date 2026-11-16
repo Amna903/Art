@@ -58,6 +58,8 @@
   --spacing-gutter: clamp(16px, 2vw, 24px);
   --spacing-gutter-page: clamp(16px, 4.5vw, 64px);
   --spacing-section-gap: clamp(72px, 8vw, 112px);
+  /* Inner padding for feature panels (newsletter box, country hero captions). */
+  --spacing-margin-desktop: clamp(24px, 5vw, 64px);
 
   --max-width-container-max: 1320px;
 
