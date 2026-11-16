@@ -9,9 +9,12 @@
  *   - every other image is served exactly as stored (portraits and hero
  *     images are already compressed to WebP before upload).
  */
+import { siteMediaUrl, siteThumbUrl } from "./thumb-url";
+
 const THUMB = /\/(artwork-)?thumbs\/.+\/(640|1280)\.webp(\?.*)?$/;
 
 export default function imageLoader({ src, width }: { src: string; width: number; quality?: number }): string {
-  if (THUMB.test(src)) return src.replace(/\/(640|1280)\.webp/, `/${width <= 640 ? 640 : 1280}.webp`);
-  return src;
+  if (THUMB.test(src)) return siteThumbUrl(src.replace(/\/(640|1280)\.webp/, `/${width <= 640 ? 640 : 1280}.webp`));
+  // Portraits, hero images etc. go through the Vercel-cached /media route.
+  return siteMediaUrl(src);
 }

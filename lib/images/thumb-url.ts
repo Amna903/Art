@@ -12,3 +12,12 @@ export function siteThumbUrl(supabaseUrl: string): string {
   const i = supabaseUrl.indexOf(MARKER);
   return i === -1 ? supabaseUrl : `/thumbs/${supabaseUrl.slice(i + MARKER.length)}`;
 }
+
+const STORAGE = "/storage/v1/object/";
+
+/** Site-relative /media URL for any other image in Supabase storage (app/media). */
+export function siteMediaUrl(url: string): string {
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!base || !url.startsWith(base + STORAGE)) return url;
+  return `/media/${url.slice(base.length + STORAGE.length)}`;
+}
