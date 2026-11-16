@@ -1,3 +1,4 @@
+import { buttonClass } from "@/components/ui/Button";
 import type { Metadata } from "next";
 import { getExhibitions } from "@/lib/sanity/queries";
 import { getPublishedExhibitions } from "@/lib/data/exhibitions";
@@ -157,7 +158,7 @@ export default async function ExhibitionsPage({ params }: PageProps<"/[lang]/exh
               href="https://nulumusic.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-primary mt-8 inline-flex min-h-[48px] items-center px-8 text-base font-semibold"
+              className={buttonClass({variant: "accent",className: "mt-8"})}
             >
               {t("RSVP at nulumusic.com")}
             </a>
@@ -179,10 +180,10 @@ export default async function ExhibitionsPage({ params }: PageProps<"/[lang]/exh
           {t("Come with curiosity. Take your time. Let a work hold your attention, and meet the person whose imagination brought it into being.")}
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <a href="#upcoming" className="btn-secondary inline-flex min-h-[48px] items-center px-8 text-base">
+          <a href="#upcoming" className={buttonClass({variant: "secondary"})}>
             {t("View upcoming exhibitions")}
           </a>
-          <Link href="/collections" className="btn-secondary inline-flex min-h-[48px] items-center px-8 text-base">
+          <Link href="/collections" className={buttonClass({variant: "secondary"})}>
             {t("Explore the collection")}
           </Link>
         </div>

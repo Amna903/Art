@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonClass } from "@/components/ui/Button";
 import { useLanguage } from "@/lib/i18n";
 
 const STEPS = [
@@ -59,7 +60,7 @@ export function Newsletter() {
               type="email"
             />
           </div>
-          <button className="bg-primary text-on-primary px-12 py-4 font-navigation text-navigation uppercase tracking-widest hover:bg-secondary transition-colors w-full md:w-auto">
+          <button className={buttonClass({className: "w-full md:w-auto"})}>
             {t("Keep me connected")}
           </button>
         </form>

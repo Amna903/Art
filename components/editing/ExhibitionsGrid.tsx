@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonClass } from "@/components/ui/Button";
 import { useRouter, useLanguage } from "@/lib/i18n";
 import { useCallback, useState } from "react";
 import Image from "next/image";
@@ -139,7 +140,7 @@ export function ExhibitionsGrid({
                 src={ev.img}
               />
               <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 to-transparent translate-y-full group-hover:translate-y-0 transition-transform">
-                <button className="w-full py-3 bg-beige text-black font-navigation text-navigation uppercase">{t("Remind Me")}</button>
+                <button className={buttonClass({variant: "inverse",size: "sm",full: true})}>{t("Remind Me")}</button>
               </div>
             </div>
             <h3 className="font-headline-sm text-headline-sm mb-2">{t(ev.title)}</h3>
@@ -229,7 +230,7 @@ export function ExhibitionsGrid({
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button onClick={() => setEditing(null)} className="border border-primary/20 px-5 py-2 text-xs uppercase tracking-[0.2em]">{t("Cancel")}</button>
-                <button onClick={save} className="bg-primary text-on-primary px-5 py-2 text-xs uppercase tracking-[0.2em]">{t("Publish")}</button>
+                <button onClick={save} className={buttonClass({size: "sm"})}>{t("Publish")}</button>
               </div>
             </div>
           </div>

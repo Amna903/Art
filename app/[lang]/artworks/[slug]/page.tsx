@@ -1,3 +1,4 @@
+import { buttonClass } from "@/components/ui/Button";
 import { PriceUponRequest } from "@/components/enquiry/PriceUponRequest";
 import { RequestPriceButton } from "@/components/enquiry/RequestPriceButton";
 import { ZoomableImage } from "@/components/artwork/ZoomableImage";
@@ -285,7 +286,7 @@ export default async function ArtworkDetailPage({ params }: Props) {
                 artworkTitle={title}
                 artistName={artist}
                 artworkImage={image}
-                className="w-full bg-primary text-on-primary font-navigation text-navigation uppercase tracking-widest py-4 px-8 hover:bg-secondary transition-colors duration-300"
+                className={buttonClass({full: true})}
               >
                 {t("Request Price")}
               </RequestPriceButton>

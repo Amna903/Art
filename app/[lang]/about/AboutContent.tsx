@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonClass } from "@/components/ui/Button";
 import Link from "@/components/i18n/Link";
 import { useLanguage } from "@/lib/i18n";
 import { QuoteBlock } from "@/components/sections/QuoteBlock";
@@ -96,10 +97,10 @@ export function AboutContent({
 
       <section className="max-w-container-max mx-auto px-gutter-page py-20 text-center">
         <div className="flex flex-col sm:flex-row justify-center gap-3">
-          <Link href="/artists" className="btn-primary inline-flex min-h-[48px] items-center justify-center px-8 text-base font-semibold">
+          <Link href="/artists" className={buttonClass({variant: "accent"})}>
             {t("Meet the artists")}
           </Link>
-          <Link href="/collections" className="btn-secondary inline-flex min-h-[48px] items-center justify-center px-8 text-base">
+          <Link href="/collections" className={buttonClass({variant: "secondary"})}>
             {t("Explore the collection")}
           </Link>
         </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonClass } from "@/components/ui/Button";
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ArtworkImage } from "@/components/ui/ArtworkImage";
@@ -257,14 +258,14 @@ export function VirtualGallery({
                   <button
                     type="button"
                     onClick={() => openTour(0, { begin: true })}
-                    className="btn-primary min-h-[48px] px-8 text-base font-semibold"
+                    className={buttonClass({variant: "accent"})}
                   >
                     {t("Start the tour")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setView("grid")}
-                    className="min-h-[48px] border border-[var(--nua-white)]/85 px-7 text-base text-[var(--nua-white)] transition-colors hover:bg-[var(--nua-white)] hover:text-[var(--nua-charcoal)]"
+                    className={buttonClass({variant: "inverse"})}
                   >
                     {t("Browse all artworks")}
                   </button>
@@ -326,7 +327,7 @@ export function VirtualGallery({
           <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-3 p-3 sm:p-4">
             <div className="pointer-events-auto">
               {view === "grid" ? (
-                <button type="button" onClick={() => openTour(index)} className="btn-primary flex min-h-[44px] items-center gap-2 px-5 text-sm font-semibold">
+                <button type="button" onClick={() => openTour(index)} className={buttonClass({variant: "accent",size: "sm"})}>
                   {t("Continue the tour")}
                   <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
                     arrow_forward
@@ -428,7 +429,7 @@ export function VirtualGallery({
                     <button
                       type="button"
                       onClick={() => setEnquiryOpen(true)}
-                      className="btn-primary mt-7 min-h-[48px] w-full px-6 text-base font-semibold"
+                      className={buttonClass({variant: "accent",full: true,className: "mt-7"})}
                     >
                       {t("Enquire about this work")}
                     </button>
@@ -496,7 +497,7 @@ export function VirtualGallery({
                 <p className="mt-3 text-lg text-[var(--nua-grey-light)]">{t("Thank you for taking your time with the work.")}</p>
                 <div className="mt-8 flex flex-col gap-3">
                   {rooms?.next && (
-                    <Link href={rooms.next.href} className="btn-primary flex min-h-[48px] items-center justify-center gap-2 px-6 text-base font-semibold">
+                    <Link href={rooms.next.href} className={buttonClass({variant: "accent"})}>
                       {t("Next room: {room}", { room: rooms.next.label })}
                       <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
                         arrow_forward
@@ -508,8 +509,8 @@ export function VirtualGallery({
                     onClick={() => openTour(0, { begin: true })}
                     className={
                       rooms?.next
-                        ? "flex min-h-[48px] items-center justify-center border border-[var(--nua-white)]/85 px-6 text-base text-[var(--nua-white)] hover:bg-[var(--nua-white)] hover:text-[var(--nua-charcoal)]"
-                        : "btn-primary min-h-[48px] px-6 text-base font-semibold"
+                        ? buttonClass({ variant: "inverse" })
+                        : buttonClass({ variant: "accent" })
                     }
                   >
                     {t("Start again")}
@@ -518,12 +519,12 @@ export function VirtualGallery({
                     <Link
                       href="/virtual-gallery#rooms"
                       onClick={() => setView("entrance")}
-                      className="flex min-h-[48px] items-center justify-center border border-[var(--nua-white)]/85 px-6 text-base text-[var(--nua-white)] hover:bg-[var(--nua-white)] hover:text-[var(--nua-charcoal)]"
+                      className={buttonClass({ variant: "inverse" })}
                     >
                       {t("All rooms")}
                     </Link>
                   )}
-                  <Link href="/artists" className="flex min-h-[48px] items-center justify-center border border-[var(--nua-white)]/85 px-6 text-base text-[var(--nua-white)] hover:bg-[var(--nua-white)] hover:text-[var(--nua-charcoal)]">
+                  <Link href="/artists" className={buttonClass({ variant: "inverse" })}>
                     {t("Meet the artists")}
                   </Link>
                   <button type="button" onClick={() => setView("grid")} className="min-h-[44px] text-base text-[var(--nua-white)]/85 underline underline-offset-4">

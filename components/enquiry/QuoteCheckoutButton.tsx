@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonClass } from "@/components/ui/Button";
 import { useEffect, useState } from "react";
 import Link from "@/components/i18n/Link";
 import { useAuth } from "@/lib/auth";
@@ -24,7 +25,7 @@ export function QuoteCheckoutButton({ quoteToken, item }: { quoteToken: string; 
     return (
       <Link
         href={`/auth?next=${encodeURIComponent(`/quote/${quoteToken}`)}`}
-        className="inline-block bg-primary text-on-primary px-6 py-3 text-xs uppercase tracking-widest"
+        className={buttonClass({})}
       >
         {t("Sign in to purchase")}
       </Link>
@@ -54,18 +55,18 @@ export function QuoteCheckoutButton({ quoteToken, item }: { quoteToken: string; 
         <button
           onClick={checkout}
           disabled={busy}
-          className="bg-primary text-on-primary px-6 py-3 text-xs uppercase tracking-widest disabled:opacity-50"
+          className={buttonClass({})}
         >
           {busy ? t("Opening secure checkout…") : t("Buy now")}
         </button>
         {inBasket ? (
-          <Link href="/basket" className="border border-primary px-6 py-3 text-xs uppercase tracking-widest">
+          <Link href="/basket" className={buttonClass({variant: "secondary"})}>
             {t("View basket")}
           </Link>
         ) : (
           <button
             onClick={() => addToCart(item)}
-            className="border border-primary px-6 py-3 text-xs uppercase tracking-widest"
+            className={buttonClass({variant: "secondary"})}
           >
             {t("Add to basket")}
           </button>

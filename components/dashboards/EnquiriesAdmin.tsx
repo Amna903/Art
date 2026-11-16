@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonClass } from "@/components/ui/Button";
 import { useLanguage } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
@@ -189,7 +190,7 @@ export function EnquiriesAdmin() {
                 <button
                   onClick={() => sendQuote(e)}
                   disabled={sendingId === e.id}
-                  className="bg-primary text-on-primary px-4 py-2 text-xs uppercase tracking-[0.2em] disabled:opacity-50"
+                  className={buttonClass({size: "sm"})}
                 >
                   {sendingId === e.id ? t("Sending…") : e.quoted_price != null ? t("Resend Quote") : t("Send Quote")}
                 </button>

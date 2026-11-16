@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonClass } from "@/components/ui/Button";
 import { useLanguage } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import Link from "@/components/i18n/Link";
@@ -123,7 +124,7 @@ export function ClientDashboard({ userId }: { userId: string }) {
             </p>
             <Link
               href="/collections"
-              className="inline-block bg-tertiary text-on-tertiary px-6 py-2.5 font-navigation text-xs uppercase tracking-widest hover:bg-secondary transition-colors"
+              className={buttonClass({size: "sm"})}
             >
               {t("Browse Artworks")}
             </Link>
@@ -181,7 +182,7 @@ export function ClientDashboard({ userId }: { userId: string }) {
             </p>
             <Link
               href="/artists"
-              className="inline-block bg-tertiary text-on-tertiary px-6 py-2.5 font-navigation text-xs uppercase tracking-widest hover:bg-secondary transition-colors"
+              className={buttonClass({size: "sm"})}
             >
               {t("Explore Artists")}
             </Link>

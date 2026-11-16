@@ -1,3 +1,4 @@
+import { buttonClass } from "@/components/ui/Button";
 // /discover/:country — rich, editorial destination page for each of the 54
 // African countries. Reached from the homepage Africa atlas map.
 import Link from "@/components/i18n/Link";
@@ -626,7 +627,7 @@ export default async function CountryExperience({ params, searchParams }: Props)
           <div className="text-center">
             <Link
               href="/#atlas"
-              className="inline-block border border-primary px-6 py-3 font-label-caps tracking-widest hover:bg-primary hover:text-beige transition-colors"
+              className={buttonClass({variant: "secondary"})}
             >
               {t("BACK TO AFRICA MAP")}
             </Link>

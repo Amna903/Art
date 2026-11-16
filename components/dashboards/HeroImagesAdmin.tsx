@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonClass } from "@/components/ui/Button";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useLanguage } from "@/lib/i18n";
@@ -254,10 +255,10 @@ export function HeroImagesAdmin() {
           </div>
         )}
         <div className="flex flex-wrap gap-3">
-          <button type="button" onClick={() => save(true)} disabled={!desktopFile || !alt.trim() || busy} className="btn-primary px-5 py-2.5 text-xs uppercase tracking-[0.2em] disabled:opacity-50">
+          <button type="button" onClick={() => save(true)} disabled={!desktopFile || !alt.trim() || busy} className={buttonClass({variant: "accent",size: "sm"})}>
             {busy ? t("Uploading…") : t("Save and make live")}
           </button>
-          <button type="button" onClick={() => save(false)} disabled={!desktopFile || !alt.trim() || busy} className="btn-secondary px-5 py-2.5 text-xs uppercase tracking-[0.2em] disabled:opacity-50">
+          <button type="button" onClick={() => save(false)} disabled={!desktopFile || !alt.trim() || busy} className={buttonClass({variant: "secondary",size: "sm"})}>
             {t("Save without publishing")}
           </button>
         </div>

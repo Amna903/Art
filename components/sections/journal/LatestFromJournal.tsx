@@ -34,10 +34,10 @@ export async function LatestFromJournal({ excludeSlug, lang }: { excludeSlug?: s
 
   return (
     <section className="px-gutter-page max-w-container-max mx-auto mb-section-gap">
-      <div className="flex justify-between items-end mb-16">
-        <div>
+      <div className="flex justify-between items-end gap-6 mb-10 md:mb-16">
+        <div className="min-w-0 flex-1">
           <h2 className="font-headline-md text-headline-md mb-4">{t("Latest from the Journal")}</h2>
-          <div className="flex gap-8 border-b border-outline-variant pb-2">
+          <div className="no-scrollbar -mx-gutter-page flex gap-6 overflow-x-auto whitespace-nowrap border-b border-outline-variant px-gutter-page pb-2 sm:mx-0 sm:gap-8 sm:px-0">
             <button className="font-label-caps text-label-caps uppercase text-secondary">{t("All Stories")}</button>
             <button className="font-label-caps text-label-caps uppercase text-on-surface-variant hover:text-primary transition-colors">
               {t("Artist Stories")}

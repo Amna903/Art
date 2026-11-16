@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonClass } from "@/components/ui/Button";
 import { useEffect, useState } from "react";
 import Link from "@/components/i18n/Link";
 import { useAuth } from "@/lib/auth";
@@ -47,7 +48,7 @@ export function BasketView() {
           <p className="text-on-surface-variant mb-6">
             {t("Your basket is empty. Artworks appear here once a curator has confirmed your price.")}
           </p>
-          <Link href="/artists" className="bg-primary text-on-primary px-6 py-3 text-xs uppercase tracking-widest">
+          <Link href="/artists" className={buttonClass({})}>
             {t("Browse Artists")}
           </Link>
         </div>
@@ -81,14 +82,14 @@ export function BasketView() {
             <button
               onClick={checkout}
               disabled={busy}
-              className="w-full bg-primary text-on-primary px-6 py-3 text-xs uppercase tracking-widest disabled:opacity-50"
+              className={buttonClass({full: true})}
             >
               {busy ? t("Opening secure checkout…") : t("Checkout")}
             </button>
           ) : (
             <Link
               href={`/auth?next=${encodeURIComponent("/basket")}`}
-              className="block text-center bg-primary text-on-primary px-6 py-3 text-xs uppercase tracking-widest"
+              className={buttonClass({full: true})}
             >
               {t("Sign in to purchase")}
             </Link>

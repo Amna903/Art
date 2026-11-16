@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonClass } from "@/components/ui/Button";
 import { useCallback, useEffect, useState } from "react";
 import { useLanguage, useRouter } from "@/lib/i18n";
 import Image from "next/image";
@@ -276,7 +277,7 @@ export function ArtistDashboard({ userId }: { userId: string }) {
               </div>
               <button
                 onClick={() => setProfileEditorOpen(true)}
-                className="bg-primary text-on-primary px-5 py-2 text-xs uppercase tracking-[0.2em]"
+                className={buttonClass({size: "sm"})}
               >
                 {t("Edit profile")}
               </button>
@@ -491,7 +492,7 @@ export function ArtistDashboard({ userId }: { userId: string }) {
                     !(Number(editing.price_usd) > 0)
                   }
                   title={t("Title, price, and an image are all required")}
-                  className="bg-primary text-on-primary px-5 py-2 text-xs uppercase tracking-[0.2em] disabled:opacity-40 disabled:cursor-not-allowed"
+                  className={buttonClass({size: "sm"})}
                 >
                   {checkingOriginality
                     ? t("Checking originality…")
@@ -582,7 +583,7 @@ export function ArtistDashboard({ userId }: { userId: string }) {
                 <button onClick={closeProfileEditor} className="border border-primary/20 px-5 py-2 text-xs uppercase tracking-[0.2em]">
                   {t("Cancel")}
                 </button>
-                <button onClick={saveProfile} disabled={profileSaving} className="bg-primary text-on-primary px-5 py-2 text-xs uppercase tracking-[0.2em] disabled:opacity-60">
+                <button onClick={saveProfile} disabled={profileSaving} className={buttonClass({size: "sm"})}>
                   {profileSaving ? t("Saving…") : t("Save profile")}
                 </button>
               </div>

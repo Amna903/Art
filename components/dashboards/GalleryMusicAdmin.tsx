@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonClass } from "@/components/ui/Button";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useLanguage } from "@/lib/i18n";
@@ -233,7 +234,7 @@ export function GalleryMusicAdmin() {
             ))}
           </select>
         </label>
-        <button type="button" onClick={upload} disabled={!file || !title.trim() || busy} className="btn-primary px-5 py-2.5 text-xs uppercase tracking-[0.2em] disabled:opacity-50">
+        <button type="button" onClick={upload} disabled={!file || !title.trim() || busy} className={buttonClass({variant: "accent",size: "sm"})}>
           {busy ? t("Uploading…") : t("Add track")}
         </button>
       </div>

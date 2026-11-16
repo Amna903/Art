@@ -1,3 +1,4 @@
+import { buttonClass } from "@/components/ui/Button";
 import type { Metadata } from "next";
 import { PriceUponRequest } from "@/components/enquiry/PriceUponRequest";
 import { RequestPriceButton } from "@/components/enquiry/RequestPriceButton";
@@ -345,7 +346,7 @@ export default async function ArtistProfilePage({ params, searchParams }: Props)
                   artworkTitle={w.title}
                   artistName={artist.name}
                   artworkImage={workImageFor(w.imageUrl)}
-                  className="shrink-0 bg-tertiary text-on-tertiary px-4 py-2 font-label-caps text-[10px] uppercase tracking-widest hover:bg-secondary transition-colors"
+                  className={buttonClass({size: "sm",className: "shrink-0"})}
                 >
                   {t("Request Price")}
                 </RequestPriceButton>

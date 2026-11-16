@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonClass } from "@/components/ui/Button";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAuth, type AppRole } from "@/lib/auth";
@@ -237,7 +238,7 @@ export default function AuthPage() {
 
           <button
             disabled={busy}
-            className="w-full bg-primary text-on-primary py-3.5 font-navigation text-navigation uppercase tracking-widest hover:bg-secondary transition-colors disabled:opacity-50 shadow-md"
+            className={buttonClass({full: true})}
           >
             {busy
               ? t("Processing…")

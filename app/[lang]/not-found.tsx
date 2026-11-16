@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonClass } from "@/components/ui/Button";
 import Link from "@/components/i18n/Link";
 import { useLanguage } from "@/lib/i18n";
 
@@ -12,7 +13,7 @@ export default function NotFound() {
         <h1 className="font-display-lg text-4xl mb-6">{t("This page isn’t part of the collection.")}</h1>
         <Link
           href="/"
-          className="border border-primary px-6 py-3 font-label-caps tracking-widest hover:bg-primary hover:text-beige transition-colors"
+          className={buttonClass({variant: "secondary"})}
         >
           {t("RETURN HOME")}
         </Link>

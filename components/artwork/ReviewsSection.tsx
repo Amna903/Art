@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonClass } from "@/components/ui/Button";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
@@ -171,7 +172,7 @@ export function ReviewsSection({ artworkSlug }: Props) {
         <button
           type="submit"
           disabled={submitting}
-          className="self-start bg-primary text-on-primary font-navigation text-navigation uppercase tracking-widest py-2.5 px-6 hover:bg-secondary transition-colors disabled:opacity-50"
+          className={buttonClass({size: "sm",className: "self-start"})}
         >
           {submitting ? t("Posting…") : t("Post Review")}
         </button>

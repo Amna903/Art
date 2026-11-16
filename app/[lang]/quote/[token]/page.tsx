@@ -1,3 +1,4 @@
+import { buttonClass } from "@/components/ui/Button";
 import type { Metadata } from "next";
 import Link from "@/components/i18n/Link";
 import Image from "next/image";
@@ -30,7 +31,7 @@ function InvalidLink({ reason, t }: { reason: string; t: Translator }) {
       </p>
       <Link
         href="/artists"
-        className="inline-flex items-center justify-center bg-primary text-on-primary px-8 py-3 font-navigation text-navigation uppercase tracking-widest"
+        className={buttonClass({})}
       >
         {t("Browse Artists")}
       </Link>

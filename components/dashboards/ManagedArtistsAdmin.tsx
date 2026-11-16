@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonClass } from "@/components/ui/Button";
 import { useRouter, useLanguage } from "@/lib/i18n";
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
@@ -373,7 +374,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
         <button
           type="button"
           onClick={openCreateArtist}
-          className="bg-primary text-on-primary px-4 py-2 text-xs uppercase tracking-widest"
+          className={buttonClass({size: "sm"})}
         >
           {t("+ New artist profile")}
         </button>
@@ -528,7 +529,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                   type="button"
                   onClick={saveArtist}
                   disabled={savingArtist}
-                  className="bg-primary text-on-primary px-4 py-2 text-xs uppercase tracking-widest disabled:opacity-50"
+                  className={buttonClass({size: "sm"})}
                 >
                   {savingArtist ? t("Saving…") : artistDraft.id ? t("Save profile") : t("Create profile")}
                 </button>
@@ -697,7 +698,7 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
                       type="button"
                       onClick={saveArtwork}
                       disabled={savingArtwork || uploadingArtwork}
-                      className="bg-primary text-on-primary px-4 py-2 text-xs uppercase tracking-widest disabled:opacity-50"
+                      className={buttonClass({size: "sm"})}
                     >
                       {savingArtwork ? t("Saving…") : t("Save artwork")}
                     </button>

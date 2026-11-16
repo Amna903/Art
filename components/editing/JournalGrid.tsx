@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonClass } from "@/components/ui/Button";
 import { useRouter, useLanguage } from "@/lib/i18n";
 import { useCallback, useState } from "react";
 import Link from "@/components/i18n/Link";
@@ -325,7 +326,7 @@ export function JournalGrid({
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button onClick={() => setEditing(null)} className="border border-primary/20 px-5 py-2 text-xs uppercase tracking-[0.2em]">{t("Cancel")}</button>
-                <button onClick={save} className="bg-primary text-on-primary px-5 py-2 text-xs uppercase tracking-[0.2em]">{t("Publish")}</button>
+                <button onClick={save} className={buttonClass({size: "sm"})}>{t("Publish")}</button>
               </div>
             </div>
           </div>

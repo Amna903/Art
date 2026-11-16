@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonClass } from "@/components/ui/Button";
 import { useRouter, useLanguage } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import Link from "@/components/i18n/Link";
@@ -69,7 +70,7 @@ export default function DashboardPage() {
           </Link>
           <button
             onClick={() => signOut().then(() => router.push("/"))}
-            className="bg-primary text-on-primary px-4 py-2 text-xs uppercase tracking-[0.2em] hover:bg-secondary transition-colors"
+            className={buttonClass({size: "sm"})}
           >
             {t("Sign out")}
           </button>

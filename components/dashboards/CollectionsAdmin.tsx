@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonClass } from "@/components/ui/Button";
 import { useRouter, useLanguage } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -194,7 +195,7 @@ export function CollectionsAdmin() {
         <button
           onClick={createCollection}
           disabled={!title.trim() || creating}
-          className="bg-primary text-on-primary px-5 py-2 text-xs uppercase tracking-[0.2em] disabled:opacity-40"
+          className={buttonClass({size: "sm"})}
         >
           {creating ? t("Creating…") : t("Create")}
         </button>

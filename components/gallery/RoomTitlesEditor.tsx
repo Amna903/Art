@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonClass } from "@/components/ui/Button";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useLanguage, useRouter } from "@/lib/i18n";
@@ -72,14 +73,14 @@ export function RoomTitlesEditor({ initial, onClose }: { initial: RoomTitles; on
           ))}
         </div>
         <div className="mt-8 flex justify-end gap-3">
-          <button type="button" onClick={onClose} className="btn-secondary px-5 py-2 text-xs uppercase tracking-[0.2em]">
+          <button type="button" onClick={onClose} className={buttonClass({variant: "secondary",size: "sm"})}>
             {t("Cancel")}
           </button>
           <button
             type="button"
             onClick={save}
             disabled={saving}
-            className="btn-primary px-5 py-2 text-xs uppercase tracking-[0.2em] disabled:opacity-50"
+            className={buttonClass({variant: "accent",size: "sm"})}
           >
             {saving ? t("Saving…") : t("Save")}
           </button>

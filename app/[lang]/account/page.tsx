@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonClass } from "@/components/ui/Button";
 import { useLanguage } from "@/lib/i18n";
 import { getCountryDisplayName } from "@/lib/data/africa";
 import { useEffect, useState } from "react";
@@ -174,7 +175,7 @@ export default function AccountPage() {
                         artworkTitle={w.artwork_title}
                         artistName={w.artist_name || undefined}
                         artworkImage={w.artwork_image || undefined}
-                        className="bg-primary text-on-primary px-6 py-2.5 font-navigation text-navigation uppercase tracking-widest hover:bg-secondary transition-colors duration-300"
+                        className={buttonClass({size: "sm"})}
                       >
                         {t("Request Price")}
                       </RequestPriceButton>
@@ -209,7 +210,7 @@ export default function AccountPage() {
                         artworkTitle={w.artwork_title}
                         artistName={w.artist_name}
                         artworkImage={w.artwork_image}
-                        className="bg-primary text-on-primary px-6 py-2.5 font-navigation text-navigation uppercase tracking-widest hover:bg-secondary transition-colors duration-300"
+                        className={buttonClass({size: "sm"})}
                       >
                         {t("Request Price")}
                       </RequestPriceButton>
@@ -223,7 +224,7 @@ export default function AccountPage() {
               <p className="text-body-lg text-on-surface-variant mb-4">{t("You have no saved artworks in your collection yet.")}</p>
               <Link
                 href="/collections"
-                className="inline-block bg-tertiary text-on-tertiary px-8 py-3 font-navigation uppercase tracking-widest hover:bg-secondary transition-colors"
+                className={buttonClass({})}
               >
                 {t("Browse Collections")}
               </Link>
@@ -301,7 +302,7 @@ export default function AccountPage() {
               <p className="text-body-lg text-on-surface-variant mb-4">{t("You are not following any artists yet.")}</p>
               <Link
                 href="/artists"
-                className="inline-block bg-tertiary text-on-tertiary px-8 py-3 font-navigation uppercase tracking-widest hover:bg-secondary transition-colors"
+                className={buttonClass({})}
               >
                 {t("Explore Artists Directory")}
               </Link>
