@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "@/components/i18n/Link";
+import { Button } from "@/components/ui/Button";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
@@ -268,24 +269,21 @@ export function SiteHeader() {
                       </span>
                     ) : null}
                   </div>
-                  <button
+                  <Button
+                    size="sm"
+                    className="min-h-[44px]"
                     onClick={() => {
                       setMobileOpen(false);
                       signOut().then(() => router.push("/"));
                     }}
-                    className="min-h-[44px] bg-primary text-on-primary px-4 font-navigation text-navigation uppercase tracking-widest"
                   >
                     {t("Sign out")}
-                  </button>
+                  </Button>
                 </>
               ) : (
-                <Link
-                  href="/auth"
-                  onClick={() => setMobileOpen(false)}
-                  className="min-h-[44px] flex items-center justify-center bg-primary text-on-primary px-5 font-navigation text-navigation uppercase tracking-widest"
-                >
+                <Button href="/auth" size="sm" className="min-h-[44px]" onClick={() => setMobileOpen(false)}>
                   {t("Join the Circle")}
-                </Link>
+                </Button>
               )}
             </div>
           </div>
