@@ -26,6 +26,7 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
   const { t, language } = useLanguage();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{ startX: number; startScrollLeft: number } | null>(null);
+  const dragged = useRef(false);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
 
@@ -59,14 +60,31 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
     const el = scrollerRef.current;
     if (!el) return;
     drag.current = { startX: e.clientX, startScrollLeft: el.scrollLeft };
-    el.setPointerCapture(e.pointerId);
+    dragged.current = false;
   };
 
   const onPointerMove = (e: React.PointerEvent) => {
     if (!drag.current || e.pointerType !== "mouse") return;
     const el = scrollerRef.current;
     if (!el) return;
-    el.scrollLeft = drag.current.startScrollLeft - (e.clientX - drag.current.startX);
+    const dx = e.clientX - drag.current.startX;
+    // Only a real drag takes over the pointer; a plain click must reach the
+    // card link underneath, so capture starts after a few pixels of movement.
+    if (!dragged.current) {
+      if (Math.abs(dx) < 5) return;
+      dragged.current = true;
+      el.setPointerCapture(e.pointerId);
+    }
+    el.scrollLeft = drag.current.startScrollLeft - dx;
+  };
+
+  // A drag that ends over a card must not also open it.
+  const onClickCapture = (e: React.MouseEvent) => {
+    if (dragged.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      dragged.current = false;
+    }
   };
 
   const endDrag = (e: React.PointerEvent) => {
@@ -114,6 +132,7 @@ export function FeaturedArtistsCarousel({ cards }: { cards: FeaturedCard[] }) {
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
         onPointerLeave={endDrag}
+        onClickCapture={onClickCapture}
         className="flex gap-12 overflow-x-auto no-scrollbar snap-x-mandatory pb-8 cursor-grab active:cursor-grabbing"
       >
         {cards.map((artist) => (
