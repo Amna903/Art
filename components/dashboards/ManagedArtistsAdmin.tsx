@@ -1,6 +1,7 @@
 "use client";
 
 import { Select } from "@/components/ui/Field";
+import { PUBLIC_ARTWORK_COLUMNS, withPrivateFields } from "@/lib/data/artwork-private";
 import { buttonClass } from "@/components/ui/Button";
 import { useRouter, useLanguage } from "@/lib/i18n";
 import { useCallback, useEffect, useState } from "react";
@@ -87,14 +88,14 @@ export function ManagedArtistsAdmin({ adminId }: { adminId: string }) {
     setLoading(true);
     const [{ data: artistRows, error: aErr }, { data: artworkRows, error: wErr }] = await Promise.all([
       supabase.from("managed_artists").select("*").order("created_at", { ascending: false }),
-      supabase.from("artworks").select("*").not("managed_artist_id", "is", null).order("created_at", { ascending: false }),
+      supabase.from("artworks").select(PUBLIC_ARTWORK_COLUMNS).not("managed_artist_id", "is", null).order("created_at", { ascending: false }),
     ]);
     if (aErr) console.error("[managed_artists]", aErr.message);
     if (wErr) console.error("[managed artworks]", wErr.message);
 
     setArtists(artistRows ?? []);
     const map = new Map<string, Artwork[]>();
-    (artworkRows ?? []).forEach((row) => {
+    (await withPrivateFields(artworkRows ?? [])).forEach((row) => {
       if (!row.managed_artist_id) return;
       const list = map.get(row.managed_artist_id) ?? [];
       list.push(row);

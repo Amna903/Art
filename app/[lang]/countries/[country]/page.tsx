@@ -273,7 +273,7 @@ export default async function Page({ params }: Props) {
       <h2 className="font-headline-md text-headline-md mb-6">{t("Never miss a masterpiece from the continent.")}</h2>
       <p className="font-body-lg text-body-lg text-on-surface-variant mb-12">{t("Join the NUA-ARTE Circle to receive exclusive first-looks at new Nigerian drops and invitations to private artist talks.")}</p>
       <div className="flex flex-col md:flex-row gap-4 justify-center items-stretch max-w-lg mx-auto">
-      <input className="flex-grow border-b border-primary py-4 px-2 font-body-md focus:outline-none focus:border-secondary bg-transparent" placeholder={t("Your Email Address")} type="email" />
+      <input className="flex-grow border-b border-primary py-4 px-2 font-body-md focus:outline-none focus:border-secondary bg-transparent" placeholder={t("Your Email Address")} aria-label={t("Your Email Address")} type="email" />
       <button className={buttonClass({})}>{t("Join The Circle")}</button>
       </div>
       <div className="mt-12 relative flex justify-center">

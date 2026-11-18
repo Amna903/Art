@@ -2,7 +2,7 @@
 
 import { buttonClass } from "@/components/ui/Button";
 import { useLanguage } from "@/lib/i18n";
-import { useNewsletter, NewsletterStatus } from "@/lib/newsletter";
+import { useNewsletter, NewsletterStatus, NewsletterConsent } from "@/lib/newsletter";
 
 const STEPS = [
   { n: "01", title: "Discover", body: "Browse a curated selection of contemporary artists from Angola and the Congo." },
@@ -69,6 +69,7 @@ export function Newsletter() {
             {t("Keep me connected")}
           </button>
         </form>
+        <NewsletterConsent checked={news.consent} onChange={news.setConsent} />
         <NewsletterStatus status={news.status} error={news.error} />
       </div>
     </section>

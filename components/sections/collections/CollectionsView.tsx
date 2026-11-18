@@ -9,7 +9,7 @@ import { EditableImage } from "@/components/editing/EditableImage";
 import { COLLECTIONS, type Collection } from "@/lib/data/collections";
 import type { SupabaseCollection } from "@/lib/data/supabase-collections";
 import { useLanguage } from "@/lib/i18n";
-import { useNewsletter, NewsletterStatus } from "@/lib/newsletter";
+import { useNewsletter, NewsletterStatus, NewsletterConsent } from "@/lib/newsletter";
 import { getCountryBySlug, getCountryDisplayName, normalizeCountrySlug } from "@/lib/data/africa";
 
 type ViewMode = "grid" | "list";
@@ -334,6 +334,7 @@ export function CollectionsView({
                 <span className="w-12 h-[1px] bg-secondary group-hover:w-24 transition-all duration-300"></span>
               </button>
             </form>
+            <NewsletterConsent checked={news.consent} onChange={news.setConsent} />
             <NewsletterStatus status={news.status} error={news.error} />
           </div>
           <div className="hidden md:block">

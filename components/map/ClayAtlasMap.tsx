@@ -213,6 +213,7 @@ export function ClayAtlasMap() {
           <input
             type="text"
             placeholder={t("Search 54 African countries…")}
+            aria-label={t("Search countries")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="bg-transparent font-mono text-xs uppercase tracking-widest focus:outline-none w-full"

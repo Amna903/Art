@@ -44,7 +44,14 @@ export function SaveButton({ artworkSlug, artworkTitle, artistName, artworkImage
       : unsaveArtwork(user?.id, artworkSlug));
 
     setBusy(false);
-    toast(next ? t("Saved to your collection") : t("Removed from your collection"));
+    if (next) {
+      toast.success(t("Saved to your collection"), {
+        description: artworkTitle,
+        action: { label: t("View"), onClick: () => router.push("/account") },
+      });
+    } else {
+      toast(t("Removed from your collection"));
+    }
   };
 
   return (
@@ -61,7 +68,7 @@ export function SaveButton({ artworkSlug, artworkTitle, artistName, artworkImage
     >
       <span
         key={bounceKey}
-        className={`material-symbols-outlined text-primary group-hover/heart:text-beige transition-colors ${
+        className={`material-symbols-outlined ${saved ? "text-secondary" : "text-primary"} group-hover/heart:text-beige transition-colors ${
           bounceKey > 0 ? "animate-icon-bounce" : ""
         }`}
         style={saved ? { fontVariationSettings: "'FILL' 1" } : undefined}

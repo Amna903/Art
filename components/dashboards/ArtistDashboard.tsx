@@ -1,6 +1,7 @@
 "use client";
 
 import { Input, Select } from "@/components/ui/Field";
+import { PUBLIC_ARTWORK_COLUMNS, withPrivateFields } from "@/lib/data/artwork-private";
 import { Modal } from "@/components/ui/Modal";
 import { buttonClass } from "@/components/ui/Button";
 import { useCallback, useEffect, useState } from "react";
@@ -50,10 +51,10 @@ export function ArtistDashboard({ userId }: { userId: string }) {
   const load = useCallback(async () => {
     setLoading(true);
     const [{ data: artworkRows }, { data: profileRow }] = await Promise.all([
-      supabase.from("artworks").select("*").eq("artist_id", userId).order("created_at", { ascending: false }),
+      supabase.from("artworks").select(PUBLIC_ARTWORK_COLUMNS).eq("artist_id", userId).order("created_at", { ascending: false }),
       supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
     ]);
-    setItems(artworkRows ?? []);
+    setItems(await withPrivateFields(artworkRows ?? []));
     setProfile(profileRow ?? null);
     setLoading(false);
   }, [userId]);

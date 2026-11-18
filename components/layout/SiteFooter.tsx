@@ -2,7 +2,20 @@
 
 import Link from "@/components/i18n/Link";
 import { useLanguage } from "@/lib/i18n";
-import { useNewsletter, NewsletterStatus } from "@/lib/newsletter";
+import { useNewsletter, NewsletterStatus, NewsletterConsent } from "@/lib/newsletter";
+
+/** Social profiles shown in the footer. Fill in the real URL; empty entries are hidden. */
+const SOCIAL: { label: string; href: string }[] = [
+  { label: "Instagram", href: "https://www.instagram.com/nuaarteofficial/" },
+];
+
+const LEGAL = [
+  { href: "/terms", label: "Terms" },
+  { href: "/privacy", label: "Privacy" },
+  { href: "/cookies", label: "Cookies" },
+  { href: "/returns", label: "Returns" },
+  { href: "/shipping", label: "Shipping" },
+];
 
 export function SiteFooter() {
   const { t } = useLanguage();
@@ -38,6 +51,7 @@ export function SiteFooter() {
               arrow_forward
             </button>
           </form>
+          <NewsletterConsent checked={news.consent} onChange={news.setConsent} className="mt-3 text-xs opacity-75" />
           <NewsletterStatus status={news.status} error={news.error} />
         </div>
 
@@ -106,6 +120,18 @@ export function SiteFooter() {
       <div>
         <div className="max-w-container-max mx-auto px-gutter-page py-6 flex flex-col md:flex-row gap-2 md:gap-6 justify-between text-[10.5px] uppercase tracking-[0.22em] opacity-55">
           <span translate="no">© {new Date().getFullYear()} NUA-ARTE</span>
+          <nav aria-label={t("Legal")} className="flex flex-wrap gap-x-5 gap-y-2">
+            {LEGAL.map((l) => (
+              <Link key={l.href} href={l.href} className="hover:opacity-100 hover:text-secondary-fixed-dim">
+                {t(l.label)}
+              </Link>
+            ))}
+            {SOCIAL.filter((s) => s.href).map((s) => (
+              <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" className="hover:text-secondary-fixed-dim">
+                {s.label}
+              </a>
+            ))}
+          </nav>
           <span translate="no">New York · Luanda</span>
         </div>
       </div>

@@ -51,6 +51,8 @@ const nextConfig: NextConfig = {
       "./node_modules/@img/sharp-linux-x64/**/*",
       "./node_modules/@img/sharp-libvips-linux-x64/**/*",
     ],
+    // Legal pages read their Markdown from content/legal at render time.
+    "/[lang]/*": ["./content/legal/**/*.md"],
   },
 };
 

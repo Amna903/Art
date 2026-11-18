@@ -4,6 +4,8 @@ import { resolveLang } from "@/lib/i18n/server";
 
 export const revalidate = 60;
 
+export const metadata = { title: "Search | NUA-ARTE", robots: { index: false, follow: true } };
+
 /** Search runs on the server: artworks are matched in the database and only
  * the results (at most 12 of each kind) are sent to the browser. */
 export default async function SearchPage({ params, searchParams }: PageProps<"/[lang]/search">) {

@@ -166,9 +166,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const { lang, t } = await getI18n(params);
   const resolved = await resolveArtwork(slug, lang, t);
+  const title = `${resolved.title} | NUA-ARTE`;
+  const description = [resolved.artist, t(resolved.medium), resolved.year].filter(Boolean).join(" · ");
+  const images = resolved.image ? [{ url: resolved.image, alt: resolved.imageAlt }] : undefined;
   return {
-    title: `${resolved.title} | NUA-ARTE`,
-    description: t("NUA-ARTE — contemporary African art movement."),
+    title,
+    description,
+    openGraph: { type: "article", title, description, images },
+    twitter: { card: "summary_large_image", title, description, images: resolved.image ? [resolved.image] : undefined },
   };
 }
 
@@ -180,8 +185,23 @@ export default async function ArtworkDetailPage({ params }: Props) {
     artistAvatar, artistLocation, artistTechnique, dimensions, referenceNumber,
   } = await resolveArtwork(slug, lang, t);
 
+  // Structured data for search engines (schema.org VisualArtwork). "<" is
+  // escaped so a title can't close the script tag.
+  const jsonLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "VisualArtwork",
+    name: title,
+    image: image || undefined,
+    creator: { "@type": "Person", name: artist },
+    artMedium: medium || undefined,
+    dateCreated: year ? String(year) : undefined,
+    size: dimensions || undefined,
+    identifier: referenceNumber || undefined,
+  }).replace(/</g, "\\u003c");
+
   return (
     <main className="max-w-container-max mx-auto px-gutter-page pt-24 md:pt-28">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
         <div className="lg:col-span-7 flex flex-col gap-6 relative gallery-lighting p-4">
           <div className="relative">
@@ -288,18 +308,14 @@ export default async function ArtworkDetailPage({ params }: Props) {
                 artworkImage={image}
                 className={buttonClass({full: true})}
               >
-                {t("Request Price")}
+                {t("Request Price & Details")}
               </RequestPriceButton>
-              <RequestPriceButton
-                artworkSlug={slug}
-                artworkTitle={title}
-                artistName={artist}
-                artworkImage={image}
-                className="w-full flex items-center justify-center gap-2 font-navigation text-navigation uppercase tracking-widest py-4 border border-primary/20 hover:border-secondary hover:text-secondary transition-all"
-              >
-                <span className="material-symbols-outlined text-[18px]">mail</span>
-                {t("Inquire About Piece")}
-              </RequestPriceButton>
+              <p className="text-xs text-on-surface-variant text-center">
+                {t("Ships insured from origin to the US and worldwide.")}{" "}
+                <Link href="/shipping" className="underline hover:text-secondary">{t("Shipping")}</Link>
+                {" · "}
+                <Link href="/returns" className="underline hover:text-secondary">{t("Returns")}</Link>
+              </p>
             </div>
 
           </div>

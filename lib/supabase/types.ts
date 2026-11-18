@@ -781,6 +781,18 @@ export type Database = {
       }
     }
     Functions: {
+      artwork_private_fields: {
+        Args: { p_ids?: string[] | null; p_originality?: string[] | null }
+        Returns: {
+          id: string
+          price_usd: number
+          originality_status: string
+          originality_score: number | null
+          originality_report: Json | null
+          originality_checked_at: string | null
+          image_phash: string | null
+        }[]
+      }
       record_site_visit: {
         Args: Record<PropertyKey, never>
         Returns: number

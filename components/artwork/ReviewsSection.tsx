@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 import { useLanguage, useRouter } from "@/lib/i18n";
-import { fetchReviews, submitReview, type Review } from "@/lib/data/reviews";
+import { fetchReviews, submitReview, type Review, deleteReview } from "@/lib/data/reviews";
 
 type Props = { artworkSlug: string };
 
@@ -26,7 +26,7 @@ function Stars({ value, size = "text-sm" }: { value: number; size?: string }) {
 }
 
 export function ReviewsSection({ artworkSlug }: Props) {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const { t, formatShortDate } = useLanguage();
   const router = useRouter();
 
@@ -62,6 +62,18 @@ export function ReviewsSection({ artworkSlug }: Props) {
     setReviews((prev) => [...prev, ...r]);
     setPage(nextPage);
     setLoadingMore(false);
+  };
+
+  const removeReview = async (id: string) => {
+    if (!window.confirm(t("Remove this review? This cannot be undone."))) return;
+    const res = await deleteReview(id);
+    if (res.error) {
+      toast(t(res.error));
+      return;
+    }
+    setReviews((prev) => prev.filter((r) => r.id !== id));
+    setTotal((n) => Math.max(0, n - 1));
+    toast(t("Review removed"));
   };
 
   const avgRating = reviews.length > 0 ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
@@ -125,7 +137,18 @@ export function ReviewsSection({ artworkSlug }: Props) {
                 </span>
               </div>
               {r.comment && <p className="text-sm text-on-surface-variant italic leading-relaxed mb-1">“{r.comment}”</p>}
-              <p className="text-xs text-primary font-label-caps uppercase tracking-widest">{r.author_name}</p>
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-xs text-primary font-label-caps uppercase tracking-widest">{r.author_name}</p>
+                {role === "admin" && (
+                  <button
+                    type="button"
+                    onClick={() => removeReview(r.id)}
+                    className="text-tiny uppercase tracking-widest text-secondary hover:underline"
+                  >
+                    {t("Remove")}
+                  </button>
+                )}
+              </div>
             </div>
           ))
         )}
@@ -167,6 +190,7 @@ export function ReviewsSection({ artworkSlug }: Props) {
           onChange={(e) => setComment(e.target.value)}
           rows={3}
           placeholder={t("Share your experience with this piece…")}
+          aria-label={t("Your review")}
           className="w-full bg-surface-container-low border border-outline/20 px-3 py-2 text-sm focus:outline-none focus:border-secondary transition-colors resize-none"
  />
         <button

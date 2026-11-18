@@ -73,6 +73,7 @@ function SearchPageInner({ q, artists: artistResults, artworks: artworkResults }
             value={query}
             onChange={(e) => handleChange(e.target.value)}
             placeholder={t("Search artists, countries, artworks…")}
+            aria-label={t("Search")}
             className="w-full bg-transparent border-b border-primary/30 focus:border-secondary outline-none py-4 pl-9 font-display text-2xl md:text-3xl text-primary placeholder:text-on-surface-variant/40 transition-colors"
  />
           {query && (

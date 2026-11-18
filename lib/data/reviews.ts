@@ -52,3 +52,11 @@ export async function submitReview(input: {
   if (error || !data) return { error: error?.message || "Failed to submit review." };
   return { review: data };
 }
+
+/** Admin only (RLS "Admins delete reviews"); returns an error message on failure. */
+export async function deleteReview(id: string): Promise<{ error?: string }> {
+  const { error, count } = await supabase.from("reviews").delete({ count: "exact" }).eq("id", id);
+  if (error) return { error: error.message };
+  if (!count) return { error: "Review could not be removed." };
+  return {};
+}

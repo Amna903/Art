@@ -8,6 +8,8 @@ import { useAuth, type AppRole } from "@/lib/auth";
 import { useLanguage, useRouter } from "@/lib/i18n";
 import { supabase } from "@/lib/supabase/client";
 import { AFRICAN_COUNTRIES } from "@/lib/data/africa";
+import Link from "@/components/i18n/Link";
+import { richText } from "@/lib/i18n/rich";
 
 type AuthMode = "signin" | "signup" | "reset" | "update-password";
 
@@ -18,6 +20,7 @@ export default function AuthPage() {
   const [mode, setMode] = useState<AuthMode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [agreed, setAgreed] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [country, setCountry] = useState("");
@@ -99,6 +102,10 @@ export default function AuthPage() {
   const handleGoogleSignIn = async () => {
     setError(null);
     setSuccessMsg(null);
+    if (mode === "signup" && !agreed) {
+      setError(t("Please accept the Terms of Service and Privacy Policy to create an account."));
+      return;
+    }
     setBusy(true);
     const res = await signInWithGoogle(mode === "signup" ? role : undefined);
     setBusy(false);
@@ -232,6 +239,18 @@ export default function AuthPage() {
               onChange={setConfirmPassword}
               required
  />
+          )}
+
+          {mode === "signup" && (
+            <label className="flex items-start gap-2 text-sm text-on-surface-variant cursor-pointer">
+              <input type="checkbox" required checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-1 shrink-0" />
+              <span>
+                {richText(t("I am 18 or older and agree to the {terms} and {privacy}."), {
+                  terms: <Link href="/terms" className="underline hover:text-secondary">{t("Terms of Service")}</Link>,
+                  privacy: <Link href="/privacy" className="underline hover:text-secondary">{t("Privacy Policy")}</Link>,
+                })}
+              </span>
+            </label>
           )}
 
           {error && <div className="text-sm text-secondary p-3 border border-secondary/30 bg-secondary/10 rounded">{error}</div>}

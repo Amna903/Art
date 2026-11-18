@@ -8,6 +8,14 @@ import { quoteFor } from "@/lib/data/quotes";
 
 export const revalidate = 60;
 
+export async function generateMetadata({ params }: PageProps<"/[lang]/about">) {
+  const { t } = await getI18n(params);
+  return {
+    title: t("About | NUA-ARTE"),
+    description: t("Who we are: NUA-ARTE acquires works directly from contemporary African artists and brings them to collectors."),
+  };
+}
+
 export default async function AboutPage({ params }: PageProps<"/[lang]/about">) {
   const { lang, t } = await getI18n(params);
   const [hero, real] = await Promise.all([getSiteHero("about", lang), getRealArtists(lang)]);

@@ -48,6 +48,19 @@ export function SiteHeader() {
     if (searchOpen) searchInputRef.current?.focus();
   }, [searchOpen]);
 
+  // While the mobile menu is open: lock page scroll and let Esc close it.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMobileOpen(false);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [mobileOpen]);
+
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const q = query.trim();
@@ -61,7 +74,12 @@ export function SiteHeader() {
     : "bg-[var(--brand-marfim)]/70 backdrop-blur-xl backdrop-saturate-150 border-b border-[var(--brand-cinza)]/40";
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${shellClass}`}>
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${shellClass} ${
+        // Open mobile menu: the header grows to the full screen so nothing behind shows through.
+        mobileOpen ? "max-lg:h-[100dvh] max-lg:flex max-lg:flex-col" : ""
+      }`}
+    >
       <nav
         className={`w-full px-4 sm:px-6 lg:px-8 max-w-container-max mx-auto transition-all duration-300 ${
           scrolled ? "py-2" : "py-3"
@@ -175,6 +193,7 @@ export function SiteHeader() {
               }}
               aria-label={mobileOpen ? t("Close menu") : t("Open menu")}
               aria-expanded={mobileOpen}
+              aria-controls="mobile-menu"
               className="material-symbols-outlined w-10 h-10 flex items-center justify-center text-on-surface hover:text-secondary transition-colors"
             >
               {mobileOpen ? "close" : "menu"}
@@ -196,6 +215,7 @@ export function SiteHeader() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t("Search artists, countries, artworks…")}
+              aria-label={t("Search")}
               className="flex-1 bg-transparent border-b border-primary/30 focus:border-secondary outline-none py-2 font-body-md text-lg text-primary placeholder:text-on-surface-variant/40 transition-colors"
  />
             <button
@@ -209,7 +229,7 @@ export function SiteHeader() {
       )}
 
       {mobileOpen && (
-        <div className="lg:hidden border-t border-[var(--brand-cinza)]/30 bg-[var(--brand-marfim)]/95 backdrop-blur-xl">
+        <div id="mobile-menu" className="lg:hidden flex-1 overflow-y-auto overscroll-contain border-t border-[var(--brand-cinza)]/30 bg-[var(--brand-marfim)]">
           <div className="max-w-container-max mx-auto px-gutter-page py-6 flex flex-col gap-1">
             {NAV.map((item) => {
               const active = pathname === item.href;

@@ -163,6 +163,7 @@ export function ArtistDirectory({ artists }: { artists: Artist[] }) {
             <select
               value={country}
               onChange={(e) => updateParams({ country: e.target.value })}
+              aria-label={t("Filter by country")}
               className="bg-transparent border border-outline text-primary font-label-caps uppercase text-xs px-3 py-2 rounded-full min-w-[200px]"
             >
               <option value="">{t("All countries")}</option>
@@ -175,6 +176,7 @@ export function ArtistDirectory({ artists }: { artists: Artist[] }) {
             <input
               type="search"
               placeholder={t("Search name, city, technique…")}
+              aria-label={t("Search artists")}
               value={q}
               onChange={(e) => updateParams({ q: e.target.value })}
               className="bg-transparent border border-outline text-primary placeholder:text-on-surface-variant/60 text-sm px-4 py-2 rounded-full min-w-[240px]"

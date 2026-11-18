@@ -1,6 +1,7 @@
 "use client";
 
 import { ARTWORK_STATUS_LABELS } from "@/lib/data/artwork-status";
+import { PUBLIC_ARTWORK_COLUMNS, fetchPrivateFields } from "@/lib/data/artwork-private";
 import { useRouter, useLanguage } from "@/lib/i18n";
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
@@ -43,13 +44,16 @@ export function OriginalityReviewAdmin() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("artworks")
-      .select("*")
-      .in("originality_status", ["review", "blocked"])
-      .order("originality_checked_at", { ascending: false });
+    // Originality data is private: the RPC returns it for admins only.
+    const queue = await fetchPrivateFields({ originality: ["review", "blocked"] });
+    const { data, error } = queue.length
+      ? await supabase.from("artworks").select(PUBLIC_ARTWORK_COLUMNS).in("id", queue.map((q) => q.id))
+      : { data: [], error: null };
     if (error) console.error("[Originality] Failed to load queue:", error.message);
-    setItems(data ?? []);
+    const byId = new Map(queue.map((q) => [q.id, q]));
+    const rows = (data ?? []).map((r) => ({ ...r, ...byId.get(r.id)! }) as Artwork);
+    rows.sort((a, b) => (b.originality_checked_at ?? "").localeCompare(a.originality_checked_at ?? ""));
+    setItems(rows);
     setLoading(false);
   }, []);
 

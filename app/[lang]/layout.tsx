@@ -6,9 +6,11 @@ import { Providers } from "./providers";
 import { VisitCounter } from "@/components/layout/VisitCounter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
-import { themeInitScript } from "@/lib/theme";
+import { CookieNotice } from "@/components/layout/CookieNotice";
+import { ThemeScript } from "@/components/layout/ThemeScript";
 import { ENABLED_LOCALES, isPreviewLocale } from "@/lib/i18n/config";
 import { getDictionary, getT, resolveLang } from "@/lib/i18n/server";
+import { SITE_URL } from "@/lib/site";
 
 // Brand fonts, self-hosted by next/font instead of a render-blocking Google
 // Fonts stylesheet. Same families and weights as before; the fallback-metric
@@ -56,11 +58,17 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Promise<Metadata> {
   const lang = resolveLang((await params).lang);
   const t = await getT(lang);
+  const title = t("NUA-ARTE | Contemporary African Art Movement");
+  const description = t(
+    "NUA-ARTE — a curated platform dedicated to contemporary African artists. Each country, each culture, each story — collected with intent.",
+  );
   return {
-    title: t("NUA-ARTE | Contemporary African Art Movement"),
-    description: t(
-      "NUA-ARTE — a curated platform dedicated to contemporary African artists. Each country, each culture, each story — collected with intent.",
-    ),
+    metadataBase: new URL(SITE_URL),
+    title,
+    description,
+    // Share cards; the image comes from opengraph-image.tsx unless a page sets its own.
+    openGraph: { type: "website", siteName: "NUA-ARTE", title, description, locale: lang },
+    twitter: { card: "summary_large_image", title, description },
     // Languages still waiting on native-speaker review stay out of search.
     robots: isPreviewLocale(lang) ? { index: false, follow: false } : undefined,
     icons: {
@@ -78,6 +86,7 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
 export default async function RootLayout({ children, params }: LayoutProps<"/[lang]">) {
   const lang = resolveLang((await params).lang);
   const dictionary = await getDictionary(lang);
+  const t = await getT(lang);
 
   return (
     <html
@@ -86,14 +95,21 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
       suppressHydrationWarning
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <ThemeScript />
       </head>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <Providers language={lang} dictionary={dictionary}>
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-background focus:text-primary focus:px-4 focus:py-2 focus:border focus:border-secondary"
+          >
+            {t("Skip to content")}
+          </a>
           <SiteHeader />
-          <main className="flex-1">{children}</main>
+          <main id="main-content" tabIndex={-1} className="flex-1 outline-none">{children}</main>
           <SiteFooter />
           <VisitCounter />
+          <CookieNotice />
         </Providers>
       </body>
     </html>

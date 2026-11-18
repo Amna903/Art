@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, useLanguage } from "@/lib/i18n";
+import { PUBLIC_ARTWORK_COLUMNS, withPrivateFields } from "@/lib/data/artwork-private";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/types";
@@ -71,7 +72,7 @@ export function AdminDashboard() {
       supabase.from("user_roles").select("user_id, role"),
       supabase
         .from("artworks")
-        .select("*", { count: "exact" })
+        .select(PUBLIC_ARTWORK_COLUMNS, { count: "exact" })
         .order("created_at", { ascending: false })
         .order("id", { ascending: false })
         .range(page * ADMIN_ARTWORKS_PER_PAGE, (page + 1) * ADMIN_ARTWORKS_PER_PAGE - 1),
@@ -91,7 +92,7 @@ export function AdminDashboard() {
       user_roles: (rolesByUser.get(p.id) ?? []).map((role) => ({ role })),
     }));
     setProfiles(profilesWithRoles);
-    setArtworks(aRes.data ?? []);
+    setArtworks(await withPrivateFields(aRes.data ?? []));
     setArtworkTotal(aRes.count ?? 0);
     setEnquiryCount(eRes.count ?? 0);
     setLoading(false);

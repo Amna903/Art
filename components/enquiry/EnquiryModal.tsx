@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useId } from "react";
 import { createPortal } from "react-dom";
 import { submitEnquiry } from "@/lib/data/enquiries";
 import { richText } from "@/lib/i18n/rich";
@@ -33,9 +33,64 @@ export function EnquiryModal({
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
 
+  const panelRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+  const uid = useId();
+  const ids = {
+    title: `${uid}-title`,
+    name: `${uid}-name`,
+    email: `${uid}-email`,
+    phone: `${uid}-phone`,
+    message: `${uid}-message`,
+  };
+
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Dialog keyboard behaviour: Esc closes, Tab stays inside the panel, and
+  // focus goes back to whatever opened the modal once it closes.
+  useEffect(() => {
+    if (!open || !mounted) return;
+    const opener = document.activeElement as HTMLElement | null;
+    const panel = panelRef.current;
+    const focusable = () =>
+      Array.from(
+        panel?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      );
+    (panel?.querySelector<HTMLElement>("input") ?? focusable()[0])?.focus();
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setSent(false);
+        setError(null);
+        onCloseRef.current();
+      } else if (e.key === "Tab") {
+        const items = focusable();
+        if (!items.length) return;
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      opener?.focus?.();
+    };
+  }, [open, mounted]);
 
   useEffect(() => {
     if (open) {
@@ -94,6 +149,10 @@ export function EnquiryModal({
       onClick={handleClose}
     >
       <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={ids.title}
         className="w-full max-w-2xl max-h-[calc(100dvh-2rem)] overflow-y-auto bg-[#161616] text-[#F0F0EE] border border-[#333333] shadow-2xl relative overflow-hidden rounded-none my-auto transition-transform duration-200"
         onClick={(e) => e.stopPropagation()}
       >
@@ -118,7 +177,7 @@ export function EnquiryModal({
               <span className="text-xs font-mono tracking-widest text-[#FF4D57] uppercase block mb-2">
                 {t("Inquiry Dispatched")}
               </span>
-              <h3 className="font-serif text-2xl mb-3 text-[#F0F0EE]">{t("Curatorial Request Sent")}</h3>
+              <h3 id={ids.title} className="font-serif text-2xl mb-3 text-[#F0F0EE]">{t("Curatorial Request Sent")}</h3>
               <p className="text-[#B8B8B8] text-base leading-relaxed max-w-md mx-auto mb-8">
                 {richText(
                   t(
@@ -145,7 +204,7 @@ export function EnquiryModal({
                 <span className="text-xs font-mono tracking-widest text-[#FF4D57] uppercase font-semibold block mb-2 pr-12">
                   {t("Private Curatorial Advisory")}
                 </span>
-                <h3 className="font-serif text-3xl font-medium text-[#F0F0EE] leading-tight mb-1 pr-12">
+                <h3 id={ids.title} className="font-serif text-3xl font-medium text-[#F0F0EE] leading-tight mb-1 pr-12">
                   {artworkTitle}
                 </h3>
                 {artistName && (
@@ -167,28 +226,30 @@ export function EnquiryModal({
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-mono uppercase tracking-widest text-[#B8B8B8] mb-1.5">
+                    <label htmlFor={ids.name} className="block text-xs font-mono uppercase tracking-widest text-[#B8B8B8] mb-1.5">
                       {t("Full Name")} <span className="text-[#FF4D57]">*</span>
                     </label>
                     <input
                       required
                       type="text"
                       placeholder={t("e.g. Eleanor Vance")}
-                      value={name}
+                      id={ids.name}
+                    value={name}
                       onChange={(e) => setName(e.target.value)}
                       className="w-full bg-[#1A1A1A] border border-[#333333] px-4 py-3 text-base text-[#F0F0EE] placeholder-[#5C5C5C] focus:outline-none focus:border-[#FF4D57] transition-colors"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-mono uppercase tracking-widest text-[#B8B8B8] mb-1.5">
+                    <label htmlFor={ids.email} className="block text-xs font-mono uppercase tracking-widest text-[#B8B8B8] mb-1.5">
                       {t("Email Address")} <span className="text-[#FF4D57]">*</span>
                     </label>
                     <input
                       required
                       type="email"
                       placeholder={t("e.g. collector@domain.com")}
-                      value={email}
+                      id={ids.email}
+                    value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full bg-[#1A1A1A] border border-[#333333] px-4 py-3 text-base text-[#F0F0EE] placeholder-[#5C5C5C] focus:outline-none focus:border-[#FF4D57] transition-colors"
                     />
@@ -196,12 +257,13 @@ export function EnquiryModal({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-widest text-[#B8B8B8] mb-1.5">
-                    {t("Phone / WhatsApp")} <span className="text-[#5C5C5C]">{t("(Optional)")}</span>
+                  <label htmlFor={ids.phone} className="block text-xs font-mono uppercase tracking-widest text-[#B8B8B8] mb-1.5">
+                    {t("Phone / WhatsApp")} <span className="text-[#8C8C8C]">{t("(Optional)")}</span>
                   </label>
                   <input
                     type="tel"
                     placeholder="+1 (555) 000-0000"
+                    id={ids.phone}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="w-full bg-[#1A1A1A] border border-[#333333] px-4 py-3 text-base text-[#F0F0EE] placeholder-[#5C5C5C] focus:outline-none focus:border-[#FF4D57] transition-colors"
@@ -209,10 +271,11 @@ export function EnquiryModal({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-widest text-[#B8B8B8] mb-1.5">
-                    {t("Message / Special Requirements")} <span className="text-[#5C5C5C]">{t("(Optional)")}</span>
+                  <label htmlFor={ids.message} className="block text-xs font-mono uppercase tracking-widest text-[#B8B8B8] mb-1.5">
+                    {t("Message / Special Requirements")} <span className="text-[#8C8C8C]">{t("(Optional)")}</span>
                   </label>
                   <textarea
+                    id={ids.message}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     rows={3}
