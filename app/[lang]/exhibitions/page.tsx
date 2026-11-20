@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/exhibition
 }
 
 // Matches the 60s window the underlying Supabase/Sanity reads are cached at.
-export const revalidate = 60;
+export const revalidate = 3600;
 
 const A = "https://nu-artcollective.lovable.app/__l5e/assets-v1";
 

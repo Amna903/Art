@@ -43,38 +43,38 @@ export const listPublishedArtworks = (opts: ListOptions) =>
           String(opts.limit),
           opts.withTotal ? "t" : "",
         ],
-        { revalidate: 60, tags: ["artworks"] },
+        { revalidate: 3600, tags: ["artworks"] },
       )();
 
 export const getCountryCounts = unstable_cache(fetchCountryCounts, ["country-counts"], {
-  revalidate: 60,
+  revalidate: 3600,
   tags: ["artworks"],
 });
 
 export const countPublishedArtworks = unstable_cache(fetchPublishedCount, ["published-count"], {
-  revalidate: 60,
+  revalidate: 3600,
   tags: ["artworks"],
 });
 
 export const getPublishedArtworksByIds = (ids: string[], lang: Language = "en") =>
   unstable_cache(() => fetchPublishedArtworksByIds(ids, lang), ["published-artworks-by-ids", ids.join(","), lang], {
-    revalidate: 60,
+    revalidate: 3600,
     tags: ["artworks"],
   })();
 
 export const getMostRequestedArtworks = (limit = 6, lang: Language = "en") =>
   unstable_cache(() => fetchMostRequestedArtworks(limit, lang), ["most-requested-artworks", String(limit), lang], {
-    revalidate: 60,
+    revalidate: 3600,
     tags: ["artworks"],
   })();
 
 export const getPublishedArtworkBySlug = (slug: string, lang: Language = "en") =>
   unstable_cache(() => fetchPublishedArtworkBySlug(slug, lang), ["published-artwork-by-slug", slug, lang], {
-    revalidate: 60,
+    revalidate: 3600,
     tags: ["artworks"],
   })();
 
 export const getRealArtists = unstable_cache(fetchRealArtists, ["real-artists"], {
-  revalidate: 60,
+  revalidate: 3600,
   tags: ["artworks"],
 });

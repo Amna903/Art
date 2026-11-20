@@ -16,7 +16,7 @@ import { getSiteHero } from "@/lib/data/site-heroes";
 import { getSiteVisits } from "@/lib/data/site-stats";
 import { resolveLang } from "@/lib/i18n/server";
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
 function toPick(artwork: SupabaseArtwork): Omit<CollectorPick, "collection"> {
   return { slug: artwork.slug, title: artwork.title, artist: artwork.artistName, artistSlug: artwork.artistSlug, image: artwork.thumbUrl ?? artwork.imageUrl };

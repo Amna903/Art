@@ -97,7 +97,7 @@ export function generateStaticParams() {
 
 // ISR so cover/artwork swaps from the admin portal aren't stuck on the
 // build-time snapshot (Vercel) while localhost (always dynamic in dev) looks fine.
-export const revalidate = 60;
+export const revalidate = 3600;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;

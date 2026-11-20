@@ -2,7 +2,7 @@ import { SearchPageContent } from "@/components/sections/search/SearchPageConten
 import { getDirectoryArtists, searchDirectoryArtworks } from "@/lib/data/directory";
 import { resolveLang } from "@/lib/i18n/server";
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
 export const metadata = { title: "Search | NUA-ARTE", robots: { index: false, follow: true } };
 

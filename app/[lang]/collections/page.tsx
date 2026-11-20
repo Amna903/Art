@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 }
 
 // Match discover/journal — without this, cover image updates can stick until redeploy.
-export const revalidate = 60;
+export const revalidate = 3600;
 
 export default async function CollectionsPage({ params }: PageProps<"/[lang]/collections">) {
   const { lang } = await getI18n(params);

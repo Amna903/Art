@@ -47,7 +47,7 @@ export function generateStaticParams() {
   return AFRICAN_COUNTRIES.map((c) => ({ country: c.slug }));
 }
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
 // Placeholder tiles behind images: the brief's light neutrals (no beige or brown).
 const SWATCH_PALETTE = ["F5F5F3", "F0F0EE", "EBEBEA", "E6E6E6"];

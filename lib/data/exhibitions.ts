@@ -30,6 +30,6 @@ async function fetchPublishedExhibitions(): Promise<Exhibition[]> {
 // revalidateTag("exhibitions") instead of waiting out the 60s window — see
 // app/api/revalidate/route.ts.
 export const getPublishedExhibitions = unstable_cache(fetchPublishedExhibitions, ["published-exhibitions"], {
-  revalidate: 60,
+  revalidate: 3600,
   tags: ["exhibitions"],
 });

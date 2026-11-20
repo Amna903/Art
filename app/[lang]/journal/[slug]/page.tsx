@@ -12,7 +12,7 @@ import { formatDate, type Translator } from "@/lib/i18n/translate";
 
 type Props = { params: Promise<{ lang: string; slug: string }> };
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
 /** Priority: Sanity CMS → real Supabase post → static demo story, same chain as artworks/collections. */
 async function resolvePost(slug: string, lang: Language, t: Translator): Promise<JournalArticleData | null> {

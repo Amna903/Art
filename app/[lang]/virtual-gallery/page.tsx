@@ -9,12 +9,12 @@ import { fetchCountryRooms, FEATURED, planRooms, roomHref, roomQuery, type RoomS
 import { normalizeCountrySlug } from "@/lib/data/africa";
 import { getI18n } from "@/lib/i18n/server";
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
 // Per-country counts and covers for the room plan: one small GROUP BY result
 // (a row per country), cached like the other listings.
 const getCountryRooms = unstable_cache(fetchCountryRooms, ["gallery-country-rooms"], {
-  revalidate: 60,
+  revalidate: 3600,
   tags: ["artworks"],
 });
 

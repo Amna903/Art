@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 
 // Same 60s window + artworks tag as homepage/detail — profile avatar edits
 // invalidate via pingRevalidate("artworks").
-export const revalidate = 60;
+export const revalidate = 3600;
 
 export default async function ArtistsPage({ params }: PageProps<"/[lang]/artists">) {
   const { lang } = await getI18n(params);

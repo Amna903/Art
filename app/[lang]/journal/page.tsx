@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/journal">)
 }
 
 // Matches the 60s window the underlying Supabase/Sanity reads are cached at.
-export const revalidate = 60;
+export const revalidate = 3600;
 
 
 export default async function JournalPage({ params }: PageProps<"/[lang]/journal">) {

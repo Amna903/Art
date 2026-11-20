@@ -43,12 +43,12 @@ async function fetchPublishedJournalPostBySlug(slug: string): Promise<JournalPos
 // instantly via revalidateTag("journal-posts") instead of waiting out the
 // 60s window — see app/api/revalidate/route.ts.
 export const getPublishedJournalPosts = unstable_cache(fetchPublishedJournalPosts, ["published-journal-posts"], {
-  revalidate: 60,
+  revalidate: 3600,
   tags: ["journal-posts"],
 });
 
 export const getPublishedJournalPostBySlug = (slug: string) =>
   unstable_cache(() => fetchPublishedJournalPostBySlug(slug), ["published-journal-post-by-slug", slug], {
-    revalidate: 60,
+    revalidate: 3600,
     tags: ["journal-posts"],
   })();

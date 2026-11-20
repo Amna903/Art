@@ -33,7 +33,7 @@ async function fetchPageBlocks(page: string): Promise<PageBlocks> {
  * (EditableText/EditableImage on that language's page), otherwise English. */
 export async function getPageBlocks(page: string, lang: Language = "en"): Promise<PageBlocks> {
   const blocks = await unstable_cache(() => fetchPageBlocks(page), ["page-blocks", page], {
-    revalidate: 60,
+    revalidate: 3600,
     tags: ["page-blocks"],
   })();
   if (lang === "en") return blocks;

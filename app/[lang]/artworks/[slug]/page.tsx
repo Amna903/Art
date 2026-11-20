@@ -18,7 +18,7 @@ import { getI18n } from "@/lib/i18n/server";
 import type { Language } from "@/lib/i18n/config";
 import type { Translator } from "@/lib/i18n/translate";
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
 type Props = { params: Promise<{ lang: string; slug: string }> };
 

@@ -45,7 +45,7 @@ async function fetchActiveHeroes(): Promise<Row[]> {
 }
 
 const getActiveHeroes = unstable_cache(fetchActiveHeroes, ["site-heroes"], {
-  revalidate: 60,
+  revalidate: 3600,
   tags: ["site-heroes"],
 });
 

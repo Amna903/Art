@@ -20,7 +20,7 @@ import { localizePath, type Language } from "@/lib/i18n/config";
 import { notFound, permanentRedirect } from "next/navigation";
 import type { Translator } from "@/lib/i18n/translate";
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
 type Props = {
   params: Promise<{ lang: string; slug: string }>;
